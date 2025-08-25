@@ -1,6 +1,7 @@
 package com.datn.ailms.controller;
 
 import com.datn.ailms.interfaces.IUserService;
+import com.datn.ailms.model.dto.request.UserRequest;
 import com.datn.ailms.model.dto.response.ApiResp;
 import com.datn.ailms.model.dto.response.UserResponse;
 
@@ -31,6 +32,15 @@ public class UserController {
         UserResponse user = IuserService.getUserById(userId);
         return ApiResp.<UserResponse>builder()
                 .result(user)
+                .build();
+    }
+
+    @PostMapping
+    public ApiResp<UserResponse> createUser(@RequestBody UserRequest userRequest){
+        UserResponse createdUser = IuserService.createUser(userRequest);
+
+        return ApiResp.<UserResponse>builder()
+                .result(createdUser)
                 .build();
     }
 }

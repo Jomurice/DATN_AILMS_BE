@@ -8,4 +8,10 @@ public interface RoleMapper {
     default String toString(Role role){
         return role.getName();
     }
+
+   default Role toRole(String roleName){
+        Role role = new Role();
+        role.setName(roleName);
+        return role;
+   }
 }
