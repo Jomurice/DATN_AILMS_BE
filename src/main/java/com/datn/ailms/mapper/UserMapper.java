@@ -3,7 +3,8 @@ package com.datn.ailms.mapper;
 import com.datn.ailms.model.dto.request.UserRequest;
 import com.datn.ailms.model.dto.response.UserResponse;
 
-import com.datn.ailms.model.entity.User;
+import com.datn.ailms.model.entities.User;
+
 import org.mapstruct.Mapper;
 
 import java.util.List;

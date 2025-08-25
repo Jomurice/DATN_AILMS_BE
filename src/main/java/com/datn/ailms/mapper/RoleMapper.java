@@ -1,6 +1,6 @@
 package com.datn.ailms.mapper;
 
-import com.datn.ailms.model.entity.Role;
+import com.datn.ailms.model.entities.Role;
 import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")
