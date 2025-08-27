@@ -77,26 +77,33 @@ public class UserService implements IUserService {
 
     public UserResponse updateUser(String id, UserRequest userRequest) {
         User user = _userRepository.findById(id).orElseThrow(
-                ()-> new AppException(ErrorCode.USER_NOT_EXISTED)
+                () -> new AppException(ErrorCode.USER_NOT_EXISTED)
         );
         user.setUsername(userRequest.getUsername());
         user.setName(userRequest.getName());
         user.setPhone(userRequest.getPhone());
         user.setEmail(userRequest.getEmail());
-        user.setGender(user.isGender());
+        user.setGender(userRequest.isGender());
         user.setDob(userRequest.getDob());
-        user.setPassword(_passwordEncoder.encode(userRequest.getPassword()));
+
+        if (userRequest.getPassword() != null && !userRequest.getPassword().isBlank()) {
+            user.setPassword(_passwordEncoder.encode(userRequest.getPassword()));
+        }
         user.setEmail(userRequest.getEmail());
 
-        Set<Role> roles = new HashSet<>();
-        for (String role : userRequest.getRoles()) {
-            _roleRepository.findById(role).ifPresent(roles::add);
+
+        if (userRequest.getRoles() != null && !userRequest.getRoles().isEmpty()) {
+            Set<Role> roles = new HashSet<>();
+            for (String role : userRequest.getRoles()) {
+                _roleRepository.findById(role).ifPresent(roles::add);
+            }
+            user.setRoles(roles);
         }
-        user.setRoles(roles);
+
         User updateUser = _userRepository.save(user);
         return _userMapper.toUserResponse(updateUser);
+
+
     }
-
-
-
 }
+
