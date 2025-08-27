@@ -3,6 +3,7 @@ package com.datn.ailms.model.dto.request;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalDate;
 import java.util.Set;
 
 @Data
@@ -17,5 +18,8 @@ public class UserRequest {
     String phone;
     String email;
     boolean gender;
+    LocalDate dob;
+    String address;
     Set<String> roles;
+
 }

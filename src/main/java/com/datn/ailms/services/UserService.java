@@ -37,10 +37,16 @@ public class UserService implements IUserService {
     }
 
     @Override
+    public List<UserResponse> getUsersByUsername(String Username) {
+        return null;
+    }
+
+    @Override
     public UserResponse getUserById(String id) {
         User user = _userRepository.findById(id).orElseThrow(
                 () -> new AppException(ErrorCode.USER_NOT_EXISTED)
         );
+        System.out.println(user.toString());
         return _userMapper.toUserResponse(user);
     }
 
@@ -68,6 +74,29 @@ public class UserService implements IUserService {
 
         return _userMapper.toUserResponse(savedUser);
     }
+
+    public UserResponse updateUser(String id, UserRequest userRequest) {
+        User user = _userRepository.findById(id).orElseThrow(
+                ()-> new AppException(ErrorCode.USER_NOT_EXISTED)
+        );
+        user.setUsername(userRequest.getUsername());
+        user.setName(userRequest.getName());
+        user.setPhone(userRequest.getPhone());
+        user.setEmail(userRequest.getEmail());
+        user.setGender(user.isGender());
+        user.setDob(userRequest.getDob());
+        user.setPassword(_passwordEncoder.encode(userRequest.getPassword()));
+        user.setEmail(userRequest.getEmail());
+
+        Set<Role> roles = new HashSet<>();
+        for (String role : userRequest.getRoles()) {
+            _roleRepository.findById(role).ifPresent(roles::add);
+        }
+        user.setRoles(roles);
+        User updateUser = _userRepository.save(user);
+        return _userMapper.toUserResponse(updateUser);
+    }
+
 
 
 }
