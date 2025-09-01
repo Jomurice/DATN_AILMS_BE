@@ -1,0 +1,25 @@
+package com.datn.ailms.model.dto.request;
+
+import lombok.*;
+import lombok.experimental.FieldDefaults;
+
+import java.time.LocalDate;
+import java.util.Set;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class UserRequestDto {
+    String username;
+    String name;
+    String password;
+    String phone;
+    String email;
+    boolean gender;
+    LocalDate dob;
+    String address;
+    Set<String> roles;
+
+}
