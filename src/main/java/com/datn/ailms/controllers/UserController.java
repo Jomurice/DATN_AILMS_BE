@@ -1,12 +1,11 @@
 package com.datn.ailms.controllers;
 
 import com.datn.ailms.interfaces.IUserService;
-import com.datn.ailms.model.dto.request.UserRequest;
+import com.datn.ailms.model.dto.request.UserRequestDto;
 import com.datn.ailms.model.dto.response.ApiResp;
-import com.datn.ailms.model.dto.response.UserResponse;
+import com.datn.ailms.model.dto.response.UserResponseDto;
 
 
-import com.datn.ailms.model.entities.User;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,33 +19,33 @@ import java.util.List;
 public class UserController {
 
     @Autowired
-    IUserService IuserService;
+    IUserService _userService;
 
     @GetMapping
-    public ApiResp<List<UserResponse>> getUsers() {
-        return ApiResp.<List<UserResponse>>builder()
-                .result(IuserService.getAllUsers())
+    public ApiResp<List<UserResponseDto>> getUsers() {
+        return ApiResp.<List<UserResponseDto>>builder()
+                .result(_userService.getAllUsers())
                 .build();
     }
     @GetMapping("/{userId}")
-    public ApiResp<UserResponse> getUserById(@PathVariable("userId") String userId){
-        UserResponse user = IuserService.getUserById(userId);
-        return ApiResp.<UserResponse>builder()
+    public ApiResp<UserResponseDto> getUserById(@PathVariable("userId") String userId){
+        UserResponseDto user = _userService.getUserById(userId);
+        return ApiResp.<UserResponseDto>builder()
                 .result(user)
                 .build();
     }
 
     @PostMapping
-    public ApiResp<UserResponse> createUser(@RequestBody UserRequest userRequest){
-        UserResponse createdUser = IuserService.createUser(userRequest);
+    public ApiResp<UserResponseDto> createUser(@RequestBody UserRequestDto userRequest){
+        UserResponseDto createdUser = _userService.createUser(userRequest);
 
-        return ApiResp.<UserResponse>builder()
+        return ApiResp.<UserResponseDto>builder()
                 .result(createdUser)
                 .build();
     }
     @PutMapping("/{userId}")
-    public ApiResp<UserResponse> updateUser(@PathVariable("userId") String userId, @RequestBody UserRequest userRequest){
-        UserResponse userResponse = IuserService.updateUser(userId, userRequest);
-        return ApiResp.<UserResponse>builder().result(userResponse).build();
+    public ApiResp<UserResponseDto> updateUser(@PathVariable("userId") String userId, @RequestBody UserRequestDto userRequest){
+        UserResponseDto userResponse = _userService.updateUser(userId, userRequest);
+        return ApiResp.<UserResponseDto>builder().result(userResponse).build();
     }
 }

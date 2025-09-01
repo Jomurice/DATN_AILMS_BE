@@ -9,8 +9,8 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 import com.datn.ailms.exceptions.AppException;
 import com.datn.ailms.mapper.UserMapper;
-import com.datn.ailms.model.dto.request.UserRequest;
-import com.datn.ailms.model.dto.response.UserResponse;
+import com.datn.ailms.model.dto.request.UserRequestDto;
+import com.datn.ailms.model.dto.response.UserResponseDto;
 import com.datn.ailms.model.entities.Role;
 import com.datn.ailms.model.entities.User;
 import com.datn.ailms.repositories.RoleRepository;
@@ -23,6 +23,7 @@ import java.util.Set;
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
+
 public class UserService implements IUserService {
 
     UserRepository _userRepository;
@@ -31,18 +32,19 @@ public class UserService implements IUserService {
     RoleRepository _roleRepository;
 
     @Override
-    public List<UserResponse> getAllUsers() {
-        List<User> results = _userRepository.findAll();
-        return _userMapper.toUserResponseList(results);
+    public List<UserResponseDto> getAllUsers() {
+        List<User> users = _userRepository.findAll();
+        return _userMapper.toUserResponseList(users);
     }
 
     @Override
-    public List<UserResponse> getUsersByUsername(String Username) {
-        return null;
+    public List<UserResponseDto> getUserByNameContainingIgnoreCase(String name) {
+        List<User> users = _userRepository.findByNameContainingIgnoreCase(name);
+        return _userMapper.toUserResponseList(users);
     }
 
     @Override
-    public UserResponse getUserById(String id) {
+    public UserResponseDto getUserById(String id) {
         User user = _userRepository.findById(id).orElseThrow(
                 () -> new AppException(ErrorCode.USER_NOT_EXISTED)
         );
@@ -51,7 +53,7 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public UserResponse createUser(UserRequest userRequest) {
+    public UserResponseDto createUser(UserRequestDto userRequest) {
         if (_userRepository.existsByUsername(userRequest.getUsername())) {
             throw new AppException(com.datn.ailms.exceptions.ErrorCode.USERNAME_EXISTED);
         }
@@ -75,7 +77,7 @@ public class UserService implements IUserService {
         return _userMapper.toUserResponse(savedUser);
     }
 
-    public UserResponse updateUser(String id, UserRequest userRequest) {
+    public UserResponseDto updateUser(String id, UserRequestDto userRequest) {
         User user = _userRepository.findById(id).orElseThrow(
                 () -> new AppException(ErrorCode.USER_NOT_EXISTED)
         );
@@ -91,7 +93,6 @@ public class UserService implements IUserService {
         }
         user.setEmail(userRequest.getEmail());
 
-
         if (userRequest.getRoles() != null && !userRequest.getRoles().isEmpty()) {
             Set<Role> roles = new HashSet<>();
             for (String role : userRequest.getRoles()) {
@@ -102,7 +103,6 @@ public class UserService implements IUserService {
 
         User updateUser = _userRepository.save(user);
         return _userMapper.toUserResponse(updateUser);
-
 
     }
 }

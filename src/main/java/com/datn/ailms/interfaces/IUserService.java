@@ -1,22 +1,22 @@
 package com.datn.ailms.interfaces;
 
-import com.datn.ailms.model.dto.request.UserRequest;
-import com.datn.ailms.model.dto.response.UserResponse;
-import com.datn.ailms.model.entities.User;
+import com.datn.ailms.model.dto.request.UserRequestDto;
+import com.datn.ailms.model.dto.response.UserResponseDto;
 
 
 import java.util.List;
 
 public interface IUserService {
 
-    List<UserResponse> getAllUsers();
+    List<UserResponseDto> getAllUsers();
 
-    List<UserResponse> getUsersByUsername(String Username);
 
-    UserResponse getUserById(String userid);
 
-    UserResponse createUser(UserRequest userRequest);
+    List<UserResponseDto> getUserByNameContainingIgnoreCase(String name);
+    UserResponseDto getUserById(String userid);
 
-    UserResponse updateUser(String userId,UserRequest userRequest);
+    UserResponseDto createUser(UserRequestDto userRequest);
+
+    UserResponseDto updateUser(String userId, UserRequestDto userRequest);
 
 }

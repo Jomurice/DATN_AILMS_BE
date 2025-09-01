@@ -39,7 +39,9 @@ public class ProductController {
             @PathVariable UUID id,
             @RequestBody ProductRequestDto request) {
         var result =  _productService.update(id, request);
-        return ApiResp.<ProductResponseDto>builder().result(result).build();
+        return ApiResp.<ProductResponseDto>builder()
+                .result(result)
+                .build();
     }
 
 }
