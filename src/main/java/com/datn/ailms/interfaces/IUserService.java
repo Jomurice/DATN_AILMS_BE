@@ -1,7 +1,8 @@
 package com.datn.ailms.interfaces;
 
-import com.datn.ailms.model.dto.request.UserRequestDto;
-import com.datn.ailms.model.dto.response.UserResponseDto;
+import com.datn.ailms.model.dto.request.UserRequest;
+import com.datn.ailms.model.dto.response.UserResponse;
+import com.datn.ailms.model.entities.User;
 
 
 import java.util.List;
