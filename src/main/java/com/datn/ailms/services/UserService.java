@@ -9,8 +9,8 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 import com.datn.ailms.exceptions.AppException;
 import com.datn.ailms.mapper.UserMapper;
-import com.datn.ailms.model.dto.request.UserRequest;
-import com.datn.ailms.model.dto.response.UserResponse;
+import com.datn.ailms.model.dto.request.UserRequestDto;
+import com.datn.ailms.model.dto.response.UserResponseDto;
 import com.datn.ailms.model.entities.Role;
 import com.datn.ailms.model.entities.User;
 import com.datn.ailms.repositories.RoleRepository;
@@ -31,18 +31,18 @@ public class UserService implements IUserService {
     RoleRepository _roleRepository;
 
     @Override
-    public List<UserResponse> getAllUsers() {
+    public List<UserResponseDto> getAllUsers() {
         List<User> results = _userRepository.findAll();
         return _userMapper.toUserResponseList(results);
     }
 
     @Override
-    public List<UserResponse> getUsersByUsername(String Username) {
+    public List<UserResponseDto> getUsersByUsername(String username) {
         return null;
     }
 
     @Override
-    public UserResponse getUserById(String id) {
+    public UserResponseDto getUserById(String id) {
         User user = _userRepository.findById(id).orElseThrow(
                 () -> new AppException(ErrorCode.USER_NOT_EXISTED)
         );
@@ -51,20 +51,20 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public UserResponse createUser(UserRequest userRequest) {
-        if (_userRepository.existsByUsername(userRequest.getUsername())) {
+    public UserResponseDto createUser(UserRequestDto request) {
+        if (_userRepository.existsByUsername(request.getUsername())) {
             throw new AppException(com.datn.ailms.exceptions.ErrorCode.USERNAME_EXISTED);
         }
 
-        if (_userRepository.existsByEmail(userRequest.getEmail())) {
+        if (_userRepository.existsByEmail(request.getEmail())) {
             throw new AppException(ErrorCode.EMAIL_EXISTED);
         }
 
-        User user = _userMapper.toUser(userRequest);
-        user.setPassword(_passwordEncoder.encode(userRequest.getPassword()));
+        User user = _userMapper.toUser(request);
+        user.setPassword(_passwordEncoder.encode(request.getPassword()));
 
         Set<Role> roles = new HashSet<>();
-        for (String role : userRequest.getRoles()) {
+        for (String role : request.getRoles()) {
             _roleRepository.findById(role).ifPresent(roles::add);
         }
 
@@ -75,26 +75,26 @@ public class UserService implements IUserService {
         return _userMapper.toUserResponse(savedUser);
     }
 
-    public UserResponse updateUser(String id, UserRequest userRequest) {
+    public UserResponseDto updateUser(String id, UserRequestDto request) {
         User user = _userRepository.findById(id).orElseThrow(
                 () -> new AppException(ErrorCode.USER_NOT_EXISTED)
         );
-        user.setUsername(userRequest.getUsername());
-        user.setName(userRequest.getName());
-        user.setPhone(userRequest.getPhone());
-        user.setEmail(userRequest.getEmail());
-        user.setGender(userRequest.isGender());
-        user.setDob(userRequest.getDob());
+        user.setUsername(request.getUsername());
+        user.setName(request.getName());
+        user.setPhone(request.getPhone());
+        user.setEmail(request.getEmail());
+        user.setGender(request.isGender());
+        user.setDob(request.getDob());
 
-        if (userRequest.getPassword() != null && !userRequest.getPassword().isBlank()) {
-            user.setPassword(_passwordEncoder.encode(userRequest.getPassword()));
+        if (request.getPassword() != null && !request.getPassword().isBlank()) {
+            user.setPassword(_passwordEncoder.encode(request.getPassword()));
         }
-        user.setEmail(userRequest.getEmail());
+        user.setEmail(request.getEmail());
 
 
-        if (userRequest.getRoles() != null && !userRequest.getRoles().isEmpty()) {
+        if (request.getRoles() != null && !request.getRoles().isEmpty()) {
             Set<Role> roles = new HashSet<>();
-            for (String role : userRequest.getRoles()) {
+            for (String role : request.getRoles()) {
                 _roleRepository.findById(role).ifPresent(roles::add);
             }
             user.setRoles(roles);

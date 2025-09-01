@@ -1,7 +1,5 @@
-package com.datn.ailms.model.dto.response;
+package com.datn.ailms.model.dto.request;
 
-
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -13,15 +11,13 @@ import java.util.Set;
 @NoArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UserResponse {
-
-    String id;
+public class UserRequestDto {
     String username;
     String name;
+    String password;
     String phone;
     String email;
     boolean gender;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     LocalDate dob;
     String address;
     Set<String> roles;

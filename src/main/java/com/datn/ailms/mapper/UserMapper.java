@@ -1,7 +1,7 @@
 package com.datn.ailms.mapper;
 
-import com.datn.ailms.model.dto.request.UserRequest;
-import com.datn.ailms.model.dto.response.UserResponse;
+import com.datn.ailms.model.dto.request.UserRequestDto;
+import com.datn.ailms.model.dto.response.UserResponseDto;
 
 import com.datn.ailms.model.entities.User;
 
@@ -12,10 +12,10 @@ import java.util.List;
 @Mapper(componentModel = "spring", uses = {RoleMapper.class})
 public interface UserMapper {
 
-    User toUser(UserRequest userRequest);
+    User toUser(UserRequestDto userRequest);
 
-    UserResponse toUserResponse(User user);
+    UserResponseDto toUserResponse(User user);
 
-    List<UserResponse> toUserResponseList(List<User> users);
+    List<UserResponseDto> toUserResponseList(List<User> users);
 
 }

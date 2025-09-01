@@ -13,6 +13,8 @@ public enum ErrorCode {
     USERNAME_EXISTED(1006, "User already exists", HttpStatus.CONFLICT),
     EMAIL_EXISTED(1007, "Email already exists", HttpStatus.CONFLICT),
 
+    CATEGORY_NOT_EXISTED(1010,"Category not existed", HttpStatus.NOT_FOUND)
+
     ;
 
 
