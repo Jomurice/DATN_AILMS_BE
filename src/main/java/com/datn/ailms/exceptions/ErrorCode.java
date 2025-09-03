@@ -17,6 +17,10 @@ public enum ErrorCode {
     ROLE_NOT_EXISTED(1008, "Role not existed", HttpStatus.NOT_FOUND),
     ROLE_EXISTED(1008, "Role already exists", HttpStatus.CONFLICT),
 
+    CATEGORY_NOT_EXISTED(1010,"Category not existed", HttpStatus.NOT_FOUND)
+
+
+
     ;
 
 

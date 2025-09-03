@@ -37,7 +37,7 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public List<UserResponseDto> getUserByNameContainingIgnoreCase(String name) {
+    public List<UserResponseDto> getUsersByNameContainingIgnoreCase(String name) {
         List<User> users = _userRepository.findByNameContainingIgnoreCase(name);
         return _userMapper.toUserResponseList(users);
     }
