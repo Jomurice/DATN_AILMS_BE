@@ -23,7 +23,6 @@ import java.util.Set;
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
-
 public class UserService implements IUserService {
 
     UserRepository _userRepository;

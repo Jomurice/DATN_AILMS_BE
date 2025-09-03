@@ -38,7 +38,6 @@ public class UserController {
     @PostMapping
     public ApiResp<UserResponseDto> createUser(@RequestBody UserRequestDto userRequest){
         UserResponseDto createdUser = _userService.createUser(userRequest);
-
         return ApiResp.<UserResponseDto>builder()
                 .result(createdUser)
                 .build();
