@@ -6,6 +6,8 @@ import com.datn.ailms.model.dto.response.ApiResp;
 import com.datn.ailms.model.dto.response.UserResponseDto;
 
 
+import com.datn.ailms.model.dto.response.UserResponseDto;
+
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +34,12 @@ public class UserController {
         UserResponseDto user = _userService.getUserById(userId);
         return ApiResp.<UserResponseDto>builder()
                 .result(user)
+                .build();
+    }
+    @GetMapping("/search")
+    public ApiResp<List<UserResponseDto>> searchUsersByName(@RequestParam("name") String name) {
+        return ApiResp.<List<UserResponseDto>>builder()
+                .result(_userService.getUsersByNameContainingIgnoreCase(name))
                 .build();
     }
 
