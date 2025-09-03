@@ -19,6 +19,8 @@ public enum ErrorCode {
 
     CATEGORY_NOT_EXISTED(1010,"Category not existed", HttpStatus.NOT_FOUND)
 
+
+
     ;
 
 
