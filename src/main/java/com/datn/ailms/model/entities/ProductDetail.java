@@ -33,7 +33,7 @@ public class ProductDetail {
      Product product;
 
     @ManyToOne
-    @JoinColumn(name = "bin_id")
-     Bin bin;
+    @JoinColumn(name = "bin_id") // ✅ mỗi serial gán vào 1 bin cụ thể
+    private Bin bin;
 }
 

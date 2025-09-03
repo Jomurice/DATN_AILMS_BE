@@ -8,4 +8,5 @@ import java.util.UUID;
 
 public interface ProductRepository extends JpaRepository<Product, UUID> {
     Optional<Product> findBySku(String sku);
+    Optional<Product> findBySerialPrefix(String serialPrefix);
 }

@@ -20,4 +20,5 @@ public class ProductResponseDto {
     private String color;
     private String storage;
     private UUID categoryId;
+    private String serialPrefix;
 }

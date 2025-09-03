@@ -12,7 +12,7 @@ public enum ErrorCode {
 
     USERNAME_EXISTED(1006, "User already exists", HttpStatus.CONFLICT),
     EMAIL_EXISTED(1007, "Email already exists", HttpStatus.CONFLICT),
-
+    PRODUCT_NOT_FOUND(1008, "Product not found", HttpStatus.NOT_FOUND),
 
     ROLE_NOT_EXISTED(1008, "Role not existed", HttpStatus.NOT_FOUND),
     ROLE_EXISTED(1008, "Role already exists", HttpStatus.CONFLICT),
