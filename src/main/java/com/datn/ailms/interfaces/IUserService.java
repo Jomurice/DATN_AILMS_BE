@@ -16,6 +16,7 @@ public interface IUserService {
 
 
     List<UserResponseDto> getUsersByNameContainingIgnoreCase(String name);
+    
     UserResponseDto getUserById(String userid);
 
     UserResponseDto createUser(UserRequestDto userRequest);
