@@ -18,5 +18,6 @@ public class ProductRequestDto {
     private String specifications;
     private String color;
     private String storage;
+    private String serialPrefix;
     private UUID categoryId; // thay vì object Category
 }

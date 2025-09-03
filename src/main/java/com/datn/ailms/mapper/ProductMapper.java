@@ -11,9 +11,11 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface ProductMapper {
     @Mapping(source = "categoryId", target = "category.id")
+    @Mapping(source = "serialPrefix", target = "serialPrefix")
     Product toEntity(ProductRequestDto request);
 
     @Mapping(source = "category.id", target = "categoryId")
+    @Mapping(source = "serialPrefix", target = "serialPrefix")
     ProductResponseDto toResponse(Product product);
 
     List<ProductResponseDto> toResponseList(List<Product> products);
