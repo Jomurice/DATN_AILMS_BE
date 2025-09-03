@@ -1,19 +1,19 @@
-package com.datn.ailms.model.dto.response.inventory;
+package com.datn.ailms.model.dto.request.inventory;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.UUID;
-
-// Response
+// Request
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CategoryResponse {
-    private UUID id;
+public class CategoryRequestDto {
     private String name;
     private String description;
 }
+
+
+
