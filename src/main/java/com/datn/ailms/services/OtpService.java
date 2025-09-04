@@ -44,7 +44,7 @@ public class OtpService {
         if (!otpEntity.getOtpCode().equals(otp)) {
             throw new AppException(ErrorCode.OTP_INVALID);
         }
-        clearOtp(userId);
+
         return true;
     }
 
