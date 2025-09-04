@@ -15,8 +15,11 @@ import com.datn.ailms.model.entities.Role;
 import com.datn.ailms.model.entities.User;
 import com.datn.ailms.repositories.RoleRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 
@@ -35,6 +38,19 @@ public class UserService implements IUserService {
         List<User> users = _userRepository.findAll();
         return _userMapper.toUserResponseList(users);
     }
+
+    public User getUserEntityByEmail(String email) {
+        return _userRepository.findByEmail(email).orElseThrow(
+                () -> new AppException(ErrorCode.USER_NOT_EXISTED));
+    }
+
+    @Override
+    public UserResponseDto getUserByEmail(String email) {
+        User user = _userRepository.findByEmail(email).orElseThrow(
+                () -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        return _userMapper.toUserResponse(user);
+    }
+
 
     @Override
     public List<UserResponseDto> getUsersByNameContainingIgnoreCase(String name) {
@@ -103,6 +119,15 @@ public class UserService implements IUserService {
         User updateUser = _userRepository.save(user);
         return _userMapper.toUserResponse(updateUser);
 
+    }
+    @Transactional
+    public void updateUserPassword(String userId, String newPassword) {
+        User user = _userRepository.findById(userId).orElseThrow(
+                () -> new AppException(ErrorCode.USER_NOT_EXISTED)
+        );
+
+        user.setPassword(_passwordEncoder.encode(newPassword));
+        _userRepository.save(user);
     }
 }
 
