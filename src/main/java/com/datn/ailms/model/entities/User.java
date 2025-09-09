@@ -21,7 +21,7 @@ public class User {
 
     @Column(length = 255)
     String username;
-
+    @Column(length = 255)
     String name;
 
     String password;
@@ -38,10 +38,17 @@ public class User {
     String address;
 
     @ManyToMany
+//    @JoinTable(
+//            name = "Users_roles",
+//            joinColumns = @JoinColumn(name = "User_id"),
+//            inverseJoinColumns = @JoinColumn(name = "roles_name")
+//    )
     @JoinTable(
             name = "Users_roles",
-            joinColumns = @JoinColumn(name = "User_id"),
-            inverseJoinColumns = @JoinColumn(name = "roles_name")
+            joinColumns = @JoinColumn(name = "User_id", referencedColumnName = "id"), // User PK
+            inverseJoinColumns = @JoinColumn(name = "roles_name", referencedColumnName = "name") // Role PK
     )
     Set<Role> roles;
+
+    boolean status = true;
 }

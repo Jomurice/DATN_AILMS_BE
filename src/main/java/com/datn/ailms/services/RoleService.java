@@ -22,6 +22,7 @@ public class RoleService implements IRoleService {
 
     @Override
     public List<RoleResponseDto> getAllRoles() {
+
         return _roleMapper.toResponseList(_roleRepository.findAll());
     }
 

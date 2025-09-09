@@ -8,9 +8,12 @@ import com.datn.ailms.model.dto.response.UserResponseDto;
 
 import com.datn.ailms.model.dto.response.UserResponseDto;
 
+import com.datn.ailms.model.entities.User;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,12 +26,38 @@ public class UserController {
     @Autowired
     IUserService _userService;
 
+//    @GetMapping
+//    public ApiResp<List<UserResponseDto>> getUsers() {
+//        return ApiResp.<List<UserResponseDto>>builder()
+//                .result(_userService.getAllUsers())
+//                .build();
+//    }
+
     @GetMapping
-    public ApiResp<List<UserResponseDto>> getUsers() {
-        return ApiResp.<List<UserResponseDto>>builder()
-                .result(_userService.getAllUsers())
+    public ApiResp<Page<UserResponseDto>> getAllUsers(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String role,
+            @RequestParam(required = false) Boolean status,
+            @RequestParam(required = false) Boolean gender,
+            Pageable pageable) {
+
+        Page<UserResponseDto> users = _userService.searchUsers(name, role, status, gender, pageable);
+
+        return ApiResp.<Page<UserResponseDto>>builder()
+                .result(users)
                 .build();
     }
+///api/users?page=0&size=10
+/// /api/users?name=quang&page=0&size=10
+/// /api/users?role=ADMIN&page=0&size=10
+/// /api/users?status=true&page=0&size=10
+/// /api/users?gender=true&page=0&size=10
+/// /api/users?name=quang&role=ADMIN&status=true&gender=true&page=0&size=10
+/// /api/users?name=quang&page=0&size=10&sort=name,asc
+///
+
+
+
     @GetMapping("/{userId}")
     public ApiResp<UserResponseDto> getUserById(@PathVariable("userId") String userId){
         UserResponseDto user = _userService.getUserById(userId);
