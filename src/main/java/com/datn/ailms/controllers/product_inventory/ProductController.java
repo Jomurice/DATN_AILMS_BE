@@ -22,6 +22,12 @@ public class ProductController {
               return ApiResp.<ProductResponseDto>builder().result(result).build();
     }
 
+    @GetMapping("/api/products/by-menu/{menuId}")
+    public List<ProductResponseDto> getProductsByMenu(@PathVariable UUID menuId) {
+        return _productService.getByMenuId(menuId);
+    }
+
+
     @GetMapping
      ApiResp<List<ProductResponseDto>> getAll() {
         var result =  _productService.getAll();

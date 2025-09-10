@@ -1,6 +1,6 @@
 package com.datn.ailms.repositories.productRepo;
 
-import com.datn.ailms.model.entities.Category;
+import com.datn.ailms.model.entities.product_entities.Category;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

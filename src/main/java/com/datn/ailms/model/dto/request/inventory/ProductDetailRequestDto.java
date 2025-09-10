@@ -1,6 +1,6 @@
 package com.datn.ailms.model.dto.request.inventory;
 
-import com.datn.ailms.model.entities.SerialStatus;
+import com.datn.ailms.model.entities.enums.SerialStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

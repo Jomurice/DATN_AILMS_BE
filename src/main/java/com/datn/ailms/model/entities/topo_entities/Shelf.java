@@ -1,4 +1,4 @@
-package com.datn.ailms.model.entities;
+package com.datn.ailms.model.entities.topo_entities;
 
 import jakarta.persistence.*;
 import lombok.*;

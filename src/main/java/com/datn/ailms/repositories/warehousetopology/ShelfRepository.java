@@ -1,6 +1,6 @@
 package com.datn.ailms.repositories.warehousetopology;
 
-import com.datn.ailms.model.entities.Shelf;
+import com.datn.ailms.model.entities.topo_entities.Shelf;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.UUID;

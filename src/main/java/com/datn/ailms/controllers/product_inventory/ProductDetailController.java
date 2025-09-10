@@ -3,14 +3,12 @@ package com.datn.ailms.controllers.product_inventory;
 import com.datn.ailms.mapper.ProductDetailMapper;
 import com.datn.ailms.model.dto.response.ApiResp;
 import com.datn.ailms.model.dto.response.inventory.ProductDetailResponseDto;
-import com.datn.ailms.model.entities.ProductDetail;
-import com.datn.ailms.model.entities.SerialStatus;
+import com.datn.ailms.model.entities.product_entities.ProductDetail;
+import com.datn.ailms.model.entities.enums.SerialStatus;
 import com.datn.ailms.repositories.productRepo.ProductDetailRepository;
 import com.datn.ailms.repositories.productRepo.ProductRepository;
-import com.datn.ailms.services.inventoryService.ProductService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;

@@ -1,4 +1,4 @@
-package com.datn.ailms.model.entities;
+package com.datn.ailms.model.entities.account_entities;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
