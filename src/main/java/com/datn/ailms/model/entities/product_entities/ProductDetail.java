@@ -1,5 +1,6 @@
 package com.datn.ailms.model.entities;
 
+import com.datn.ailms.model.entities.enums.SerialStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;

@@ -1,6 +1,7 @@
 // package com.datn.ailms.model.entities;
 package com.datn.ailms.model.entities;
 
+import com.datn.ailms.model.entities.enums.RuleLevel;
 import jakarta.persistence.*;
 import lombok.*;
 import java.util.UUID;
