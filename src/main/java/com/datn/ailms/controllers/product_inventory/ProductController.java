@@ -22,6 +22,7 @@ public class ProductController {
               return ApiResp.<ProductResponseDto>builder().result(result).build();
     }
 
+    @PostMapping()
     @GetMapping
      ApiResp<List<ProductResponseDto>> getAll() {
         var result =  _productService.getAll();

@@ -3,10 +3,9 @@
     import jakarta.persistence.*;
     import lombok.*;
     import lombok.experimental.FieldDefaults;
-    
-    import java.util.Set;
-    import java.util.UUID;
-    
+
+    import java.util.*;
+
     @Entity
     @Table(
             name = "products",
@@ -51,4 +50,6 @@
         @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
         private Set<ProductDetail> productDetails;
 
+        @OneToMany(mappedBy = "product")
+        private List<ProductImage> productImages = new ArrayList<>();
     }
