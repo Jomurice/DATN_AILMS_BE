@@ -1,6 +1,6 @@
 package com.datn.ailms.repositories.userRepo;
 
-import com.datn.ailms.model.entities.User;
+import com.datn.ailms.model.entities.account_entities.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

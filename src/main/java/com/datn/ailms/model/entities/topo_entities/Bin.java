@@ -1,5 +1,6 @@
-package com.datn.ailms.model.entities;
+package com.datn.ailms.model.entities.topo_entities;
 
+import com.datn.ailms.model.entities.product_entities.ProductDetail;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;

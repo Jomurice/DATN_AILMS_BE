@@ -1,8 +1,8 @@
 package com.datn.ailms.configs;
 
 import com.datn.ailms.constants.PredefineRole;
-import com.datn.ailms.model.entities.Role;
-import com.datn.ailms.model.entities.User;
+import com.datn.ailms.model.entities.account_entities.Role;
+import com.datn.ailms.model.entities.account_entities.User;
 import com.datn.ailms.repositories.RoleRepository;
 import com.datn.ailms.repositories.userRepo.UserRepository;
 import lombok.AccessLevel;

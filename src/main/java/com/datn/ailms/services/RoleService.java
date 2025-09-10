@@ -6,7 +6,7 @@ import com.datn.ailms.interfaces.IRoleService;
 import com.datn.ailms.mapper.RoleMapper;
 import com.datn.ailms.model.dto.request.RoleRequestDto;
 import com.datn.ailms.model.dto.response.RoleResponseDto;
-import com.datn.ailms.model.entities.Role;
+import com.datn.ailms.model.entities.account_entities.Role;
 import com.datn.ailms.repositories.RoleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

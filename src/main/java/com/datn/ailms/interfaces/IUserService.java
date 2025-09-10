@@ -5,14 +5,13 @@ import com.datn.ailms.model.dto.request.ChangePasswordRequestDto;
 import com.datn.ailms.model.dto.request.UserRequestDto;
 
 import com.datn.ailms.model.dto.response.UserResponseDto;
-import com.datn.ailms.model.entities.User;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 
 import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+
 
 public interface IUserService {
 
