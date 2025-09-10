@@ -1,7 +1,6 @@
 package com.datn.ailms.repositories.productRepo;
 
-import com.datn.ailms.model.entities.Product;
-import com.datn.ailms.model.entities.ProductDetail;
+import com.datn.ailms.model.entities.product_entities.ProductDetail;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

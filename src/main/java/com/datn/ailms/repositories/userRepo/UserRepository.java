@@ -1,6 +1,6 @@
 package com.datn.ailms.repositories.userRepo;
 
-import com.datn.ailms.model.entities.User;
+import com.datn.ailms.model.entities.account_entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

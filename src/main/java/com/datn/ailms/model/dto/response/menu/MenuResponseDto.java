@@ -11,10 +11,10 @@ import java.util.UUID;
 @NoArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class MenuListResponseDto {
+public class MenuResponseDto {
     UUID id;
     String path;
     UUID parentId;
     String title;
-    List<MenuListResponseDto> children;
+    List<MenuResponseDto> children;
 }

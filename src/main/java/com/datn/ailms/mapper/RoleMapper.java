@@ -2,7 +2,7 @@ package com.datn.ailms.mapper;
 
 import com.datn.ailms.model.dto.request.RoleRequestDto;
 import com.datn.ailms.model.dto.response.RoleResponseDto;
-import com.datn.ailms.model.entities.Role;
+import com.datn.ailms.model.entities.account_entities.Role;
 import org.mapstruct.Mapper;
 
 import java.util.List;

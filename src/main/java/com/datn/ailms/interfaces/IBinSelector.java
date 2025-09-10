@@ -1,7 +1,7 @@
 package com.datn.ailms.interfaces;
 
-import com.datn.ailms.model.entities.Bin;
-import com.datn.ailms.model.entities.ProductDetail;
+import com.datn.ailms.model.entities.topo_entities.Bin;
+import com.datn.ailms.model.entities.product_entities.ProductDetail;
 
 public interface IBinSelector {
     Bin binSelector(ProductDetail productDetail);

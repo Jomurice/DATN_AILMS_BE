@@ -13,8 +13,6 @@ public interface IUserService {
 
     List<UserResponseDto> getAllUsers();
 
-
-
     List<UserResponseDto> getUsersByNameContainingIgnoreCase(String name);
     UserResponseDto getUserById(String userid);
 

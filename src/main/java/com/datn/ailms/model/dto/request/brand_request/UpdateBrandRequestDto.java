@@ -1,2 +1,13 @@
-package com.datn.ailms.model.dto.request.brand_request;public class UpdateBrandRequestDto {
+package com.datn.ailms.model.dto.request.brand_request;
+
+import lombok.*;
+import lombok.experimental.FieldDefaults;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class UpdateBrandRequestDto {
+    String name;
 }

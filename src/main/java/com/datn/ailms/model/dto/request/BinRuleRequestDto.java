@@ -1,6 +1,6 @@
 package com.datn.ailms.model.dto.request;
 
-import com.datn.ailms.model.entities.RuleLevel;
+import com.datn.ailms.model.entities.enums.RuleLevel;
 import lombok.Data;
 
 import java.util.UUID;

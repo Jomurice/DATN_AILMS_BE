@@ -1,9 +1,7 @@
 package com.datn.ailms.controllers.product_inventory;
 
-import com.datn.ailms.interfaces.IInventory;
 import com.datn.ailms.model.dto.response.ApiResp;
 import com.datn.ailms.model.dto.response.inventory.ProductDetailResponseDto;
-import com.datn.ailms.model.entities.ProductDetail;
 import com.datn.ailms.services.topoServices.InventoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;

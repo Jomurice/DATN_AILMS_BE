@@ -1,7 +1,6 @@
 package com.datn.ailms.interfaces;
 
 import com.datn.ailms.model.dto.response.inventory.ProductDetailResponseDto;
-import com.datn.ailms.model.entities.ProductDetail;
 
 import java.util.UUID;
 

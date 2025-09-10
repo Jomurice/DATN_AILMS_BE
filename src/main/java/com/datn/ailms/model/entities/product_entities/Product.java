@@ -1,5 +1,6 @@
-    package com.datn.ailms.model.entities;
+    package com.datn.ailms.model.entities.product_entities;
     
+    import com.datn.ailms.model.entities.CategoryBrand;
     import jakarta.persistence.*;
     import lombok.*;
     import lombok.experimental.FieldDefaults;
@@ -42,10 +43,9 @@
         @Column(name = "serial_prefix")
         private String serialPrefix;
 
-        // Quan hệ với Category
         @ManyToOne
-        @JoinColumn(name = "category_id")
-        private Category category;
+        @JoinColumn(name = "category_brand_id", nullable = false)
+        private CategoryBrand categoryBrand;
     
         // Quan hệ với ProductDetail (serial numbers)
         @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
