@@ -7,6 +7,8 @@ import com.datn.ailms.repositories.userRepo.UserRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import com.datn.ailms.exceptions.AppException;
 import com.datn.ailms.mapper.UserMapper;
@@ -20,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
+
 import java.util.Set;
 
 
@@ -36,7 +38,7 @@ public class UserService implements IUserService {
 
     @Override
     public List<UserResponseDto> getAllUsers() {
-        List<User> users = _userRepository.findAll();
+        List<User> users = _userRepository.findAllWithRoles();
         return _userMapper.toUserResponseList(users);
     }
 
@@ -50,6 +52,18 @@ public class UserService implements IUserService {
         User user = _userRepository.findByEmail(email).orElseThrow(
                 () -> new AppException(ErrorCode.USER_NOT_EXISTED));
         return _userMapper.toUserResponse(user);
+    }
+
+    @Override
+    public Page<UserResponseDto> searchUsers(String name,
+                                             String role,
+                                             Boolean status,
+                                             Boolean gender,
+                                             Pageable pageable) {
+
+        Page<User> users = _userRepository.searchUsers(name, role, status, gender, pageable);
+
+        return users.map(_userMapper::toUserResponse);
     }
 
 
@@ -121,6 +135,7 @@ public class UserService implements IUserService {
         return _userMapper.toUserResponse(updateUser);
 
     }
+
     @Transactional
     public void updateUserPassword(String userId, String newPassword) {
         User user = _userRepository.findById(userId).orElseThrow(
@@ -148,5 +163,30 @@ public class UserService implements IUserService {
         user.setPassword(_passwordEncoder.encode(request.getNewPassword()));
         _userRepository.save(user);
     }
+
+    @Override
+    public UserResponseDto activeAccount(String id) {
+        User user = _userRepository.findById(id).orElseThrow(
+                () -> new AppException(ErrorCode.USER_NOT_EXISTED)
+        );
+
+        user.setStatus(true);
+        User savedUser = _userRepository.save(user);
+
+        return _userMapper.toUserResponse(savedUser);
+    }
+    @Override
+    public UserResponseDto blockedAccount(String id) {
+        User user = _userRepository.findById(id).orElseThrow(
+                () -> new AppException(ErrorCode.USER_NOT_EXISTED)
+        );
+
+        user.setStatus(false);
+        User savedUser = _userRepository.save(user);
+
+        return _userMapper.toUserResponse(savedUser);
+    }
+
+
 }
 
