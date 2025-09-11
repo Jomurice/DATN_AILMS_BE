@@ -4,6 +4,7 @@ import com.datn.ailms.interfaces.ICategoryService;
 import com.datn.ailms.model.dto.request.inventory.CategoryRequestDto;
 import com.datn.ailms.model.dto.response.ApiResp;
 import com.datn.ailms.model.dto.response.inventory.CategoryResponseDto;
+import com.datn.ailms.model.entities.Category;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 

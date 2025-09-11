@@ -6,17 +6,14 @@ import com.datn.ailms.interfaces.IInventory;
 import com.datn.ailms.mapper.ProductDetailMapper;
 import com.datn.ailms.mapper.ProductMapper;
 import com.datn.ailms.model.dto.response.inventory.ProductDetailResponseDto;
-import com.datn.ailms.model.entities.enums.SerialStatus;
-import com.datn.ailms.model.entities.product_entities.Product;
-import com.datn.ailms.model.entities.product_entities.ProductDetail;
-import com.datn.ailms.model.entities.topo_entities.*;
+import com.datn.ailms.model.entities.*;
 import com.datn.ailms.repositories.productRepo.ProductDetailRepository;
-import com.datn.ailms.repositories.productRepo.ProductRepository;
 import com.datn.ailms.repositories.warehousetopology.BinRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -26,47 +23,37 @@ import java.util.UUID;
 public class InventoryService implements IInventory {
 
     private final ProductDetailRepository _detailRepo;
-    private final ProductRepository _productRepo;      // thêm repo này
     private final BinRepository _binRepo;
     private final BinSelectorAutomatic _binSelector;
     private final BinRuleService _binRuleService;
     private final ProductMapper _pMapper;
-    private final ProductDetailMapper _pdMapper;
+    private final ProductDetailMapper   _pdMapper;
 
     @Override
     @Transactional
     public ProductDetailResponseDto scanAndPutToBin(String serialNumber) {
-        // 1. Tìm hoặc tạo ProductDetail
-        ProductDetail detail = _detailRepo.findBySerialNumber(serialNumber)
+        var detail = _detailRepo.findBySerialNumber(serialNumber)
                 .orElseThrow(() -> new EntityNotFoundException("Serial not found: " + serialNumber));
 
-        // 2. Nếu chưa gán product → tìm theo prefix
-        if (detail.getProduct() == null) {
-            String prefix = extractPrefix(serialNumber);
-            Product product = _productRepo.findBySerialPrefix(prefix)
-                    .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
-            detail.setProduct(product);
-        }
-
-        // 3. Nếu chưa gán bin → tìm bin
+        // nếu serial đã có bin thì trả luôn (hoặc override tùy policy)
         if (detail.getBin() == null) {
-            Bin bin = _binRuleService.findBinForSerial(serialNumber);
-
+            Bin bin = _binRuleService.findBinForSerial(serialNumber); // ném nếu không match
+            // kiểm tra capacity, optimistic lock tùy bạn
             if (bin.getCurrentQty() >= bin.getCapacity()) {
                 throw new IllegalStateException("Target bin full: " + bin.getCode());
             }
-
-            // cập nhật capacity
+            // cập nhật số lượng bin (đơn giản)
             bin.setCurrentQty(bin.getCurrentQty() + 1);
             _binRepo.save(bin);
 
-            // gán vào detail
             detail.setBin(bin);
             detail.setStatus(SerialStatus.IN_STOCK);
-        }
+            _detailRepo.save(detail);
 
-        _detailRepo.save(detail);
-        return _pdMapper.toResponse(detail);
+            return _pdMapper.toResponse(detail);
+        } else {
+            return _pdMapper.toResponse(detail); // hoặc move tuỳ nghiệp vụ
+        }
     }
 
     @Override
@@ -108,7 +95,7 @@ public class InventoryService implements IInventory {
             old.setCurrentQty(Math.max(0, old.getCurrentQty() - 1));
             _binRepo.save(old);
         }
-        // tăng bin mới
+        // tăng bin mới (optimistic lock qua @Version)
         target.setCurrentQty(target.getCurrentQty() + 1);
         try {
             _binRepo.saveAndFlush(target);
@@ -116,14 +103,5 @@ public class InventoryService implements IInventory {
             throw new IllegalStateException("Bin updated concurrently, please retry");
         }
         d.setBin(target);
-        d.setStatus(SerialStatus.IN_STOCK);
-    }
-
-    private String extractPrefix(String serialNumber) {
-        // Giả sử hãng Apple, Samsung luôn có 5-6 ký tự đầu là prefix
-        if (serialNumber.length() < 5) {
-            throw new IllegalArgumentException("Serial number không hợp lệ: " + serialNumber);
-        }
-        return serialNumber.substring(0, 6).toUpperCase();
     }
 }

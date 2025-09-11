@@ -4,8 +4,10 @@ import com.datn.ailms.interfaces.IRoleService;
 import com.datn.ailms.model.dto.request.RoleRequestDto;
 import com.datn.ailms.model.dto.response.ApiResp;
 import com.datn.ailms.model.dto.response.RoleResponseDto;
+import com.datn.ailms.model.entities.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

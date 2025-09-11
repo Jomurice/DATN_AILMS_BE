@@ -1,7 +1,7 @@
 package com.datn.ailms.repositories.warehousetopology;
 
-import com.datn.ailms.model.entities.topo_entities.BinRule;
-import com.datn.ailms.model.entities.enums.RuleLevel;
+import com.datn.ailms.model.entities.BinRule;
+import com.datn.ailms.model.entities.RuleLevel;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

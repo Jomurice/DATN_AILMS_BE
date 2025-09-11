@@ -5,8 +5,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.UUID;
-
 // Request
 @Data
 @NoArgsConstructor
@@ -15,7 +13,6 @@ import java.util.UUID;
 public class CategoryRequestDto {
     private String name;
     private String description;
-    private UUID menuId;
 }
 
 

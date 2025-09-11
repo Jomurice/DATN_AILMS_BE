@@ -3,7 +3,7 @@ package com.datn.ailms.mapper;
 import com.datn.ailms.model.dto.request.UserRequestDto;
 import com.datn.ailms.model.dto.response.UserResponseDto;
 
-import com.datn.ailms.model.entities.account_entities.User;
+import com.datn.ailms.model.entities.User;
 
 import org.mapstruct.Mapper;
 

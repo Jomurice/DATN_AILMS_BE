@@ -6,7 +6,7 @@ import com.datn.ailms.model.dto.request.AuthenRequest;
 import com.datn.ailms.model.dto.request.IntrospectRequest;
 import com.datn.ailms.model.dto.response.AuthenResponse;
 import com.datn.ailms.model.dto.response.IntrospectResponse;
-import com.datn.ailms.model.entities.account_entities.User;
+import com.datn.ailms.model.entities.User;
 import com.datn.ailms.repositories.userRepo.UserRepository;
 import com.datn.ailms.interfaces.IAuthenticationService;
 import com.nimbusds.jose.*;

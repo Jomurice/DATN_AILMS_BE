@@ -3,7 +3,7 @@ package com.datn.ailms.mapper;
 
 import com.datn.ailms.model.dto.request.inventory.ProductDetailRequestDto;
 import com.datn.ailms.model.dto.response.inventory.ProductDetailResponseDto;
-import com.datn.ailms.model.entities.product_entities.ProductDetail;
+import com.datn.ailms.model.entities.ProductDetail;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

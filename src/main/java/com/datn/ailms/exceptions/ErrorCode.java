@@ -12,19 +12,15 @@ public enum ErrorCode {
 
     USERNAME_EXISTED(1006, "User already exists", HttpStatus.CONFLICT),
     EMAIL_EXISTED(1007, "Email already exists", HttpStatus.CONFLICT),
-    PRODUCT_NOT_FOUND(1008, "Product not found", HttpStatus.NOT_FOUND),
-    MENU_EXISTED(1009, "Menu already exists", HttpStatus.CONFLICT),
-    PARENT_NOT_FOUND(1010, "Parent not found", HttpStatus.NOT_FOUND),
-    MENU_NOT_FOUND(1011,"Menu not found", HttpStatus.NOT_FOUND),
+
+
     ROLE_NOT_EXISTED(1008, "Role not existed", HttpStatus.NOT_FOUND),
     ROLE_EXISTED(1008, "Role already exists", HttpStatus.CONFLICT),
 
-    CATEGORY_NOT_EXISTED(1010,"Category not existed", HttpStatus.NOT_FOUND),
+    CATEGORY_NOT_EXISTED(1010,"Category not existed", HttpStatus.NOT_FOUND)
 
-    OTP_NOT_EXISTED(1020, "OTP not existed", HttpStatus.NOT_FOUND),
-    OTP_EXPIRED(1021, "OTP expired", HttpStatus.BAD_REQUEST),
-    OTP_INVALID(1022, "OTP invalid", HttpStatus.BAD_REQUEST),
-    PASSWORD_INCORRECT(1023, "Password incorrect", HttpStatus.BAD_REQUEST),
+
+
     ;
 
 

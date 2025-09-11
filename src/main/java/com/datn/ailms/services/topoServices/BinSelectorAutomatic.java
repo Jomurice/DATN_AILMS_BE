@@ -1,8 +1,8 @@
 package com.datn.ailms.services.topoServices;
 
 import com.datn.ailms.interfaces.IBinSelector;
-import com.datn.ailms.model.entities.topo_entities.Bin;
-import com.datn.ailms.model.entities.product_entities.ProductDetail;
+import com.datn.ailms.model.entities.Bin;
+import com.datn.ailms.model.entities.ProductDetail;
 import com.datn.ailms.repositories.warehousetopology.BinRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
