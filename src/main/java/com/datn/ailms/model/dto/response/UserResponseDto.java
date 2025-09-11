@@ -25,5 +25,6 @@ public class UserResponseDto {
     LocalDate dob;
     String address;
     Set<String> roles;
+    boolean status;
 
 }
