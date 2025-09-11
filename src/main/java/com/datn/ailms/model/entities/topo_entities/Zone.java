@@ -1,4 +1,4 @@
-package com.datn.ailms.model.entities;
+package com.datn.ailms.model.entities.topo_entities;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -8,25 +8,25 @@ import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Table(name = "shelves")
+@Table(name = "zones")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Shelf {
+public class Zone {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-     UUID id;
+    UUID id;
 
     String name;
 
      String code;
 
     @ManyToOne
-    @JoinColumn(name = "aisle_id")
-     Aisle aisle;
+    @JoinColumn(name = "warehouse_id")
+     Warehouse warehouse;
 
-    @OneToMany(mappedBy = "shelf", cascade = CascadeType.ALL)
-     List<Bin> bins;
+    @OneToMany(mappedBy = "zone", cascade = CascadeType.ALL)
+     List<Aisle> aisles;
 }

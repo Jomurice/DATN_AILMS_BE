@@ -1,6 +1,6 @@
 package com.datn.ailms.repositories;
 
-import com.datn.ailms.model.entities.Role;
+import com.datn.ailms.model.entities.account_entities.Role;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

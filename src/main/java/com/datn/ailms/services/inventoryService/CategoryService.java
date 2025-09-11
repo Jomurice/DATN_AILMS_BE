@@ -6,10 +6,11 @@ import com.datn.ailms.interfaces.ICategoryService;
 import com.datn.ailms.mapper.CategoryMapper;
 import com.datn.ailms.model.dto.request.inventory.CategoryRequestDto;
 import com.datn.ailms.model.dto.response.inventory.CategoryResponseDto;
-import com.datn.ailms.model.entities.Category;
+import com.datn.ailms.model.entities.other_entities.Menu;
+import com.datn.ailms.model.entities.product_entities.Category;
+import com.datn.ailms.repositories.menu_repo.MenuRepository;
 import com.datn.ailms.repositories.productRepo.CategoryRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,6 +23,7 @@ public class CategoryService implements ICategoryService {
 
     private final CategoryRepository _categoryRepository;
     private final CategoryMapper _categoryMapper;
+    private final MenuRepository _menuRepository;
 
     @Override
     public List<CategoryResponseDto> getAllCategories() {
@@ -41,20 +43,30 @@ public class CategoryService implements ICategoryService {
     @Override
     public CategoryResponseDto createCategory(CategoryRequestDto request) {
         Category category = _categoryMapper.toEntity(request);
+        if (request.getMenuId() != null) {
+            Menu menu = _menuRepository.findById(request.getMenuId())
+                    .orElseThrow(() -> new RuntimeException("Menu not found"));
+            category.setMenu(menu);
+        }
         category = _categoryRepository.save(category);
         return _categoryMapper.toResponse(category);
     }
 
     @Override
     public CategoryResponseDto updateCategory(UUID categoryId, CategoryRequestDto request) {
-        Category category = _categoryRepository.findById(categoryId).orElseThrow(
-                ()-> new AppException(ErrorCode.CATEGORY_NOT_EXISTED)
-        );
+        Category category = _categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_EXISTED));
+
         category.setName(request.getName());
         category.setDescription(request.getDescription());
 
-        Category updateCategory = _categoryRepository.save(category);
+        if (request.getMenuId() != null) {
+            Menu menu = _menuRepository.findById(request.getMenuId())
+                    .orElseThrow(() -> new RuntimeException("Menu not found"));
+            category.setMenu(menu);
+        }
 
-        return _categoryMapper.toResponse(updateCategory);
+        category = _categoryRepository.save(category);
+        return _categoryMapper.toResponse(category);
     }
 }

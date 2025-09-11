@@ -5,7 +5,6 @@ import com.datn.ailms.model.dto.request.ChangePasswordRequestDto;
 import com.datn.ailms.model.dto.request.UserRequestDto;
 
 import com.datn.ailms.model.dto.response.UserResponseDto;
-import com.datn.ailms.model.entities.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

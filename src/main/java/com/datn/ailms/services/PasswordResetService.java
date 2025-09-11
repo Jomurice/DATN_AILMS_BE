@@ -6,7 +6,7 @@ import com.datn.ailms.model.dto.request.EmailRequestDto;
 import com.datn.ailms.model.dto.request.OtpRequestDto;
 import com.datn.ailms.model.dto.request.PasswordRequestDto;
 import com.datn.ailms.model.entities.Otp;
-import com.datn.ailms.model.entities.User;
+import com.datn.ailms.model.entities.account_entities.User;
 import com.datn.ailms.repositories.userRepo.OtpRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;

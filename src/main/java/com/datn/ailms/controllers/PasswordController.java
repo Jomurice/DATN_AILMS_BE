@@ -4,7 +4,6 @@ import com.datn.ailms.model.dto.request.ChangePasswordRequestDto;
 import com.datn.ailms.model.dto.request.EmailRequestDto;
 import com.datn.ailms.model.dto.request.PasswordRequestDto;
 import com.datn.ailms.model.dto.response.ApiResp;
-import com.datn.ailms.model.entities.User;
 import com.datn.ailms.services.PasswordResetService;
 import com.datn.ailms.services.UserService;
 import lombok.RequiredArgsConstructor;
