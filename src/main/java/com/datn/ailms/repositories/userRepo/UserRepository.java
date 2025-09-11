@@ -32,27 +32,27 @@ public interface UserRepository extends JpaRepository<User, String> {
 
 
     @Query(value = """
-        SELECT u.* FROM users u
-        LEFT JOIN users_roles r ON u.id = r.user_id
-        WHERE (:name IS NULL OR :name = '' OR LOWER(u.name::text) LIKE LOWER(CONCAT('%', :name, '%')))
-          AND (:role IS NULL OR :role = '' OR r.roles_name = :role)
-          AND (:status IS NULL OR u.status = :status)
-          AND (:gender IS NULL OR u.gender = :gender)
-        """,
+            SELECT DISTINCT u.* FROM users u
+            INNER JOIN users_roles r ON u.id = r.user_id
+            WHERE (:name IS NULL OR unaccent(lower(u.name)) LIKE unaccent(lower(CONCAT('%', :name, '%'))))
+              AND (:role IS NULL OR r.roles_name = :role)
+              AND (:status IS NULL OR u.status = :status)
+              AND (:gender IS NULL OR u.gender = :gender)
+            """,
             countQuery = """
-        SELECT COUNT(*) FROM users u
-        LEFT JOIN users_roles r ON u.id = r.user_id
-        WHERE (:name IS NULL OR :name = '' OR LOWER(u.name::text) LIKE LOWER(CONCAT('%', :name, '%')))
-          AND (:role IS NULL OR :role = '' OR r.roles_name = :role)
-          AND (:status IS NULL OR u.status = :status)
-          AND (:gender IS NULL OR u.gender = :gender)
-        """,
+                  SELECT COUNT(DISTINCT u.id) FROM users u
+                  LEFT JOIN users_roles r ON u.id = r.user_id
+                  WHERE (:name IS NULL OR unaccent(lower(u.name)) LIKE unaccent(lower(CONCAT('%', :name, '%'))))
+                    AND (:role IS NULL OR r.roles_name = :role)
+                    AND (:status IS NULL OR u.status = :status)
+                    AND (:gender IS NULL OR u.gender = :gender)
+                    """,
             nativeQuery = true)
-    Page<User> searchUsers(@Param("name") String name,
-                           @Param("role") String role,
-                           @Param("status") Boolean status,
-                           @Param("gender") Boolean gender,
-                           Pageable pageable);
-
+    Page<User> searchUsers(
+            @Param("name") String name,
+            @Param("role") String role,
+            @Param("status") Boolean status,
+            @Param("gender") Boolean gender,
+            Pageable pageable);
 
 }
