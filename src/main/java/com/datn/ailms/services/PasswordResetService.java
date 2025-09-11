@@ -43,10 +43,10 @@ public class PasswordResetService {
     public void ResetPassword(PasswordRequestDto request) {
         User user = _userService.getUserEntityByEmail(request.getEmail());
 
-        boolean isValidOtp = _otpService.validateOtp(user.getId(), request.getOtpCode());
-        if (!isValidOtp) {
-            throw new AppException(ErrorCode.OTP_INVALID);
-        }
+//        boolean isValidOtp = _otpService.validateOtp(user.getId(), request.getOtpCode());
+//        if (!isValidOtp) {
+//            throw new AppException(ErrorCode.OTP_INVALID);
+//        }
 
         if(!request.getNewPassword().equals(request.getConfirmPassword())) {
             throw new AppException(ErrorCode.PASSWORD_INCORRECT);

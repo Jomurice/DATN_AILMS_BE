@@ -34,16 +34,16 @@ public interface UserRepository extends JpaRepository<User, String> {
     @Query(value = """
         SELECT u.* FROM users u
         LEFT JOIN users_roles r ON u.id = r.user_id
-        WHERE (:name IS NULL OR LOWER(u.name::text) LIKE LOWER(CONCAT('%', :name, '%')))
-          AND (:role IS NULL OR r.roles_name = :role)
+        WHERE (:name IS NULL OR :name = '' OR LOWER(u.name::text) LIKE LOWER(CONCAT('%', :name, '%')))
+          AND (:role IS NULL OR :role = '' OR r.roles_name = :role)
           AND (:status IS NULL OR u.status = :status)
           AND (:gender IS NULL OR u.gender = :gender)
         """,
             countQuery = """
         SELECT COUNT(*) FROM users u
         LEFT JOIN users_roles r ON u.id = r.user_id
-        WHERE (:name IS NULL OR LOWER(u.name::text) LIKE LOWER(CONCAT('%', :name, '%')))
-          AND (:role IS NULL OR r.roles_name = :role)
+        WHERE (:name IS NULL OR :name = '' OR LOWER(u.name::text) LIKE LOWER(CONCAT('%', :name, '%')))
+          AND (:role IS NULL OR :role = '' OR r.roles_name = :role)
           AND (:status IS NULL OR u.status = :status)
           AND (:gender IS NULL OR u.gender = :gender)
         """,
@@ -53,5 +53,6 @@ public interface UserRepository extends JpaRepository<User, String> {
                            @Param("status") Boolean status,
                            @Param("gender") Boolean gender,
                            Pageable pageable);
+
 
 }

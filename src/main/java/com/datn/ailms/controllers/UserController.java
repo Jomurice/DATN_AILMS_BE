@@ -65,12 +65,12 @@ public class UserController {
                 .result(user)
                 .build();
     }
-    @GetMapping("/search")
-    public ApiResp<List<UserResponseDto>> searchUsersByName(@RequestParam("name") String name) {
-        return ApiResp.<List<UserResponseDto>>builder()
-                .result(_userService.getUsersByNameContainingIgnoreCase(name))
-                .build();
-    }
+//    @GetMapping("/search")
+//    public ApiResp<List<UserResponseDto>> searchUsersByName(@RequestParam("name") String name) {
+//        return ApiResp.<List<UserResponseDto>>builder()
+//                .result(_userService.getUsersByNameContainingIgnoreCase(name))
+//                .build();
+//    }
 
     @PostMapping
     public ApiResp<UserResponseDto> createUser(@RequestBody UserRequestDto userRequest){
