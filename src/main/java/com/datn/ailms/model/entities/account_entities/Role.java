@@ -1,9 +1,6 @@
 package com.datn.ailms.model.entities.account_entities;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -17,6 +14,7 @@ import java.util.Set;
 @Table(name="roles")
 @Builder
 public class Role {
+    @Column(length = 255)
     @Id
     String name;
     String description;

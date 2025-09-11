@@ -4,12 +4,12 @@ import com.datn.ailms.model.dto.request.ChangePasswordRequestDto;
 import com.datn.ailms.model.dto.request.EmailRequestDto;
 import com.datn.ailms.model.dto.request.PasswordRequestDto;
 import com.datn.ailms.model.dto.response.ApiResp;
-import com.datn.ailms.model.entities.User;
+
 import com.datn.ailms.services.PasswordResetService;
 import com.datn.ailms.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
