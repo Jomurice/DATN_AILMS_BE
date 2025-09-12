@@ -32,21 +32,23 @@ public interface UserRepository extends JpaRepository<User, String> {
 
 
     @Query(value = """
-            SELECT u.* FROM users u
+        SELECT DISTINCT u.* 
+        FROM users u
+        LEFT JOIN users_roles r ON u.id = r.user_id
+        WHERE (:name IS NULL OR unaccent(lower(u.name)) LIKE unaccent(lower(CONCAT('%', :name, '%'))))
+          AND (:role IS NULL OR r.roles_name = :role)
+          AND (:status IS NULL OR u.status = :status)
+          AND (:gender IS NULL OR u.gender = :gender)
+        """,
+            countQuery = """
+            SELECT COUNT(DISTINCT u.id) 
+            FROM users u
             LEFT JOIN users_roles r ON u.id = r.user_id
             WHERE (:name IS NULL OR unaccent(lower(u.name)) LIKE unaccent(lower(CONCAT('%', :name, '%'))))
               AND (:role IS NULL OR r.roles_name = :role)
               AND (:status IS NULL OR u.status = :status)
               AND (:gender IS NULL OR u.gender = :gender)
-            """,
-            countQuery = """
-                    SELECT COUNT(*) FROM users u
-                    LEFT JOIN users_roles r ON u.id = r.user_id
-                    WHERE (:name IS NULL OR unaccent(lower(u.name)) LIKE unaccent(lower(CONCAT('%', :name, '%'))))
-                      AND (:role IS NULL OR r.roles_name = :role)
-                      AND (:status IS NULL OR u.status = :status)
-                      AND (:gender IS NULL OR u.gender = :gender)
-                    """,
+        """,
             nativeQuery = true)
     Page<User> searchUsers(
             @Param("name") String name,
@@ -54,5 +56,15 @@ public interface UserRepository extends JpaRepository<User, String> {
             @Param("status") Boolean status,
             @Param("gender") Boolean gender,
             Pageable pageable);
+    @Query(value = """
+        SELECT 
+            COUNT(*) AS totalUser, 
+            COUNT(CASE WHEN gender = true THEN 1 END) AS totalMale,
+            COUNT(CASE WHEN gender = false THEN 1 END) AS totalFemale
+        FROM users
+        """, nativeQuery = true)
+    User countUserStats();
 
+    @Query("SELECT COUNT(e) FROM User e")
+    long countUsers();
 }
