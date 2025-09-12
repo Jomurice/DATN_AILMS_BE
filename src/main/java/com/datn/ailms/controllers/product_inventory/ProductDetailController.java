@@ -11,6 +11,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -20,6 +21,14 @@ public class ProductDetailController {
     private final ProductDetailRepository _productDetailRepository;
     private final ProductDetailMapper _productDetailMapper;
     private final ProductRepository productRepo;
+
+    @GetMapping
+    ApiResp<List<ProductDetailResponseDto>> getAll(){
+        var result = _productDetailRepository.findAll();
+        var toList = _productDetailMapper.toResponseList(result);
+        return ApiResp.<List<ProductDetailResponseDto>>builder().result(toList).build();
+    }
+
     // API tạo 1 serial mới chưa gán bin
     @PostMapping("/create-serial")
     public ApiResp<ProductDetailResponseDto> createSerial(@RequestParam String serial,
