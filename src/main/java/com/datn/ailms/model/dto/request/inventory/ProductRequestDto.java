@@ -19,6 +19,5 @@ public class ProductRequestDto {
     private String color;
     private String storage;
     private String serialPrefix;
-    private UUID categoryId; // id của Category
-    private UUID brandId;    // id của Brand
+    private UUID categoryBrandId;
 }

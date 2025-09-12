@@ -3,6 +3,7 @@ package com.datn.ailms.controllers.product_inventory;
 import com.datn.ailms.interfaces.ICategoryService;
 import com.datn.ailms.model.dto.request.inventory.CategoryRequestDto;
 import com.datn.ailms.model.dto.response.ApiResp;
+import com.datn.ailms.model.dto.response.inventory.CategoryDetailResponseDto;
 import com.datn.ailms.model.dto.response.inventory.CategoryResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -25,9 +26,9 @@ public class CategoryController {
     }
 
     @GetMapping("/{categoryId}")
-    public ApiResp<CategoryResponseDto> getCategoryById(@PathVariable UUID categoryId){
-        CategoryResponseDto category = _categoryService.getCategoryById(categoryId);
-        return ApiResp.<CategoryResponseDto>builder()
+    public ApiResp<CategoryDetailResponseDto> getCategoryById(@PathVariable UUID categoryId){
+        CategoryDetailResponseDto category = _categoryService.getCategoryById(categoryId);
+        return ApiResp.<CategoryDetailResponseDto>builder()
                 .result(category)
                 .build();
     }
