@@ -24,9 +24,9 @@ public class ProductService {
     public ProductResponseDto create(ProductRequestDto request) {
         Product entity = mapper.toEntity(request);
 
-        // tìm CategoryBrand theo categoryId + brandId
+        // tìm CategoryBrand theo categoryId
         CategoryBrand categoryBrand = categoryBrandRepo
-                .findByCategoryIdAndBrandId(request.getCategoryId(), request.getBrandId())
+                .findById(request.getCategoryBrandId())
                 .orElseThrow(() -> new RuntimeException("CategoryBrand not found"));
 
         entity.setCategoryBrand(categoryBrand);
@@ -63,7 +63,7 @@ public class ProductService {
 
         // gán CategoryBrand mới nếu thay đổi
         CategoryBrand categoryBrand = categoryBrandRepo
-                .findByCategoryIdAndBrandId(request.getCategoryId(), request.getBrandId())
+                .findById(request.getCategoryBrandId())
                 .orElseThrow(() -> new RuntimeException("CategoryBrand not found"));
 
         updated.setCategoryBrand(categoryBrand);
