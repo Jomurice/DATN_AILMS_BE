@@ -50,5 +50,5 @@ public class User {
     )
     Set<Role> roles;
 
-    boolean status;
+    boolean status = true;
 }
