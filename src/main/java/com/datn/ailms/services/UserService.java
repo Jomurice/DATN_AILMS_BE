@@ -102,7 +102,6 @@ public class UserService implements IUserService {
 
         user.setRoles(roles);
         user.setStatus(true);
-
         User savedUser = _userRepository.save(user);
 
         return _userMapper.toUserResponse(savedUser);
