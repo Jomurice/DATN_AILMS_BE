@@ -35,7 +35,7 @@ public class CategoryBrandService implements ICategoryBrand {
                 .orElseThrow(() -> new RuntimeException("Brand not found: " + request.getBrandId()));
 
         // Kiểm tra tồn tại
-        categoryBrandRepo.findByCategoryIdAndBrandId(category.getId(), brand.getId())
+        categoryBrandRepo.findById(category.getId())
                 .ifPresent(cb -> {throw new RuntimeException("CategoryBrand already exists");});
 
         CategoryBrand cb = mapper.toEntity(request);
