@@ -6,7 +6,9 @@ import com.datn.ailms.model.dto.response.ApiResp;
 import com.datn.ailms.model.dto.response.UserResponseDto;
 
 
-import com.datn.ailms.services.stats.UserStatsDto;
+
+
+
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,12 +83,5 @@ public class UserController {
     public ApiResp<UserResponseDto> updateUser(@PathVariable("userId") String userId, @RequestBody UserRequestDto userRequest){
         UserResponseDto userResponse = _userService.updateUser(userId, userRequest);
         return ApiResp.<UserResponseDto>builder().result(userResponse).build();
-    }
-
-    @GetMapping("/stats")
-    public ApiResp<UserStatsDto> getUserStats() {
-        return ApiResp.<UserStatsDto>builder()
-                .result(_userService.getUserStats())
-                .build();
     }
 }
