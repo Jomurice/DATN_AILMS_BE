@@ -1,5 +1,6 @@
 package com.datn.ailms.repositories.userRepo;
 
+import com.datn.ailms.model.dto.response.stats.UserStatsDto;
 import com.datn.ailms.model.entities.account_entities.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -56,15 +57,19 @@ public interface UserRepository extends JpaRepository<User, String> {
             @Param("status") Boolean status,
             @Param("gender") Boolean gender,
             Pageable pageable);
-    @Query(value = """
-        SELECT 
-            COUNT(*) AS totalUser, 
-            COUNT(CASE WHEN gender = true THEN 1 END) AS totalMale,
-            COUNT(CASE WHEN gender = false THEN 1 END) AS totalFemale
-        FROM users
-        """, nativeQuery = true)
-    User countUserStats();
 
     @Query("SELECT COUNT(e) FROM User e")
     long countUsers();
+
+
+    @Query(value = """
+        SELECT 
+            COUNT(*) AS totalUsers, 
+            COUNT(CASE WHEN gender = true THEN 1 END) AS totalMales,
+            COUNT(CASE WHEN gender = false THEN 1 END) AS totalFemales,
+            COUNT(CASE WHEN status = true THEN 1 END) AS totalActives,
+            COUNT(CASE WHEN status = false THEN 1 END) AS totalBlocked
+        FROM users
+        """, nativeQuery = true)
+    UserStatsDto countUserStats();
 }
