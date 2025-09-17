@@ -21,7 +21,7 @@ public class OtpService {
     private final UserService _userService;
 
     public String createOtp(String userId) {
-        String otp = _otpGenerator.generateOtp(6);
+        String otp = _otpGenerator.generateCodeNumbers(6);
 
         Otp otpEntity = new Otp();
         otpEntity.setUserId(userId);
