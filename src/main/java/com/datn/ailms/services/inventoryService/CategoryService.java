@@ -5,6 +5,7 @@ import com.datn.ailms.exceptions.ErrorCode;
 import com.datn.ailms.interfaces.ICategoryService;
 import com.datn.ailms.mapper.CategoryMapper;
 import com.datn.ailms.model.dto.request.inventory.CategoryRequestDto;
+import com.datn.ailms.model.dto.response.inventory.CategoryDetailResponseDto;
 import com.datn.ailms.model.dto.response.inventory.CategoryResponseDto;
 import com.datn.ailms.model.entities.other_entities.Menu;
 import com.datn.ailms.model.entities.product_entities.Category;
@@ -33,11 +34,11 @@ public class CategoryService implements ICategoryService {
     }
 
     @Override
-    public CategoryResponseDto getCategoryById(UUID categoryId) {
+    public CategoryDetailResponseDto getCategoryById(UUID categoryId) {
         Category category = _categoryRepository.findById(categoryId).orElseThrow(
                 () -> new AppException(ErrorCode.CATEGORY_NOT_EXISTED)
         );
-        return _categoryMapper.toResponse(category);
+        return _categoryMapper.toDetailResponse(category);
     }
 
     @Override

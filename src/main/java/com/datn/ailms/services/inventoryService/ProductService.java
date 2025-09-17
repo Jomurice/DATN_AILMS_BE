@@ -3,9 +3,13 @@ package com.datn.ailms.services.inventoryService;
 import com.datn.ailms.mapper.ProductMapper;
 import com.datn.ailms.model.dto.request.inventory.ProductRequestDto;
 import com.datn.ailms.model.dto.response.inventory.ProductResponseDto;
+import com.datn.ailms.model.entities.Brand;
 import com.datn.ailms.model.entities.CategoryBrand;
+import com.datn.ailms.model.entities.product_entities.Category;
 import com.datn.ailms.model.entities.product_entities.Product;
+import com.datn.ailms.repositories.BrandRepository;
 import com.datn.ailms.repositories.categoryBrand.CategoryBrandRepository;
+import com.datn.ailms.repositories.productRepo.CategoryRepository;
 import com.datn.ailms.repositories.productRepo.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,16 +22,31 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ProductService {
     private final ProductRepository productRepo;
-    private final CategoryBrandRepository categoryBrandRepo;
+    private final CategoryBrandRepository _categoryBrandRepo;
     private final ProductMapper mapper;
+    private final BrandRepository _brandRepo;
+    private final CategoryRepository _categoryRepo;
+
 
     public ProductResponseDto create(ProductRequestDto request) {
         Product entity = mapper.toEntity(request);
 
-        // tìm CategoryBrand theo categoryId + brandId
-        CategoryBrand categoryBrand = categoryBrandRepo
+        // Lấy category & brand
+        Category category = _categoryRepo.findById(request.getCategoryId())
+                .orElseThrow(() -> new RuntimeException("Category not found"));
+        Brand brand = _brandRepo.findById(request.getBrandId())
+                .orElseThrow(() -> new RuntimeException("Brand not found"));
+
+        // Kiểm tra CategoryBrand
+        CategoryBrand categoryBrand = _categoryBrandRepo
                 .findByCategoryIdAndBrandId(request.getCategoryId(), request.getBrandId())
-                .orElseThrow(() -> new RuntimeException("CategoryBrand not found"));
+                .orElseGet(() -> {
+                    CategoryBrand cb = new CategoryBrand();
+                    cb.setId(UUID.randomUUID());
+                    cb.setCategory(category);
+                    cb.setBrand(brand);
+                    return _categoryBrandRepo.save(cb);
+                });
 
         entity.setCategoryBrand(categoryBrand);
 
@@ -62,8 +81,8 @@ public class ProductService {
         updated.setId(existing.getId());
 
         // gán CategoryBrand mới nếu thay đổi
-        CategoryBrand categoryBrand = categoryBrandRepo
-                .findByCategoryIdAndBrandId(request.getCategoryId(), request.getBrandId())
+        CategoryBrand categoryBrand = _categoryBrandRepo
+                .findByCategoryIdAndBrandId(request.getCategoryId(),request.getBrandId())
                 .orElseThrow(() -> new RuntimeException("CategoryBrand not found"));
 
         updated.setCategoryBrand(categoryBrand);
