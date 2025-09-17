@@ -25,6 +25,8 @@ public enum ErrorCode {
     OTP_EXPIRED(1021, "OTP expired", HttpStatus.BAD_REQUEST),
     OTP_INVALID(1022, "OTP invalid", HttpStatus.BAD_REQUEST),
     PASSWORD_INCORRECT(1023, "Password incorrect", HttpStatus.BAD_REQUEST),
+
+    USER_BLOCKED(1024, "User blocked", HttpStatus.CONFLICT),
     ;
 
 

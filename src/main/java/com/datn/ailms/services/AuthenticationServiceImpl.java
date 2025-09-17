@@ -80,6 +80,10 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
 
         if(!authenticated) throw new AppException(ErrorCode.UNAUTHENTICATED);
 
+        if(!user.isStatus()){
+            throw new  AppException(ErrorCode.USER_BLOCKED);
+        }
+
         var token = generateToken(user);
         return AuthenResponse.builder()
                 .token(token.token)
