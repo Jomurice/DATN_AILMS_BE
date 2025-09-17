@@ -4,7 +4,9 @@
     import jakarta.persistence.*;
     import lombok.*;
     import lombok.experimental.FieldDefaults;
-    
+
+    import java.time.LocalDate;
+    import java.time.LocalDateTime;
     import java.util.Set;
     import java.util.UUID;
     
@@ -39,6 +41,10 @@
         private String color;
     
         private String storage;
+
+        LocalDateTime createdAt;
+
+        LocalDateTime updatedAt;
 
         @Column(name = "serial_prefix")
         private String serialPrefix;
