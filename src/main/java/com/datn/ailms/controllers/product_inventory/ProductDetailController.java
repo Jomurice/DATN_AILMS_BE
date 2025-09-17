@@ -9,8 +9,11 @@ import com.datn.ailms.repositories.productRepo.ProductDetailRepository;
 import com.datn.ailms.repositories.productRepo.ProductRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.convert.Jsr310Converters;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -41,7 +44,8 @@ public class ProductDetailController {
         detail.setStatus(SerialStatus.INBOUND); // trạng thái ban đầu
         detail.setBin(null);                // chưa gán bin
         detail.setProduct(product);
-
+        detail.setCreatedAt(LocalDateTime.now());
+        detail.setUpdatedAt(LocalDateTime.now());
         _productDetailRepository.save(detail);
         var result = _productDetailMapper.toResponse(detail);
         return ApiResp.<ProductDetailResponseDto>builder().result(result).build();
