@@ -10,6 +10,7 @@ import com.datn.ailms.repositories.productRepo.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -30,6 +31,8 @@ public class ProductService {
                 .orElseThrow(() -> new RuntimeException("CategoryBrand not found"));
 
         entity.setCategoryBrand(categoryBrand);
+        entity.setCreatedAt(LocalDateTime.now());
+        entity.setUpdatedAt(LocalDateTime.now());
 
         entity = productRepo.save(entity);
         return mapper.toResponse(entity);
@@ -60,7 +63,7 @@ public class ProductService {
 
         // giữ lại id cũ
         updated.setId(existing.getId());
-
+        updated.setUpdatedAt(LocalDateTime.now());
         // gán CategoryBrand mới nếu thay đổi
         CategoryBrand categoryBrand = categoryBrandRepo
                 .findById(request.getCategoryBrandId())
