@@ -5,6 +5,7 @@ import com.datn.ailms.model.dto.request.DashboardStatsRequestDto;
 import com.datn.ailms.model.dto.response.DashboardStatsResponseDto;
 import com.datn.ailms.repositories.productRepo.ProductDetailRepository;
 import com.datn.ailms.repositories.userRepo.UserRepository;
+import com.datn.ailms.services.stats.UserStatsDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -48,11 +49,11 @@ public class DashboardService implements IDashboardService {
         }
 
 //        long exported = orderDetailRepository.countExportedBetween(start, now);
-        long employees = _userRepo.countUsers();
+        UserStatsDto employees = _userRepo.countUserStats();
         return DashboardStatsResponseDto.builder()
                 .inStock(inStock)
 //                .exported(exported)
-                .employees(employees)
+                .employees(employees.getTotalActives())
                 .build();
     }
 }
