@@ -19,5 +19,6 @@ public class ProductRequestDto {
     private String color;
     private String storage;
     private String serialPrefix;
-    private UUID categoryBrandId;
+    private UUID categoryId;
+    private UUID brandId;
 }
