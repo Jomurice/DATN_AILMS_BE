@@ -6,7 +6,7 @@ import com.datn.ailms.model.dto.request.UserRequestDto;
 
 import com.datn.ailms.model.dto.response.UserResponseDto;
 
-import com.datn.ailms.services.stats.UserStatsDto;
+import com.datn.ailms.model.dto.response.stats.UserStatsDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -35,5 +35,6 @@ public interface IUserService {
 
      UserResponseDto activeAccount(String id);
      UserResponseDto blockedAccount(String id);
+
     UserStatsDto getUserStats();
 }

@@ -6,7 +6,7 @@ import com.datn.ailms.model.dto.response.ApiResp;
 import com.datn.ailms.model.dto.response.UserResponseDto;
 
 
-import com.datn.ailms.services.stats.UserStatsDto;
+import com.datn.ailms.model.dto.response.stats.UserStatsDto;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Autowired;

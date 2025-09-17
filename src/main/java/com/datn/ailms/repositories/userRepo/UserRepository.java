@@ -1,7 +1,7 @@
 package com.datn.ailms.repositories.userRepo;
 
+import com.datn.ailms.model.dto.response.stats.UserStatsDto;
 import com.datn.ailms.model.entities.account_entities.User;
-import com.datn.ailms.services.stats.UserStatsDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -57,6 +57,11 @@ public interface UserRepository extends JpaRepository<User, String> {
             @Param("status") Boolean status,
             @Param("gender") Boolean gender,
             Pageable pageable);
+
+    @Query("SELECT COUNT(e) FROM User e")
+    long countUsers();
+
+
     @Query(value = """
         SELECT 
             COUNT(*) AS totalUsers, 

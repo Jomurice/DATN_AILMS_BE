@@ -3,8 +3,8 @@ package com.datn.ailms.services;
 import com.datn.ailms.exceptions.ErrorCode;
 import com.datn.ailms.interfaces.IUserService;
 import com.datn.ailms.model.dto.request.ChangePasswordRequestDto;
+import com.datn.ailms.model.dto.response.stats.UserStatsDto;
 import com.datn.ailms.repositories.userRepo.UserRepository;
-import com.datn.ailms.services.stats.UserStatsDto;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -192,7 +192,6 @@ public class UserService implements IUserService {
     public UserStatsDto getUserStats() {
         return _userRepository.countUserStats();
     }
-
 
 
 }
