@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -20,14 +21,17 @@ public class Warehouse {
     UUID id;
 
 
-    @Column(nullable=false, unique=true, length=32)
-    private String code;      // HN01, HCM01...
+    @Column(nullable = false, unique = true, length = 32)
+    String code;      // HN01, HCM01...
 
-    @Column(nullable=false, length=128)
-    private String name;
+    @Column(nullable = false, length = 128)
+    String name;
 
-    private String location;
+    String location;
 
+    LocalDateTime createdAt;
+
+    LocalDateTime updatedAt;
     @OneToMany(mappedBy = "warehouse", cascade = CascadeType.ALL)
-     List<Zone> zones;
+    List<Zone> zones;
 }
