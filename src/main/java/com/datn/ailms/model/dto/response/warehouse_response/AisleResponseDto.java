@@ -4,6 +4,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -18,4 +19,5 @@ public class AisleResponseDto {
     LocalDateTime createdAt;
     LocalDateTime updatedAt;
     UUID zoneId;
+    List<ShelfResponseDto> shelfList;
 }

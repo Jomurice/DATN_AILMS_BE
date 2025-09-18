@@ -29,6 +29,13 @@ public class ZoneService implements IZoneService {
     }
 
     @Override
+    public List<ZoneResponseDto> findAllByWarehouseIdNativeQuery(UUID warehouseId) {
+        List<Zone> zones = _zoneRepository.findAllByWarehouseIdNativeQuery(warehouseId);
+
+        return _zoneMapper.toZoneResponseDtoList(zones);
+    }
+
+    @Override
     public ZoneResponseDto getZoneById(UUID zoneId) {
         Zone zone = _zoneRepository.findById(zoneId).orElseThrow(
                 ()-> new AppException(ErrorCode.ZONE_NOT_EXISTED)
