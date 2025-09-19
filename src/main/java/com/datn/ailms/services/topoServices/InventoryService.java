@@ -39,11 +39,10 @@ public class InventoryService implements IInventory {
         // 1. Tìm hoặc tạo ProductDetail
         ProductDetail detail = _detailRepo.findBySerialNumber(serialNumber)
                 .orElseThrow(() -> new EntityNotFoundException("Serial not found: " + serialNumber));
-
+//        String prefix = extractPrefix(serialNumber);
         // 2. Nếu chưa gán product → tìm theo prefix
         if (detail.getProduct() == null) {
-            String prefix = extractPrefix(serialNumber);
-            Product product = _productRepo.findBySerialPrefix(prefix)
+            Product product = _productRepo.findBySerialMatch(serialNumber)
                     .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
             detail.setProduct(product);
         }

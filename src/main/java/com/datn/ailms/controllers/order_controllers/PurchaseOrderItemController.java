@@ -2,6 +2,7 @@ package com.datn.ailms.controllers.order_controllers;
 
 import com.datn.ailms.model.dto.request.order.PurchaseOrderItemRequestDto;
 import com.datn.ailms.model.dto.response.ApiResp;
+import com.datn.ailms.model.dto.response.inventory.ProductDetailResponseDto;
 import com.datn.ailms.model.dto.response.order.PurchaseOrderItemResponseDto;
 import com.datn.ailms.services.orderService.PurchaseOrderItemService;
 import lombok.AccessLevel;
@@ -32,6 +33,15 @@ public class PurchaseOrderItemController {
     ApiResp<Void> removeItem(@PathVariable UUID itemId){
         _itemService.removeItem(itemId);
         return ApiResp.<Void>builder().build();
+    }
+
+    @PostMapping("/{itemId}/scan")
+    public ApiResp<ProductDetailResponseDto> scan(
+            @PathVariable UUID itemId,
+            @RequestParam String serial
+    ) {
+        var result = _itemService.scanSerial(itemId, serial);
+        return ApiResp.<ProductDetailResponseDto>builder().result(result).build();
     }
 
 }
