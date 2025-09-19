@@ -8,7 +8,9 @@ import com.datn.ailms.model.dto.request.warehouse_request.CreateShelfRequestDto;
 import com.datn.ailms.model.dto.request.warehouse_request.UpdateShelfRequestDto;
 import com.datn.ailms.model.dto.response.warehouse_response.ShelfResponseDto;
 import com.datn.ailms.model.entities.topo_entities.Shelf;
+import com.datn.ailms.repositories.warehousetopology.AisleRepository;
 import com.datn.ailms.repositories.warehousetopology.ShelfRepository;
+import com.datn.ailms.repositories.warehousetopology.ZoneRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +24,7 @@ public class ShelfService implements IShelfService {
 
     private final ShelfRepository _shelfRepository;
     private final ShelfMapper _shelfMapper;
+    private final AisleRepository _aisleRepo;
 
     @Override
     public List<ShelfResponseDto> getAllShelves() {
@@ -46,6 +49,9 @@ public class ShelfService implements IShelfService {
     @Override
     public ShelfResponseDto createShelf(CreateShelfRequestDto request) {
         Shelf shelf = _shelfMapper.toShelf(request);
+
+        var aisle = _aisleRepo.findById(request.getAisleId()).orElseThrow(() -> new AppException(ErrorCode.AISLE_NOT_EXISTED));
+        shelf.setAisle(aisle);
         shelf.setCreatedAt(LocalDateTime.now());
         shelf.setUpdatedAt(LocalDateTime.now());
 

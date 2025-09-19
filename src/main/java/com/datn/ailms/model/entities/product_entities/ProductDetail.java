@@ -6,6 +6,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(
         name = "product_details",
@@ -25,6 +27,10 @@ public class ProductDetail {
 
     @Column(nullable = false, unique = true, length = 100)
      String serialNumber;   // mỗi sản phẩm cụ thể có 1 serial riêng, duy nhất
+
+    LocalDateTime createdAt;
+
+    LocalDateTime updatedAt;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable=false, length=20)

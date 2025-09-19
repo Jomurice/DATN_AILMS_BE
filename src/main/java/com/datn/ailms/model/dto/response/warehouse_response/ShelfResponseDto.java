@@ -5,6 +5,7 @@ import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -12,10 +13,9 @@ import java.util.UUID;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ShelfResponseDto {
     UUID id;
-
     String code;
     String name;
-    UUID warehouseId;
+    UUID aisleId;
     LocalDateTime createdAt;
     LocalDateTime updatedAt;
 }

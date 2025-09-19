@@ -1,0 +1,21 @@
+package com.datn.ailms.model.dto.response.order;
+
+import com.datn.ailms.model.dto.response.inventory.ProductResponseDto;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
+
+import java.util.UUID;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class PurchaseOrderItemResponseDto {
+    private UUID id;
+    private Integer orderQuantity;
+
+    private Integer scannedQuantity;
+
+    private ProductResponseDto product;
+}
