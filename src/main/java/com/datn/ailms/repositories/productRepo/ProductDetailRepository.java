@@ -14,4 +14,6 @@ public interface ProductDetailRepository extends JpaRepository<ProductDetail, UU
 
     @Query("SELECT COUNT(p) FROM ProductDetail p")
     long countProductDetail();
+
+    Optional<ProductDetail> findBySerialNumberIgnoreCase(String serialNumber);
 }

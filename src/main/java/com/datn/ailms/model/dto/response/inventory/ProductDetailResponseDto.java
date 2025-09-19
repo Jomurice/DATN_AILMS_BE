@@ -18,4 +18,5 @@ public class ProductDetailResponseDto {
     private SerialStatus status;
     private UUID productId;
     private UUID binId;
+    private UUID purchaseOrderItemId;
 }

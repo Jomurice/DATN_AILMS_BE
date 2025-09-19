@@ -14,4 +14,13 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
     Optional<Product> findBySerialPrefix(String serialPrefix);
     @Query("SELECT p FROM Product p WHERE p.categoryBrand.category.menu.id = :menuId")
     List<Product> findByMenuId(@Param("menuId") UUID menuId);
+
+    @Query("""
+    SELECT p FROM Product p
+    WHERE UPPER(:serial) LIKE UPPER(p.serialPrefix) || '%'
+""")
+    Optional<Product> findBySerialMatch(@Param("serial") String serial);
+
+
+
 }

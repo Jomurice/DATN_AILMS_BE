@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -22,7 +23,8 @@ public class Shelf {
     String name;
 
      String code;
-
+     LocalDateTime createdAt;
+     LocalDateTime updatedAt;
     @ManyToOne
     @JoinColumn(name = "aisle_id")
      Aisle aisle;

@@ -14,5 +14,9 @@ public interface BinRepository extends JpaRepository<Bin, UUID> {
        and (b.preferredProductId is null or b.preferredProductId = :productId)
      order by (b.capacity - b.currentQty) desc
     """)
+
     List<Bin> findAvailableForProduct(UUID productId);
+
+    @Query(value = "SELECT * FROM bins b WHERE b.shelf_id = ?1", nativeQuery = true)
+    List<Bin> findAllByShelfIdNativeQuery(UUID shelfId);
 }
