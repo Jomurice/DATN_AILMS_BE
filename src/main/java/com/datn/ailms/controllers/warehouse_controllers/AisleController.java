@@ -1,4 +1,4 @@
-package com.datn.ailms.controllers;
+package com.datn.ailms.controllers.warehouse_controllers;
 
 import com.datn.ailms.interfaces.IAisleService;
 import com.datn.ailms.model.dto.request.warehouse_request.CreateAisleRequestDto;
@@ -6,7 +6,6 @@ import com.datn.ailms.model.dto.request.warehouse_request.UpdateAisleRequestDto;
 import com.datn.ailms.model.dto.response.ApiResp;
 import com.datn.ailms.model.dto.response.warehouse_response.AisleResponseDto;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

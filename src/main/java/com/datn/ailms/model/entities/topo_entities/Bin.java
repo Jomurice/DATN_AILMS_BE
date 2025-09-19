@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -20,13 +21,17 @@ import java.util.UUID;
 public class Bin {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    UUID id;
 
     String name;
 
-    private String code;  // ví dụ: BIN-A1-S1
+    String code;  // ví dụ: BIN-A1-S1
     @Column(nullable=false) Integer capacity;
     @Column(nullable=false) Integer currentQty;
+
+    LocalDateTime createdAt;
+    LocalDateTime updatedAt;
+
 
     // gợi ý bind sản phẩm/sku cho bin này (tuỳ chọn)
     Long preferredProductId;
