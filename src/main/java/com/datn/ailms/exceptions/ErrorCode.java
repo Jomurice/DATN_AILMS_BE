@@ -3,6 +3,7 @@ package com.datn.ailms.exceptions;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 
 @Getter
 public enum ErrorCode {
@@ -31,6 +32,10 @@ public enum ErrorCode {
     AISLE_NOT_EXISTED(1027, "AISLE not existed", HttpStatus.NOT_FOUND),
     SHELF_NOT_EXISTED(1028, "Shell not existed", HttpStatus.NOT_FOUND),
     BIN_NOT_EXISTED(1028, "Bin not existed", HttpStatus.NOT_FOUND),
+    ORDER_NOT_FOUND(1029,"Order not found",HttpStatus.NOT_FOUND),
+    INVALID_PARAM(1030,"Invalid Parameter", HttpStatus.BAD_REQUEST),
+    SERIAL_ALREADY_SCANNED(1031,"Serial had been scanned", HttpStatus.CONFLICT),
+    BIN_FULL(1032,"No more space in Bin", HttpStatus.CONFLICT),
 
     ;
 

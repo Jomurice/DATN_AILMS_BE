@@ -18,6 +18,7 @@ public interface ProductDetailMapper {
 
     @Mapping(source = "product.id", target = "productId")
     @Mapping(source = "bin.id", target = "binId")
+    @Mapping(target = "purchaseOrderItemId", source = "purchaseOrderItem.id")
     ProductDetailResponseDto toResponse(ProductDetail productDetail);
 
     List<ProductDetailResponseDto> toResponseList(List<ProductDetail> details);
