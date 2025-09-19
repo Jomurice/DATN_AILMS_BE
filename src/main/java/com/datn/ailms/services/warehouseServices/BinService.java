@@ -1,4 +1,4 @@
-package com.datn.ailms.services.WarehouseServices;
+package com.datn.ailms.services.warehouseServices;
 
 import com.datn.ailms.exceptions.AppException;
 import com.datn.ailms.exceptions.ErrorCode;
@@ -9,14 +9,13 @@ import com.datn.ailms.model.dto.request.warehouse_request.UpdateBinRequestDto;
 import com.datn.ailms.model.dto.response.warehouse_response.BinResponseDto;
 import com.datn.ailms.model.entities.topo_entities.Bin;
 import com.datn.ailms.model.entities.topo_entities.Shelf;
+import com.datn.ailms.repositories.productRepo.ProductRepository;
 import com.datn.ailms.repositories.warehousetopology.BinRepository;
 import com.datn.ailms.repositories.warehousetopology.ShelfRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.web.filter.ShallowEtagHeaderFilter;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -27,7 +26,7 @@ public class BinService implements IBinService {
     private final BinRepository _binRepository;
     private final BinMapper _binMapper;
     private final ShelfRepository _shelfRepository;
-
+    private final ProductRepository _productRepository;
     @Override
     public List<BinResponseDto> getAllBins() {
         List<Bin> bins = _binRepository.findAll();
@@ -57,8 +56,11 @@ public class BinService implements IBinService {
                 () -> new AppException(ErrorCode.SHELF_NOT_EXISTED)
         );
 
+
+
         Bin bin = _binMapper.toBin(request);
         bin.setShelf(shelf);
+        bin.setPreferredProductId(request.getPreferredProductId());
         bin.setCreatedAt(LocalDateTime.now());
         bin.setUpdatedAt(LocalDateTime.now());
 
@@ -79,6 +81,7 @@ public class BinService implements IBinService {
             );
             bin.setShelf(shelf);
         }
+        bin.setPreferredProductId(request.getPreferredProductId());
         bin.setUpdatedAt(LocalDateTime.now());
 
         return _binMapper.toBinResponseDto(_binRepository.save(bin));

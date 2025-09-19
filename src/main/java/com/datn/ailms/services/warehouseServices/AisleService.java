@@ -1,4 +1,4 @@
-package com.datn.ailms.services.WarehouseServices;
+package com.datn.ailms.services.warehouseServices;
 
 import com.datn.ailms.exceptions.AppException;
 import com.datn.ailms.exceptions.ErrorCode;
@@ -9,7 +9,6 @@ import com.datn.ailms.model.dto.request.warehouse_request.UpdateAisleRequestDto;
 import com.datn.ailms.model.dto.response.warehouse_response.AisleResponseDto;
 import com.datn.ailms.model.entities.topo_entities.Aisle;
 import com.datn.ailms.repositories.warehousetopology.AisleRepository;
-import com.datn.ailms.repositories.warehousetopology.ShelfRepository;
 import com.datn.ailms.repositories.warehousetopology.ZoneRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

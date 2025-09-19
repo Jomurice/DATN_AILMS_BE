@@ -1,4 +1,4 @@
-package com.datn.ailms.services.WarehouseServices;
+package com.datn.ailms.services.warehouseServices;
 
 import com.datn.ailms.exceptions.AppException;
 import com.datn.ailms.exceptions.ErrorCode;
