@@ -15,29 +15,40 @@ import java.util.UUID;
 @RequestMapping("/api/shelves")
 @RequiredArgsConstructor
 public class ShelfController {
+    private final IShelfService _shelfService;
 
-    private final IShelfService shelfService;
 
     @GetMapping
     public ApiResp<List<ShelfResponseDto>> getAllShelves() {
         return ApiResp.<List<ShelfResponseDto>>builder()
-                .result(shelfService.getAllShelves())
+                .result(_shelfService.getAllShelves())
                 .build();
     }
+
+
+    @GetMapping("/aisle/{aisleId}")
+    public ApiResp<List<ShelfResponseDto>> getShelvesByAisleId(@PathVariable UUID aisleId) {
+        return ApiResp.<List<ShelfResponseDto>>builder()
+                .result(_shelfService.findAllByAisleIdNativeQuery(aisleId))
+                .build();
+    }
+
 
     @GetMapping("/{shelfId}")
     public ApiResp<ShelfResponseDto> getShelfById(@PathVariable UUID shelfId) {
         return ApiResp.<ShelfResponseDto>builder()
-                .result(shelfService.getShelfById(shelfId))
+                .result(_shelfService.getShelfById(shelfId))
                 .build();
     }
+
 
     @PostMapping
     public ApiResp<ShelfResponseDto> createShelf(@RequestBody CreateShelfRequestDto request) {
         return ApiResp.<ShelfResponseDto>builder()
-                .result(shelfService.createShelf(request))
+                .result(_shelfService.createShelf(request))
                 .build();
     }
+
 
     @PutMapping("/{shelfId}")
     public ApiResp<ShelfResponseDto> updateShelf(
@@ -45,7 +56,10 @@ public class ShelfController {
             @RequestBody UpdateShelfRequestDto request
     ) {
         return ApiResp.<ShelfResponseDto>builder()
-                .result(shelfService.updateShelf(shelfId, request))
+                .result(_shelfService.updateShelf(shelfId, request))
                 .build();
     }
+
+
+
 }

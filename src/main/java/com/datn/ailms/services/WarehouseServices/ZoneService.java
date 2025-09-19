@@ -22,9 +22,17 @@ import java.util.UUID;
 public class ZoneService implements IZoneService {
     private final ZoneRepository _zoneRepository;
     private final ZoneMapper _zoneMapper;
+    private final WarehouseRepository _warehouseRepository;
     @Override
     public List<ZoneResponseDto> getAllZones() {
         List<Zone> zones = _zoneRepository.findAll();
+        return _zoneMapper.toZoneResponseDtoList(zones);
+    }
+
+    @Override
+    public List<ZoneResponseDto> findAllByWarehouseIdNativeQuery(UUID warehouseId) {
+        List<Zone> zones = _zoneRepository.findAllByWarehouseIdNativeQuery(warehouseId);
+
         return _zoneMapper.toZoneResponseDtoList(zones);
     }
 
@@ -40,6 +48,9 @@ public class ZoneService implements IZoneService {
     public ZoneResponseDto createZone(CreateZoneRequestDto request) {
 
         Zone zone = _zoneMapper.toZone(request);
+        var warehouse = _warehouseRepository.findById(request.getWarehouseId())
+                .orElseThrow(() -> new AppException(ErrorCode.WAREHOUSE_NOT_EXISTED));
+        zone.setWarehouse(warehouse);
 
         zone.setCreatedAt(LocalDateTime.now());
         zone.setUpdatedAt(LocalDateTime.now());

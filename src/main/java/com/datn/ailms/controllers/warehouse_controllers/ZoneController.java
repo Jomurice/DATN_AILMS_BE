@@ -27,12 +27,21 @@ public class ZoneController {
     }
 
 
+    @GetMapping("/warehouse/{warehouseId}")
+    public ApiResp<List<ZoneResponseDto>> getZonesByWarehouseId(@PathVariable UUID warehouseId) {
+        return ApiResp.<List<ZoneResponseDto>>builder()
+                .result(_zoneService.findAllByWarehouseIdNativeQuery(warehouseId))
+                .build();
+    }
+
+
     @GetMapping("/{zoneId}")
     public ApiResp<ZoneResponseDto> getZoneById(@PathVariable UUID zoneId) {
         return ApiResp.<ZoneResponseDto>builder()
                 .result(_zoneService.getZoneById(zoneId))
                 .build();
     }
+
 
     @PostMapping
     public ApiResp<ZoneResponseDto> createZone(@RequestBody CreateZoneRequestDto request) {
@@ -51,4 +60,7 @@ public class ZoneController {
                 .result(_zoneService.updateZone(zoneId, request))
                 .build();
     }
+
+
+
 }

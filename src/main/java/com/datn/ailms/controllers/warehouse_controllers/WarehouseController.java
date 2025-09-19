@@ -6,6 +6,7 @@ import com.datn.ailms.model.dto.request.warehouse_request.UpdateWarehouseRequest
 import com.datn.ailms.model.dto.response.ApiResp;
 import com.datn.ailms.model.dto.response.warehouse_response.WarehouseResponseDto;
 
+
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +20,6 @@ import java.util.UUID;
 public class WarehouseController {
 
     public final IWarehouseService _warehouseService;
-
 
     @GetMapping
     public ApiResp<List<WarehouseResponseDto>> getAllWarehouses() {

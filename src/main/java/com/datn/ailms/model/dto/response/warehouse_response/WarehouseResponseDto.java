@@ -4,6 +4,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -23,4 +24,6 @@ public class WarehouseResponseDto {
     LocalDateTime createdAt;
 
     LocalDateTime updatedAt;
+
+    List<ZoneResponseDto> zones;
 }

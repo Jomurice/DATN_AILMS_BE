@@ -1,4 +1,4 @@
-package com.datn.ailms.model.dto.request.warehouse_request;
+package com.datn.ailms.model.dto.request.order;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -10,8 +10,8 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class CreateShelfRequestDto {
-    String code;
-    String name;
-    UUID aisleId;
+public class PurchaseOrderItemRequestDto {
+    UUID productId;      // FE chỉ gửi productId
+    Integer orderQuantity;
+
 }
