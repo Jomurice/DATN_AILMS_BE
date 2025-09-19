@@ -13,5 +13,5 @@ import java.util.UUID;
 public class CreateShelfRequestDto {
     String code;
     String name;
-    UUID warehouseId;
+    UUID aisleId;
 }

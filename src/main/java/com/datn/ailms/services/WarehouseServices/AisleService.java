@@ -9,6 +9,8 @@ import com.datn.ailms.model.dto.request.warehouse_request.UpdateAisleRequestDto;
 import com.datn.ailms.model.dto.response.warehouse_response.AisleResponseDto;
 import com.datn.ailms.model.entities.topo_entities.Aisle;
 import com.datn.ailms.repositories.warehousetopology.AisleRepository;
+import com.datn.ailms.repositories.warehousetopology.ShelfRepository;
+import com.datn.ailms.repositories.warehousetopology.ZoneRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -22,7 +24,7 @@ public class AisleService implements IAisleService {
 
     private final AisleRepository _aisleRepository;
     private final AisleMapper _aisleMapper;
-
+    private final ZoneRepository _zoneRepo;
 
     @Override
     public List<AisleResponseDto> getAllAisles() {
@@ -47,6 +49,9 @@ public class AisleService implements IAisleService {
     @Override
     public AisleResponseDto createAisle(CreateAisleRequestDto request) {
         Aisle aisle = _aisleMapper.toAisle(request);
+
+        var zone = _zoneRepo.findById(request.getZoneId()).orElseThrow(()-> new AppException(ErrorCode.ZONE_NOT_EXISTED));
+        aisle.setZone(zone);
         aisle.setCreatedAt(LocalDateTime.now());
         aisle.setUpdatedAt(LocalDateTime.now());
 

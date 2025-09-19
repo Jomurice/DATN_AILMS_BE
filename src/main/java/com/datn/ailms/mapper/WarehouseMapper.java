@@ -16,9 +16,6 @@ public interface WarehouseMapper {
     WarehouseResponseDto toWarehouseResponseDto(Warehouse warehouse);
     List<WarehouseResponseDto> toWarehouseResponseDtoList(List<Warehouse> warehouses);
 
-
-
-
     ZoneResponseDto toZoneDto(Zone zone);
     AisleResponseDto toAisleDto(Aisle aisle);
     ShelfResponseDto toShelfDto(Shelf shelf);
