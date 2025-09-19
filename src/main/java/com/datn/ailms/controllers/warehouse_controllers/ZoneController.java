@@ -34,7 +34,7 @@ public class ZoneController {
                 .build();
     }
 
-    @PostMapping
+    @PostMapping()
     public ApiResp<ZoneResponseDto> createZone(@RequestBody CreateZoneRequestDto request) {
         return ApiResp.<ZoneResponseDto>builder()
                 .result(_zoneService.createZone(request))
