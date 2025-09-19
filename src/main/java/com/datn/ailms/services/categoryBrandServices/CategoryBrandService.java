@@ -35,15 +35,18 @@ public class CategoryBrandService implements ICategoryBrand {
                 .orElseThrow(() -> new RuntimeException("Brand not found: " + request.getBrandId()));
 
         // Kiểm tra tồn tại
-        categoryBrandRepo.findById(category.getId())
-                .ifPresent(cb -> {throw new RuntimeException("CategoryBrand already exists");});
+        // Tìm theo categoryId + brandId
+        CategoryBrand cb = categoryBrandRepo.findByCategoryIdAndBrandId(category.getId(), brand.getId())
+                .orElse(null);
 
-        CategoryBrand cb = mapper.toEntity(request);
-        cb.setId(UUID.randomUUID());
-        cb.setCategory(category);
-        cb.setBrand(brand);
-
-        cb = categoryBrandRepo.save(cb);
+        if (cb == null) {
+            // Nếu chưa có thì tạo mới
+            cb = new CategoryBrand();
+            cb.setId(UUID.randomUUID());
+            cb.setCategory(category);
+            cb.setBrand(brand);
+            cb = categoryBrandRepo.save(cb);
+        }
 
         return mapper.toResponse(cb);
     }
