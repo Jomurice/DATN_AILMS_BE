@@ -20,4 +20,5 @@ public class ZoneResponseDto {
     LocalDateTime createdAt;
     LocalDateTime updatedAt;
 
+    List<AisleResponseDto> aisles;
 }

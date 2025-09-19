@@ -31,6 +31,12 @@ public class AisleService implements IAisleService {
     }
 
     @Override
+    public List<AisleResponseDto> findAllByZoneIdNativeQuery(UUID zoneId) {
+        List<Aisle> aisles = _aisleRepository.findAllByZoneIdNativeQuery(zoneId);
+        return _aisleMapper.toAisleResponseDtoList(aisles);
+    }
+
+    @Override
     public AisleResponseDto getAisleById(UUID aisleId) {
         Aisle aisle = _aisleRepository.findById(aisleId).orElseThrow(
                 ()-> new AppException(ErrorCode.AISLE_NOT_EXISTED)

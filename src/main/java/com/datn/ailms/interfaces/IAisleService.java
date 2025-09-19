@@ -11,6 +11,7 @@ import java.util.UUID;
 public interface IAisleService {
 
     List<AisleResponseDto> getAllAisles();
+    List<AisleResponseDto> findAllByZoneIdNativeQuery(UUID zoneId);
     AisleResponseDto getAisleById(UUID aisleId);
     AisleResponseDto createAisle(CreateAisleRequestDto request);
     AisleResponseDto updateAisle(UUID aisleId,UpdateAisleRequestDto request);

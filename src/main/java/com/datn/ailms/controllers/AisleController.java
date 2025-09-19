@@ -16,7 +16,6 @@ import java.util.UUID;
 @RequestMapping("/api/aisles")
 @RequiredArgsConstructor
 public class AisleController {
-
     private final IAisleService _aisleService;
 
 
@@ -24,6 +23,14 @@ public class AisleController {
     public ApiResp<List<AisleResponseDto>> getAllAisles() {
         return ApiResp.<List<AisleResponseDto>>builder()
                 .result(_aisleService.getAllAisles())
+                .build();
+    }
+
+
+    @GetMapping("/zone/{zoneId}")
+    public ApiResp<List<AisleResponseDto>> getAislesByZoneId(@PathVariable UUID zoneId) {
+        return ApiResp.<List<AisleResponseDto>>builder()
+                .result(_aisleService.findAllByZoneIdNativeQuery(zoneId))
                 .build();
     }
 
@@ -43,6 +50,7 @@ public class AisleController {
                 .build();
     }
 
+
     @PutMapping("/{aisleId}")
     public ApiResp<AisleResponseDto> updateAisle(
             @PathVariable UUID aisleId,
@@ -52,4 +60,6 @@ public class AisleController {
                 .result(_aisleService.updateAisle(aisleId, request))
                 .build();
     }
+
+
 }
