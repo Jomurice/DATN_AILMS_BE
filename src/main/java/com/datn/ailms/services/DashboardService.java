@@ -3,9 +3,9 @@ package com.datn.ailms.services;
 import com.datn.ailms.interfaces.IDashboardService;
 import com.datn.ailms.model.dto.request.DashboardStatsRequestDto;
 import com.datn.ailms.model.dto.response.DashboardStatsResponseDto;
+import com.datn.ailms.model.dto.response.stats.UserStatsDto;
 import com.datn.ailms.repositories.productRepo.ProductDetailRepository;
 import com.datn.ailms.repositories.userRepo.UserRepository;
-import com.datn.ailms.services.stats.UserStatsDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
