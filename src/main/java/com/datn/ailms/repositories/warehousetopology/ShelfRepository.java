@@ -12,5 +12,5 @@ public interface ShelfRepository extends JpaRepository<Shelf, UUID> {
     List<Shelf> findByAisleId(UUID aisleId);
 
     @Query(value = "SELECT * FROM shelves s WHERE s.aisle_id = ?1", nativeQuery = true)
-    List<Shelf> findAllByAisleIdNativeQuery(UUID shelfId);
+    List<Shelf> findAllByAisleIdNativeQuery(UUID aisleId);
 }
