@@ -1,6 +1,9 @@
 package com.datn.ailms.model.dto.request.warehouse_request;
 
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
 import java.util.UUID;
@@ -8,10 +11,9 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class CreateShelfRequestDto {
-    String code;
+public class CreateLocationRequestDto {
     String name;
-    UUID aisleId;
+    String address;
+    UUID parentId;
 }

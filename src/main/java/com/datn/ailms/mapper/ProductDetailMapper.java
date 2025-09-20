@@ -1,26 +1,26 @@
-package com.datn.ailms.mapper;
-
-
-import com.datn.ailms.model.dto.request.inventory.ProductDetailRequestDto;
-import com.datn.ailms.model.dto.response.inventory.ProductDetailResponseDto;
-import com.datn.ailms.model.entities.product_entities.ProductDetail;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-
-import java.util.List;
-
-@Mapper(componentModel = "spring")
-public interface ProductDetailMapper {
-
-    @Mapping(source = "productId", target = "product.id")
-    @Mapping(source = "binId", target = "bin.id")
-    ProductDetail toEntity(ProductDetailRequestDto request);
-
-    @Mapping(source = "product.id", target = "productId")
-    @Mapping(source = "bin.id", target = "binId")
-    @Mapping(target = "purchaseOrderItemId", source = "purchaseOrderItem.id")
-    ProductDetailResponseDto toResponse(ProductDetail productDetail);
-
-    List<ProductDetailResponseDto> toResponseList(List<ProductDetail> details);
-
-}
+//package com.datn.ailms.mapper;
+//
+//
+//import com.datn.ailms.model.dto.request.inventory.ProductDetailRequestDto;
+//import com.datn.ailms.model.dto.response.inventory.ProductDetailResponseDto;
+//import com.datn.ailms.model.entities.product_entities.ProductDetail;
+//import org.mapstruct.Mapper;
+//import org.mapstruct.Mapping;
+//
+//import java.util.List;
+//
+//@Mapper(componentModel = "spring")
+//public interface ProductDetailMapper {
+//
+//    @Mapping(source = "productId", target = "product.id")
+//    @Mapping(source = "binId", target = "bin.id")
+//    ProductDetail toEntity(ProductDetailRequestDto request);
+//
+//    @Mapping(source = "product.id", target = "productId")
+//    @Mapping(source = "bin.id", target = "binId")
+//    @Mapping(target = "purchaseOrderItemId", source = "purchaseOrderItem.id")
+//    ProductDetailResponseDto toResponse(ProductDetail productDetail);
+//
+//    List<ProductDetailResponseDto> toResponseList(List<ProductDetail> details);
+//
+//}

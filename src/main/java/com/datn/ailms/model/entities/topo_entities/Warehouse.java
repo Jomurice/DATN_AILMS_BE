@@ -1,5 +1,6 @@
 package com.datn.ailms.model.entities.topo_entities;
 
+import com.datn.ailms.model.entities.Location;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -27,11 +28,22 @@ public class Warehouse {
     @Column(nullable = false, length = 128)
     String name;
 
-    String location;
+    String type; // ZONE, AISLE, SHELF, BIN
 
     LocalDateTime createdAt;
 
     LocalDateTime updatedAt;
-    @OneToMany(mappedBy = "warehouse", cascade = CascadeType.ALL)
-    List<Zone> zones;
+
+    @ManyToOne
+    @JoinColumn(name="parent_id")
+    Warehouse parent;
+
+    @OneToMany(mappedBy = "parent")
+    List<Warehouse> children;
+
+
+    @ManyToOne
+    @JoinColumn(name = "location_id")
+    Location location;
+
 }
