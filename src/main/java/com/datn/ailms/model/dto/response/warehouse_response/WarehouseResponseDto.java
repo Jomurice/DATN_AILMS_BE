@@ -18,6 +18,8 @@ public class WarehouseResponseDto {
     String code;
     String type;
     UUID parentId;
+    Integer currentQuantity;
+    Integer capacity;
     UUID locationId;
     List<WarehouseResponseDto> children; // tùy chọn, nếu muốn trả hierarchy
 }
