@@ -33,6 +33,13 @@ public class ProductDetailController {
         return ApiResp.<List<ProductDetailResponseDto>>builder().result(toList).build();
     }
 
+    @GetMapping("/{id}")
+    ApiResp<List<ProductDetailResponseDto>> getByProductId(@PathVariable UUID id){
+        var result = _productDetailRepository.findByProductId(id);
+        var toList = _productDetailMapper.toResponseList(result);
+        return ApiResp.<List<ProductDetailResponseDto>>builder().result(toList).build();
+    }
+
     // API tạo 1 serial mới chưa gán bin
     @PostMapping("/create-serial")
     public ApiResp<ProductDetailResponseDto> createSerial(@RequestParam String serial) {
