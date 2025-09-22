@@ -9,11 +9,24 @@ import java.util.UUID;
 
 public interface IWarehouseService {
 
-    List<WarehouseResponseDto> getAllWarehouses();
+    // Tạo mới warehouse (zone/aisle/shelf/bin)
+    WarehouseResponseDto create(CreateWarehouseRequestDto dto);
 
-    WarehouseResponseDto getWarehouseById(UUID warehouseId);
+    // Cập nhật warehouse
+    WarehouseResponseDto update(UUID id, UpdateWarehouseRequestDto dto);
 
-    WarehouseResponseDto createWarehouse(CreateWarehouseRequestDto request);
+    // Xoá warehouse
+    void delete(UUID id);
 
-    WarehouseResponseDto updateWarehouse(UUID warehouseId, UpdateWarehouseRequestDto request);
+    // Lấy theo id
+    WarehouseResponseDto findById(UUID id);
+
+    // Lấy tất cả warehouse
+    List<WarehouseResponseDto> findAll();
+
+    // Lấy tree warehouse theo location (zone → aisle → shelf → bin)
+    List<WarehouseResponseDto> findTreeByLocation(UUID  locationId);
+
+    // Lấy con trực tiếp
+    List<WarehouseResponseDto> findChildren(UUID parentId);
 }

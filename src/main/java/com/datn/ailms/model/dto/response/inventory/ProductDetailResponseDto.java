@@ -17,6 +17,7 @@ public class ProductDetailResponseDto {
     private String serialNumber;
     private SerialStatus status;
     private UUID productId;
-    private UUID binId;
+    private UUID warehouseId;
+    private UUID scannedBy;
     private UUID purchaseOrderItemId;
 }

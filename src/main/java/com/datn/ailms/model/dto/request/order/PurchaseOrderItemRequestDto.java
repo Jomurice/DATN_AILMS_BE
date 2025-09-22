@@ -13,5 +13,4 @@ import java.util.UUID;
 public class PurchaseOrderItemRequestDto {
     UUID productId;      // FE chỉ gửi productId
     Integer orderQuantity;
-
 }

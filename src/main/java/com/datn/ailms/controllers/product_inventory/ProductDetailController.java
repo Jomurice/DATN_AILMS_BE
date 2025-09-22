@@ -1,5 +1,6 @@
 package com.datn.ailms.controllers.product_inventory;
 
+//import com.datn.ailms.mapper.ProductDetailMapper;
 import com.datn.ailms.mapper.ProductDetailMapper;
 import com.datn.ailms.model.dto.response.ApiResp;
 import com.datn.ailms.model.dto.response.inventory.ProductDetailResponseDto;
@@ -37,8 +38,8 @@ public class ProductDetailController {
     public ApiResp<ProductDetailResponseDto> createSerial(@RequestParam String serial) {
         ProductDetail detail = new ProductDetail();
         detail.setSerialNumber(serial);
-        detail.setStatus(SerialStatus.INBOUND); // trạng thái ban đầu
-        detail.setBin(null);                // chưa gán bin
+        detail.setStatus(SerialStatus.IN_STOCK); // trạng thái ban đầu
+        detail.setWarehouse(null);                // chưa gán bin
         detail.setProduct(null);
         detail.setCreatedAt(LocalDateTime.now());
         detail.setUpdatedAt(LocalDateTime.now());

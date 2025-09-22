@@ -1,8 +1,9 @@
 package com.datn.ailms.model.entities.product_entities;
 
+import com.datn.ailms.model.entities.account_entities.User;
 import com.datn.ailms.model.entities.enums.SerialStatus;
 import com.datn.ailms.model.entities.order_entites.PurchaseOrderItem;
-import com.datn.ailms.model.entities.topo_entities.Bin;
+import com.datn.ailms.model.entities.topo_entities.Warehouse;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -42,11 +43,17 @@ public class ProductDetail {
      Product product;
 
     @ManyToOne
-    @JoinColumn(name = "bin_id") // ✅ mỗi serial gán vào 1 bin cụ thể
-    private Bin bin;
+    @JoinColumn(name = "warehouse_id") // ✅ mỗi serial gán vào 1 bin cụ thể
+    private Warehouse warehouse;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "purchase_order_item_id")
     PurchaseOrderItem purchaseOrderItem;
+
+
+    // 👉 User thực hiện scan
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "scanned_by")
+    private User scannedBy;
 }
 

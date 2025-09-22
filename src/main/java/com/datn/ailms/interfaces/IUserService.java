@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 
 
 import java.util.List;
+import java.util.UUID;
 
 
 public interface IUserService {
@@ -25,16 +26,16 @@ public interface IUserService {
 
     List<UserResponseDto> getUsersByNameContainingIgnoreCase(String name);
     
-    UserResponseDto getUserById(String userid);
+    UserResponseDto getUserById(UUID userid);
 
     UserResponseDto createUser(UserRequestDto userRequest);
 
-    UserResponseDto updateUser(String userId, UserRequestDto userRequest);
+    UserResponseDto updateUser(UUID userId, UserRequestDto userRequest);
 
     void changePassword(String username, ChangePasswordRequestDto request);
 
-     UserResponseDto activeAccount(String id);
-     UserResponseDto blockedAccount(String id);
+     UserResponseDto activeAccount(UUID id);
+     UserResponseDto blockedAccount(UUID id);
 
     UserStatsDto getUserStats();
 }

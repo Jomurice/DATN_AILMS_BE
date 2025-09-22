@@ -5,10 +5,12 @@ import com.datn.ailms.interfaces.order_interface.IPurchaseOrderService;
 import com.datn.ailms.mapper.PurchaseOrderMapper;
 import com.datn.ailms.model.dto.request.order.PurchaseOrderRequestDto;
 import com.datn.ailms.model.dto.response.order.PurchaseOrderResponseDto;
+import com.datn.ailms.model.entities.account_entities.User;
 import com.datn.ailms.model.entities.order_entites.PurchaseOrder;
 import com.datn.ailms.model.entities.product_entities.Product;
 import com.datn.ailms.repositories.orderRepo.PurchaseOrderRepository;
 import com.datn.ailms.repositories.productRepo.ProductRepository;
+import com.datn.ailms.repositories.userRepo.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -27,11 +29,14 @@ public class PurchaseOrderService implements IPurchaseOrderService {
     final PurchaseOrderRepository _orderRepo;
     final PurchaseOrderMapper _orderMapper;
     final ProductRepository _productRepository;
+    final UserRepository _userRepository;
     @Override
     public PurchaseOrderResponseDto create(PurchaseOrderRequestDto request) {
         PurchaseOrder order = _orderMapper.toEntity(request);
         // Nếu entity đã dùng @GeneratedValue thì bỏ dòng dưới
-        // order.setId(UUID.randomUUID());
+        User user = _userRepository.findById(request.getCreatedBy())
+                .orElseThrow(() -> new RuntimeException("User not found: " + request.getCreatedBy()));
+        order.setCreatedBy(user);
 
         // Gắn quan hệ 2 chiều: mỗi item phải biết order cha
         if (order.getItems() != null) {
