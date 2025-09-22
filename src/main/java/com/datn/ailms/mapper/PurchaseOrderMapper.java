@@ -11,13 +11,15 @@ import java.util.List;
 @Mapper(componentModel = "spring",uses = { PurchaseOrderItemMapper.class })
 public interface PurchaseOrderMapper {
     @Mapping(source = "items", target = "items")
+    @Mapping(source = "createdBy.id", target = "createdBy")
     PurchaseOrderResponseDto toDto(PurchaseOrder entity);
 
     @Mapping(source = "items", target = "items")
+    @Mapping(source = "createdBy", target = "createdBy.id")
     PurchaseOrder toEntity(PurchaseOrderRequestDto dto);
 
     List<PurchaseOrderResponseDto> toResponseList(List<PurchaseOrder> entities);
 
-    List<PurchaseOrder> toEntityList(List<PurchaseOrderResponseDto> dtos);
+//    List<PurchaseOrder> toEntityList(List<PurchaseOrderResponseDto> dtos);
 
 }

@@ -25,6 +25,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import java.util.Set;
+import java.util.UUID;
 
 
 @Service
@@ -75,7 +76,7 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public UserResponseDto getUserById(String id) {
+    public UserResponseDto getUserById(UUID id) {
         User user = _userRepository.findById(id).orElseThrow(
                 () -> new AppException(ErrorCode.USER_NOT_EXISTED)
         );
@@ -108,7 +109,7 @@ public class UserService implements IUserService {
         return _userMapper.toUserResponse(savedUser);
     }
 
-    public UserResponseDto updateUser(String id, UserRequestDto userRequest) {
+    public UserResponseDto updateUser(UUID id, UserRequestDto userRequest) {
         User user = _userRepository.findById(id).orElseThrow(
                 () -> new AppException(ErrorCode.USER_NOT_EXISTED)
         );
@@ -138,7 +139,7 @@ public class UserService implements IUserService {
     }
 
     @Transactional
-    public void updateUserPassword(String userId, String newPassword) {
+    public void updateUserPassword(UUID userId, String newPassword) {
         User user = _userRepository.findById(userId).orElseThrow(
                 () -> new AppException(ErrorCode.USER_NOT_EXISTED)
         );
@@ -166,7 +167,7 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public UserResponseDto activeAccount(String id) {
+    public UserResponseDto activeAccount(UUID id) {
         User user = _userRepository.findById(id).orElseThrow(
                 () -> new AppException(ErrorCode.USER_NOT_EXISTED)
         );
@@ -177,7 +178,7 @@ public class UserService implements IUserService {
         return _userMapper.toUserResponse(savedUser);
     }
     @Override
-    public UserResponseDto blockedAccount(String id) {
+    public UserResponseDto blockedAccount(UUID id) {
         User user = _userRepository.findById(id).orElseThrow(
                 () -> new AppException(ErrorCode.USER_NOT_EXISTED)
         );

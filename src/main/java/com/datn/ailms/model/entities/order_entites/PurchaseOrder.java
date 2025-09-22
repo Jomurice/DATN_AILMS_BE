@@ -1,5 +1,6 @@
 package com.datn.ailms.model.entities.order_entites;
 
+import com.datn.ailms.model.entities.account_entities.User;
 import com.datn.ailms.model.entities.product_entities.Product;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -38,4 +39,8 @@ public class PurchaseOrder {
     @JoinColumn(name = "product_id")
     private Product product;
 
+    // 👉 User tạo đơn hàng
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by", nullable = false)
+    private User createdBy;
 }

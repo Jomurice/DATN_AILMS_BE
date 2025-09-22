@@ -1,11 +1,15 @@
 package com.datn.ailms.model.entities.account_entities;
 
+import com.datn.ailms.model.entities.order_entites.PurchaseOrder;
+import com.datn.ailms.model.entities.order_entites.PurchaseOrderItem;
+import com.datn.ailms.model.entities.product_entities.ProductDetail;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
 import java.util.Set;
+import java.util.UUID;
 
 @Entity
 @Data
@@ -17,7 +21,7 @@ import java.util.Set;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    String id;
+    UUID id;
 
     @Column(length = 255)
     String username;
@@ -51,4 +55,11 @@ public class User {
     Set<Role> roles;
 
     boolean status;
+
+
+    @OneToMany(mappedBy = "createdBy")
+    private Set<PurchaseOrder> createdOrders;
+
+    @OneToMany(mappedBy = "scannedBy")
+    private Set<ProductDetail> scannedItems;
 }

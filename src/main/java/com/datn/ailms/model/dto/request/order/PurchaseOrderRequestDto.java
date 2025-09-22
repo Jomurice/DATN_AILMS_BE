@@ -18,6 +18,6 @@ public class PurchaseOrderRequestDto {
     String supplier;
     String status;
     LocalDate createdAt;
-
+    UUID createdBy;
     List<PurchaseOrderItemRequestDto> items;
 }
