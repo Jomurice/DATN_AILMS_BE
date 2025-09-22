@@ -13,4 +13,9 @@ import java.util.UUID;
 public interface WarehouseRepository extends JpaRepository<Warehouse, UUID> {
     Optional<Warehouse> findByCode(String code);
 
+    // WarehouseRepository
+    List<Warehouse> findByParentId(UUID parentId);
+    List<Warehouse> findByLocationIdAndParentIsNull(UUID  locationId);
+    List<Warehouse> findByLocationId(UUID locationId);
+
 }

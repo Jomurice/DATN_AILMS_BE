@@ -18,7 +18,7 @@ import java.util.UUID;
 @Table(name = "otps")
 public class Otp {
     @Id
-    String userId;
+    UUID userId;
     String otpCode;
     LocalDateTime expiryTime;
     LocalDateTime createdAt;

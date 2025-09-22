@@ -13,12 +13,14 @@ import java.util.List;
 public interface ProductDetailMapper {
 
     @Mapping(source = "productId", target = "product.id")
-    @Mapping(source = "binId", target = "bin.id")
+    @Mapping(source = "warehouseId", target = "warehouse.id")
+    @Mapping(source = "scannedBy", target = "scannedBy.id")
     ProductDetail toEntity(ProductDetailRequestDto request);
 
     @Mapping(source = "product.id", target = "productId")
-    @Mapping(source = "bin.id", target = "binId")
+    @Mapping(source = "warehouse.id", target = "warehouseId")
     @Mapping(target = "purchaseOrderItemId", source = "purchaseOrderItem.id")
+    @Mapping(source = "scannedBy.id", target = "scannedBy")
     ProductDetailResponseDto toResponse(ProductDetail productDetail);
 
     List<ProductDetailResponseDto> toResponseList(List<ProductDetail> details);

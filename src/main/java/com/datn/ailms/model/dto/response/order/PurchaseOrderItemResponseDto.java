@@ -1,5 +1,6 @@
 package com.datn.ailms.model.dto.response.order;
 
+import com.datn.ailms.model.dto.response.UserResponseDto;
 import com.datn.ailms.model.dto.response.inventory.ProductDetailResponseDto;
 import com.datn.ailms.model.dto.response.inventory.ProductResponseDto;
 import lombok.*;
@@ -20,6 +21,5 @@ public class PurchaseOrderItemResponseDto {
     private Integer scannedQuantity;
 
     private ProductResponseDto product;
-
     List<ProductDetailResponseDto> scannedSerials;
 }

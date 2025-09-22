@@ -1,5 +1,6 @@
 package com.datn.ailms.model.dto.response.order;
 
+import com.datn.ailms.model.dto.response.UserResponseDto;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -18,6 +19,6 @@ public class PurchaseOrderResponseDto {
     String supplier;
     String status;
     LocalDate createdAt;
-
+    UUID createdBy;
     List<PurchaseOrderItemResponseDto> items;
 }

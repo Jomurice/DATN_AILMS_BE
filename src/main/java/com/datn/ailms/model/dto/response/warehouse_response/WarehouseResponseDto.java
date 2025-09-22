@@ -14,16 +14,12 @@ import java.util.UUID;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class WarehouseResponseDto {
     UUID id;
-
-    String code;
-
     String name;
-
-    String location;
-
-    LocalDateTime createdAt;
-
-    LocalDateTime updatedAt;
-
-    List<ZoneResponseDto> zones;
+    String code;
+    String type;
+    UUID parentId;
+    Integer currentQuantity;
+    Integer capacity;
+    UUID locationId;
+    List<WarehouseResponseDto> children; // tùy chọn, nếu muốn trả hierarchy
 }

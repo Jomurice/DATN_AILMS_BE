@@ -38,9 +38,10 @@ public class PurchaseOrderItemController {
     @PostMapping("/{itemId}/scan")
     public ApiResp<ProductDetailResponseDto> scan(
             @PathVariable UUID itemId,
-            @RequestParam String serial
+            @RequestParam String serial,
+            @RequestParam UUID userId
     ) {
-        var result = _itemService.scanSerial(itemId, serial);
+        var result = _itemService.scanSerial(itemId, serial, userId);
         return ApiResp.<ProductDetailResponseDto>builder().result(result).build();
     }
 

@@ -1,5 +1,6 @@
 package com.datn.ailms.model.entities.order_entites;
 
+import com.datn.ailms.model.entities.account_entities.User;
 import com.datn.ailms.model.entities.product_entities.Product;
 import com.datn.ailms.model.entities.product_entities.ProductDetail;
 import jakarta.persistence.*;
@@ -37,5 +38,6 @@ public class PurchaseOrderItem {
 
     @OneToMany(mappedBy = "purchaseOrderItem", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     List<ProductDetail> productDetails = new ArrayList<>();
+
 
 }

@@ -7,6 +7,7 @@ import com.datn.ailms.model.dto.response.ApiResp;
 import com.datn.ailms.model.dto.response.warehouse_response.WarehouseResponseDto;
 
 
+import com.datn.ailms.services.warehouseServices.WarehouseSerivce;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.web.bind.annotation.*;
@@ -19,20 +20,26 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class WarehouseController {
 
-    public final IWarehouseService _warehouseService;
+    public final WarehouseSerivce _warehouseService;
 
     @GetMapping
     public ApiResp<List<WarehouseResponseDto>> getAllWarehouses() {
         return ApiResp.<List<WarehouseResponseDto>>builder()
-                .result(_warehouseService.getAllWarehouses())
+                .result(_warehouseService.findAll())
                 .build();
     }
 
+    @GetMapping("/tree/location/{locationId}")
+    public ApiResp<List<WarehouseResponseDto>> getTreeByLocation(@PathVariable UUID locationId) {
+        return ApiResp.<List<WarehouseResponseDto>>builder()
+                .result(_warehouseService.findTreeByLocation(locationId))
+                .build();
+    }
 
     @GetMapping("/{warehouseId}")
     public ApiResp<WarehouseResponseDto> getWarehouseById(@PathVariable UUID warehouseId) {
         return ApiResp.<WarehouseResponseDto>builder()
-                .result(_warehouseService.getWarehouseById(warehouseId))
+                .result(_warehouseService.findById(warehouseId))
                 .build();
     }
 
@@ -40,7 +47,7 @@ public class WarehouseController {
     @PostMapping
     public ApiResp<WarehouseResponseDto> createWarehouse(@RequestBody CreateWarehouseRequestDto request) {
         return ApiResp.<WarehouseResponseDto>builder()
-                .result(_warehouseService.createWarehouse(request))
+                .result(_warehouseService.create(request))
                 .build();
     }
 
@@ -51,7 +58,7 @@ public class WarehouseController {
             @RequestBody UpdateWarehouseRequestDto request) {
 
         return ApiResp.<WarehouseResponseDto>builder()
-                .result(_warehouseService.updateWarehouse(warehouseId, request))
+                .result(_warehouseService.update(warehouseId, request))
                 .build();
     }
 }

@@ -16,5 +16,6 @@ public class ProductDetailRequestDto {
     private String serialNumber;
     private SerialStatus status;
     private UUID productId; // liên kết Product
-    private UUID binId;     // liên kết Bin
+    private UUID warehouseId;
+    private UUID scannedBy;
 }

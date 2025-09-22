@@ -8,17 +8,20 @@ import com.datn.ailms.mapper.PurchaseOrderItemMapper;
 import com.datn.ailms.model.dto.request.order.PurchaseOrderItemRequestDto;
 import com.datn.ailms.model.dto.response.inventory.ProductDetailResponseDto;
 import com.datn.ailms.model.dto.response.order.PurchaseOrderItemResponseDto;
+import com.datn.ailms.model.entities.account_entities.User;
+import com.datn.ailms.model.entities.enums.SerialStatus;
 import com.datn.ailms.model.entities.order_entites.PurchaseOrder;
 import com.datn.ailms.model.entities.order_entites.PurchaseOrderItem;
 import com.datn.ailms.model.entities.product_entities.Product;
 import com.datn.ailms.model.entities.product_entities.ProductDetail;
-import com.datn.ailms.model.entities.topo_entities.Bin;
+import com.datn.ailms.model.entities.topo_entities.Warehouse;
 import com.datn.ailms.repositories.orderRepo.PurchaseOrderItemRepository;
 import com.datn.ailms.repositories.orderRepo.PurchaseOrderRepository;
 import com.datn.ailms.repositories.productRepo.ProductDetailRepository;
 import com.datn.ailms.repositories.productRepo.ProductRepository;
-import com.datn.ailms.repositories.warehousetopology.BinRepository;
-import com.datn.ailms.services.topoServices.BinRuleService;
+import com.datn.ailms.repositories.userRepo.UserRepository;
+import com.datn.ailms.repositories.warehousetopology.WarehouseRepository;
+import com.datn.ailms.services.topoServices.WarehouseRuleService;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -41,8 +44,9 @@ public class PurchaseOrderItemService implements IPurchaseOrderItemService {
     final ProductRepository _productRepo;
     final ProductDetailRepository _detailRepo;
     final ProductDetailMapper _pdMapper;
-    final BinRuleService _binruleService;
-    final BinRepository _binRepo;
+    final WarehouseRuleService _warehouseRuleService;
+    final WarehouseRepository _whRepo;
+    final UserRepository _userRepo;
 
     @Override
     public PurchaseOrderItemResponseDto addItem(UUID orderId, PurchaseOrderItemRequestDto request) {
@@ -68,7 +72,7 @@ public class PurchaseOrderItemService implements IPurchaseOrderItemService {
     }
 
     @Override
-    public ProductDetailResponseDto scanSerial(UUID itemId, String serialNumber) {
+    public ProductDetailResponseDto scanSerial(UUID itemId, String serialNumber,UUID userId) {
         PurchaseOrderItem item = _itemRepo.findById(itemId)
                 .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
 
@@ -118,20 +122,34 @@ public class PurchaseOrderItemService implements IPurchaseOrderItemService {
         }
 
         // 4. If bin not assigned yet -> find bin via BinRuleService
-        if (detail.getBin() == null) {
-            Bin bin = _binruleService.findBinForSerial(normSerial); // may throw if none -> bubble up
+        if (detail.getWarehouse() == null) {
+            Warehouse wh = _warehouseRuleService.findWarehouseForSerial(normSerial); // may throw if none -> bubble up
             // ensure capacity
-            if (bin.getCurrentQty() >= bin.getCapacity()) {
+            if (wh.getCurrentQuantity() >= wh.getCapacity()) {
                 throw new AppException(ErrorCode.BIN_FULL);
             }
-            bin.setCurrentQty(bin.getCurrentQty() + 1);
-            _binRepo.save(bin);
-            detail.setBin(bin);
+            wh.setCurrentQuantity(wh.getCurrentQuantity() + 1);
+            _whRepo.save(wh);
+            detail.setWarehouse(wh);
         }
 
         // 5. Assign to order item
         detail.setPurchaseOrderItem(item);
         detail.setUpdatedAt(LocalDateTime.now());
+
+        // ✅ set status INBOUND khi scan
+        detail.setStatus(SerialStatus.INBOUND);
+
+        // ✅ set scannedBy
+//        User currentUser = SecurityUtils.getCurrentUser()
+//                .orElseThrow(() -> new AppException(ErrorCode.UNAUTHORIZED));
+//        detail.setScannedBy(currentUser);
+
+
+        // ✅ lấy User từ userId
+        User currentUser = _userRepo.findById(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        detail.setScannedBy(currentUser);
 
         // persist detail
         ProductDetail saved = _detailRepo.save(detail);
