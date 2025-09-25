@@ -16,6 +16,7 @@ import java.util.UUID;
 public class LocationResponseDto {
     private UUID id;
     private String name;
+    String address;
     private UUID parentId; // null nếu root
     private List<LocationResponseDto> children; // null hoặc list con
 }
