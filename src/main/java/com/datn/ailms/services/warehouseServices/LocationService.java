@@ -48,7 +48,7 @@ public class LocationService implements ILocationService {
     public LocationResponseDto update(UUID id, CreateLocationRequestDto dto) {
         Location location = _locationRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Location not found: " + id));
-
+        location.setName(dto.getName());
         location.setAddress(dto.getAddress());
 
         if (dto.getParentId() != null) {
