@@ -3,7 +3,9 @@ package com.datn.ailms.controllers.order_controllers;
 import com.datn.ailms.interfaces.order_interface.IPurchaseOrderService;
 import com.datn.ailms.model.dto.request.order.PurchaseOrderRequestDto;
 import com.datn.ailms.model.dto.response.ApiResp;
+import com.datn.ailms.model.dto.response.ProductDetailSerialDto;
 import com.datn.ailms.model.dto.response.order.PurchaseOrderResponseDto;
+import com.datn.ailms.model.entities.product_entities.ProductDetail;
 import com.datn.ailms.services.orderService.PurchaseOrderService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -50,5 +52,24 @@ public class PurchaseOrderController {
          _purchaseOrderService.delete(id);
         return ApiResp.<PurchaseOrderResponseDto>builder().build();
     }
+
+    @PostMapping("/{orderId}/complete")
+    public ApiResp<Void> completeOrder(
+            @PathVariable UUID orderId,
+            @RequestParam UUID userId
+    ) {
+        _purchaseOrderService.completeItem(orderId, userId);
+        return ApiResp.<Void>builder().build();
+    }
+
+    @GetMapping("/{orderId}/serials")
+    public ApiResp<List<ProductDetailSerialDto>> getSerials(
+            @PathVariable UUID orderId,
+            @RequestParam(required = false) String sku
+    ) {
+        List<ProductDetailSerialDto> serials = _purchaseOrderService.getSerials(orderId, sku);
+        return ApiResp.<List<ProductDetailSerialDto>>builder().result(serials).build();
+    }
+
 
 }
