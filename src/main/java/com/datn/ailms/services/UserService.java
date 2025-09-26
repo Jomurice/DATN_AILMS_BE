@@ -80,7 +80,7 @@ public class UserService implements IUserService {
         User user = _userRepository.findById(id).orElseThrow(
                 () -> new AppException(ErrorCode.USER_NOT_EXISTED)
         );
-        System.out.println(user.toString());
+//        System.out.println(user.toString());
         return _userMapper.toUserResponse(user);
     }
 
