@@ -26,7 +26,7 @@ public class OtpGenerator {
         SecureRandom random = new SecureRandom();
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < length; i++) {
-            int digitalCode = random.nextInt(10);
+            String digitalCode = String.valueOf(random.nextInt(10));
             builder.append(digitalCode);
         }
         return builder.toString();
