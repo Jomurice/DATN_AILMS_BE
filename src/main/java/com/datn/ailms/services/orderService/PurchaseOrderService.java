@@ -1,14 +1,23 @@
 package com.datn.ailms.services.orderService;
 
 
+import com.datn.ailms.exceptions.AppException;
+import com.datn.ailms.exceptions.ErrorCode;
 import com.datn.ailms.interfaces.order_interface.IPurchaseOrderService;
 import com.datn.ailms.mapper.PurchaseOrderMapper;
 import com.datn.ailms.model.dto.request.order.PurchaseOrderRequestDto;
+import com.datn.ailms.model.dto.response.ProductDetailSerialDto;
+import com.datn.ailms.model.dto.response.inventory.ProductDetailResponseDto;
 import com.datn.ailms.model.dto.response.order.PurchaseOrderResponseDto;
 import com.datn.ailms.model.entities.account_entities.User;
+import com.datn.ailms.model.entities.enums.SerialStatus;
 import com.datn.ailms.model.entities.order_entites.PurchaseOrder;
+import com.datn.ailms.model.entities.order_entites.PurchaseOrderItem;
 import com.datn.ailms.model.entities.product_entities.Product;
+import com.datn.ailms.model.entities.product_entities.ProductDetail;
+import com.datn.ailms.repositories.orderRepo.PurchaseOrderItemRepository;
 import com.datn.ailms.repositories.orderRepo.PurchaseOrderRepository;
+import com.datn.ailms.repositories.productRepo.ProductDetailRepository;
 import com.datn.ailms.repositories.productRepo.ProductRepository;
 import com.datn.ailms.repositories.userRepo.UserRepository;
 import jakarta.transaction.Transactional;
@@ -17,6 +26,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -30,6 +40,8 @@ public class PurchaseOrderService implements IPurchaseOrderService {
     final PurchaseOrderMapper _orderMapper;
     final ProductRepository _productRepository;
     final UserRepository _userRepository;
+    final ProductDetailRepository _detailRepo;
+    final PurchaseOrderItemRepository purchaseOrderItemRepository;
     @Override
     public PurchaseOrderResponseDto create(PurchaseOrderRequestDto request) {
         PurchaseOrder order = _orderMapper.toEntity(request);
@@ -54,6 +66,7 @@ public class PurchaseOrderService implements IPurchaseOrderService {
                 item.setProduct(product);
             });
         }
+        order.setStatus("IN_BOUND");
         PurchaseOrder savedOrder = _orderRepo.save(order);
         return _orderMapper.toDto(savedOrder);
     }
@@ -87,4 +100,50 @@ public class PurchaseOrderService implements IPurchaseOrderService {
     public void delete(UUID id) {
         _orderRepo.deleteById(id);
     }
+
+    @Override
+    public void completeItem(UUID orderId, UUID userId) {
+        PurchaseOrder order = _orderRepo.findById(orderId)
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+
+        // check user tồn tại
+        _userRepository.findById(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        // cập nhật tất cả ProductDetail về IN_STOCK
+        order.getItems().forEach(item -> {
+            item.getProductDetails().forEach(detail -> {
+                if (detail.getStatus() == SerialStatus.INBOUND) {
+                    detail.setStatus(SerialStatus.IN_STOCK);
+                    detail.setUpdatedAt(LocalDateTime.now());
+                    _detailRepo.save(detail);
+                }
+            });
+        });
+
+//        order.setCreatedAt(new LocalDate());
+        order.setStatus("COMPLETED");
+        _orderRepo.save(order);
+    }
+
+    @Override
+    public List<ProductDetailSerialDto> getSerials(UUID orderId, String sku) {
+// Lấy tất cả item của đơn hàng
+        List<PurchaseOrderItem> items = purchaseOrderItemRepository.findByPurchaseOrderId(orderId);
+
+        return items.stream()
+                .flatMap(item -> item.getProductDetails().stream()
+                        .map(pd -> {
+                            ProductDetailSerialDto dto = new ProductDetailSerialDto();
+                            dto.setProductId(pd.getProduct().getId());
+                            dto.setSerialNumber(pd.getSerialNumber());
+                            dto.setSku(pd.getProduct().getSku());
+                            dto.setStatus(pd.getStatus());
+                            //dto.set`pd.getBinId() != null ? pd.getBinId().getId().toString() : null);
+                            return dto;
+                        })
+                )
+                .toList();
+    }
+
 }
