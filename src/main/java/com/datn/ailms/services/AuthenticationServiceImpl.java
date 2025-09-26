@@ -105,6 +105,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
                 .issueTime(issueTime) //Lấy thời điểm hịiện tại
                 .expirationTime(expiryTime) //Thời  hạn token
                 .jwtID(java.util.UUID.randomUUID().toString())
+                .claim("name",user.getName())
                 .claim("scope",buildScope(user))
                 .claim("id",user.getId())
                 .build();
