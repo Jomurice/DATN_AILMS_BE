@@ -29,10 +29,10 @@ public class WarehouseController {
                 .build();
     }
 
-    @GetMapping("/tree/location/{locationId}")
-    public ApiResp<List<WarehouseResponseDto>> getTreeByLocation(@PathVariable UUID locationId) {
+    @GetMapping("/tree/location/{location}")
+    public ApiResp<List<WarehouseResponseDto>> getTreeByLocation(@PathVariable String location) {
         return ApiResp.<List<WarehouseResponseDto>>builder()
-                .result(_warehouseService.findTreeByLocation(locationId))
+                .result(_warehouseService.findTreeByLocation(location))
                 .build();
     }
 

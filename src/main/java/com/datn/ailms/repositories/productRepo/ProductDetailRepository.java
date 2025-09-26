@@ -1,6 +1,7 @@
 package com.datn.ailms.repositories.productRepo;
 
 import com.datn.ailms.model.dto.response.ProductDetailSerialDto;
+import com.datn.ailms.model.entities.enums.SerialStatus;
 import com.datn.ailms.model.entities.product_entities.ProductDetail;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -15,8 +16,11 @@ import java.util.UUID;
 public interface ProductDetailRepository extends JpaRepository<ProductDetail, UUID> {
     Optional<ProductDetail> findBySerialNumber(String serialNumber);
 
-    @Query("SELECT COUNT(p) FROM ProductDetail p")
+    @Query("SELECT COUNT(p) FROM ProductDetail p ")
     long countProductDetail();
+
+    @Query("SELECT COUNT(p) FROM ProductDetail p WHERE p.status = :status")
+    long countByStatus(@Param("status") SerialStatus status);
 
     List<ProductDetail> findByProductId(UUID productId);
 
@@ -26,6 +30,9 @@ public interface ProductDetailRepository extends JpaRepository<ProductDetail, UU
             "JOIN FETCH p.purchaseOrderItem poi " +
             "JOIN FETCH p.product prod")
     List<ProductDetail> findAllWithPOAndProduct();
+
+    boolean existsBySerialNumber(String serialNumber);
+//    ProductDetail findBySerialNumber(String serialNumber);
 
 
 

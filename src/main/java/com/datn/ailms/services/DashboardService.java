@@ -31,7 +31,7 @@ public class DashboardService implements IDashboardService {
 
         String timeframe = requestDto.getTimeframe();
 
-        long inStock = _productDetailRepo.countProductDetail();
+        long inStock = _productDetailRepo.countByStatus(SerialStatus.IN_WAREHOUSE);
 
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime start;
@@ -73,18 +73,18 @@ public class DashboardService implements IDashboardService {
         // Chọn query phù hợp
         switch (timeframe) {
             case "24H":
-                inboundRows = dashboardRepository.countByStatusAndHour(SerialStatus.INBOUND, start, end);
+                inboundRows = dashboardRepository.countByStatusAndHour(SerialStatus.IN_WAREHOUSE, start, end);
                 outboundRows = dashboardRepository.countByStatusAndHour(SerialStatus.OUTBOUND, start, end);
                 break;
             case "7D":
             case "30D":
             case "1M":
-                inboundRows = dashboardRepository.countByStatusAndDay(SerialStatus.INBOUND, start, end);
+                inboundRows = dashboardRepository.countByStatusAndDay(SerialStatus.IN_WAREHOUSE, start, end);
                 outboundRows = dashboardRepository.countByStatusAndDay(SerialStatus.OUTBOUND, start, end);
                 break;
             case "1Y":
             default: // ALL
-                inboundRows = dashboardRepository.countByStatusAndMonth(SerialStatus.INBOUND, start, end);
+                inboundRows = dashboardRepository.countByStatusAndMonth(SerialStatus.IN_WAREHOUSE, start, end);
                 outboundRows = dashboardRepository.countByStatusAndMonth(SerialStatus.OUTBOUND, start, end);
                 break;
         }

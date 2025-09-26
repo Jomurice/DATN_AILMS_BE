@@ -29,7 +29,7 @@ public class PurchaseOrderItem {
 
     Integer orderQuantity;
 
-    Integer scannedQuantity;
+    Integer scannedQuantity = 0;
 
     // FK tới Product
     @ManyToOne(fetch = FetchType.LAZY)
