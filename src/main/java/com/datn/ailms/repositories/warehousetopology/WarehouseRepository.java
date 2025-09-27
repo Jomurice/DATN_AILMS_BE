@@ -15,7 +15,6 @@ public interface WarehouseRepository extends JpaRepository<Warehouse, UUID> {
 
     // WarehouseRepository
     List<Warehouse> findByParentId(UUID parentId);
-    List<Warehouse> findByLocationIdAndParentIsNull(UUID  locationId);
-    List<Warehouse> findByLocationId(UUID locationId);
+    List<Warehouse> findByLocationAndParentIsNull(String  location);
 
 }
