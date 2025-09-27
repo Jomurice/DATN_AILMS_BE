@@ -12,7 +12,7 @@ import java.util.UUID;
 public interface ProductRepository extends JpaRepository<Product, UUID> {
     Optional<Product> findBySku(String sku);
     Optional<Product> findBySerialPrefix(String serialPrefix);
-    @Query("SELECT p FROM Product p WHERE p.categoryBrand.category.menu.id = :menuId")
+    @Query("SELECT p FROM Product p WHERE p.category.menu.id = :menuId")
     List<Product> findByMenuId(@Param("menuId") UUID menuId);
 
     @Query("""

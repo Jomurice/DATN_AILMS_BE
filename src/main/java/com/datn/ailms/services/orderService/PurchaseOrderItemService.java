@@ -76,98 +76,99 @@ public class PurchaseOrderItemService implements IPurchaseOrderItemService {
         PurchaseOrderItem item = _itemRepo.findById(itemId)
                 .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
 
-        // Normalize serial
         String normSerial = serialNumber == null ? null : serialNumber.trim();
-
         if (normSerial == null || normSerial.isEmpty()) {
             throw new AppException(ErrorCode.INVALID_PARAM);
         }
 
-        // 1. Check if the serial already exists globally
+        ProductDetail detail = prepareProductDetail(item, normSerial, userId);
+        ProductDetail saved = _detailRepo.save(detail);
+
+        if (item.getProductDetails().stream().noneMatch(d -> d.getId().equals(saved.getId()))) {
+            item.getProductDetails().add(saved);
+        }
+
+        updateScannedQuantity(item);
+
+        return _pdMapper.toResponse(saved);
+    }
+
+    @Override
+    public ProductDetail prepareProductDetail(PurchaseOrderItem item, String normSerial, UUID userId) {
         Optional<ProductDetail> existing = _detailRepo.findBySerialNumberIgnoreCase(normSerial);
+
         if (existing.isPresent()) {
             ProductDetail ed = existing.get();
-            if (ed.getPurchaseOrderItem() != null && !ed.getPurchaseOrderItem().getId().equals(itemId)) {
-                // already assigned to a different order item
+            // Nếu serial đã gắn vào item khác thì chặn
+            if (ed.getPurchaseOrderItem() != null && !ed.getPurchaseOrderItem().getId().equals(item.getId())) {
                 throw new AppException(ErrorCode.SERIAL_ALREADY_SCANNED);
             }
-            // if exists and belongs to same item -> return dto
-            if (ed.getPurchaseOrderItem() != null && ed.getPurchaseOrderItem().getId().equals(itemId)) {
-                return _pdMapper.toResponse(ed);
+
+            // Nếu serial đã gắn đúng item hiện tại rồi thì cũng chặn (không cho quét lại)
+            if (ed.getPurchaseOrderItem() != null && ed.getPurchaseOrderItem().getId().equals(item.getId())) {
+                throw new AppException(ErrorCode.SERIAL_ALREADY_SCANNED);
             }
-            // else exists but not assigned yet -> we'll assign below
-        }
 
-        // 2. Ensure we have product master to assign (prefer the product of order item)
-        Product product = item.getProduct();
-        if (product == null) {
-            throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
-        }
-
-        ProductDetail detail;
-        if (existing.isPresent()) {
-            detail = existing.get();
-        } else {
-            // create new ProductDetail
-            detail = ProductDetail.builder()
-                    .serialNumber(normSerial)
-                    .product(product)
-                    .createdAt(LocalDateTime.now())
-                    .build();
-        }
-
-        // 3. If detail.product is null, set it (shouldn't happen if orderItem.product provided)
-        if (detail.getProduct() == null) {
-            detail.setProduct(product);
-        }
-
-        // 4. If bin not assigned yet -> find bin via BinRuleService
-        if (detail.getWarehouse() == null) {
-            Warehouse wh = _warehouseRuleService.findWarehouseForSerial(normSerial); // may throw if none -> bubble up
-            // ensure capacity
-            if (wh.getCurrentQuantity() >= wh.getCapacity()) {
-                throw new AppException(ErrorCode.BIN_FULL);
+            // 🔥 Bổ sung quan hệ nếu thiếu
+            if (ed.getProduct() == null) {
+                ed.setProduct(item.getProduct());
             }
-            wh.setCurrentQuantity(wh.getCurrentQuantity() + 1);
-            _whRepo.save(wh);
-            detail.setWarehouse(wh);
+            if (ed.getWarehouse() == null) {
+                Warehouse wh = _warehouseRuleService.findWarehouseForSerial(normSerial);
+                if (wh.getCurrentQuantity() >= wh.getCapacity()) {
+                    throw new AppException(ErrorCode.BIN_FULL);
+                }
+                wh.setCurrentQuantity(wh.getCurrentQuantity() + 1);
+                _whRepo.save(wh);
+                ed.setWarehouse(wh);
+            }
+            if (ed.getPurchaseOrderItem() == null) {
+                ed.setPurchaseOrderItem(item);
+            }
+            if (ed.getScannedBy() == null) {
+                User currentUser = _userRepo.findById(userId)
+                        .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+                ed.setScannedBy(currentUser);
+            }
+
+            ed.setStatus(SerialStatus.INBOUND);
+            ed.setUpdatedAt(LocalDateTime.now());
+            return ed;
         }
 
-        // 5. Assign to order item
-        detail.setPurchaseOrderItem(item);
-        detail.setUpdatedAt(LocalDateTime.now());
+        // ===== Nếu chưa tồn tại thì tạo mới =====
+        Product product = Optional.ofNullable(item.getProduct())
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
 
-        // ✅ set status INBOUND khi scan
-        detail.setStatus(SerialStatus.INBOUND);
+        ProductDetail detail = ProductDetail.builder()
+                .serialNumber(normSerial)
+                .product(product)
+                .createdAt(LocalDateTime.now())
+                .build();
 
-        // ✅ set scannedBy
-//        User currentUser = SecurityUtils.getCurrentUser()
-//                .orElseThrow(() -> new AppException(ErrorCode.UNAUTHORIZED));
-//        detail.setScannedBy(currentUser);
+        Warehouse wh = _warehouseRuleService.findWarehouseForSerial(normSerial);
+        if (wh.getCurrentQuantity() >= wh.getCapacity()) {
+            throw new AppException(ErrorCode.BIN_FULL);
+        }
+        wh.setCurrentQuantity(wh.getCurrentQuantity() + 1);
+        _whRepo.save(wh);
+        detail.setWarehouse(wh);
 
-
-        // ✅ lấy User từ userId
         User currentUser = _userRepo.findById(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         detail.setScannedBy(currentUser);
+        detail.setStatus(SerialStatus.INBOUND);
+        detail.setPurchaseOrderItem(item);
+        detail.setUpdatedAt(LocalDateTime.now());
 
-        // persist detail
-        ProductDetail saved = _detailRepo.save(detail);
+        return detail;
+    }
 
-        // 6. Update scannedQuantity on item
-        int scanned = (int) item.getProductDetails().stream()
-                .map(ProductDetail::getSerialNumber)
-                .filter(s -> s != null).count();
 
-        // if saved is new, add to list (ensure in-memory sync)
-        if (item.getProductDetails().stream().noneMatch(d -> d.getId() != null && d.getId().equals(saved.getId()))) {
-            item.getProductDetails().add(saved);
-            scanned = scanned + 1; // adjust
-        }
-
+    @Override
+    public void updateScannedQuantity(PurchaseOrderItem item) {
+        int scanned = (int) item.getProductDetails().stream() .filter(d -> d.getSerialNumber() != null) .count();
         item.setScannedQuantity(scanned);
-        _itemRepo.save(item); // save update
-
-        return _pdMapper.toResponse(saved);
+        _itemRepo.save(item);
     }
 }

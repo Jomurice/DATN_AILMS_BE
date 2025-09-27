@@ -20,7 +20,7 @@ public interface ProductDetailMapper {
     @Mapping(source = "product.id", target = "productId")
     @Mapping(source = "warehouse.id", target = "warehouseId")
     @Mapping(target = "purchaseOrderItemId", source = "purchaseOrderItem.id")
-    @Mapping(source = "scannedBy.id", target = "scannedBy")
+    @Mapping(source = "scannedBy.id", target = "scannedByUserId")
     ProductDetailResponseDto toResponse(ProductDetail productDetail);
 
     List<ProductDetailResponseDto> toResponseList(List<ProductDetail> details);

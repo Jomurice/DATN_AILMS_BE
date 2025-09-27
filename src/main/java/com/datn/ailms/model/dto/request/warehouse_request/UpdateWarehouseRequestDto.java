@@ -15,7 +15,7 @@ public class UpdateWarehouseRequestDto {
     String code;        // Mã warehouse, ví dụ HN01, ZONE01
     String type;        // ZONE, AISLE, SHELF, BIN
     UUID parentId;      // UUID warehouse cha, null nếu là cấp gốc (Zone)
-    UUID locationId;    // UUID location mà warehouse thuộc về
+    String location;    // UUID location mà warehouse thuộc về
     Integer currentQuantity;
     Integer capacity;
 }
