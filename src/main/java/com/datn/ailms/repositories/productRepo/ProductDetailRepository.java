@@ -34,6 +34,10 @@ public interface ProductDetailRepository extends JpaRepository<ProductDetail, UU
     boolean existsBySerialNumber(String serialNumber);
 //    ProductDetail findBySerialNumber(String serialNumber);
 
+    @Query("SELECT COUNT(p) FROM ProductDetail p WHERE p.purchaseOrderItem.id = :itemId AND p.status = 'IN_WAREHOUSE'")
+    int countScannedByPurchaseOrderItem(@Param("itemId") UUID itemId);
+
+
 
 
 }

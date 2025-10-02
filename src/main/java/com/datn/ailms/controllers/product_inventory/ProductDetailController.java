@@ -49,9 +49,9 @@ public class ProductDetailController {
     }
 
     // 2️⃣ Lấy ProductDetail theo productId
-    @GetMapping("/{id}")
-    public ApiResp<List<ProductDetailResponseDto>> getByProductId(@PathVariable UUID id) {
-        var result = _productDetailRepository.findByProductId(id);
+    @GetMapping("/{productId}")
+    public ApiResp<List<ProductDetailResponseDto>> getByProductId(@PathVariable UUID productId) {
+        var result = _productDetailRepository.findByProductId(productId);
         var toList = _productDetailMapper.toResponseList(result);
         return ApiResp.<List<ProductDetailResponseDto>>builder().result(toList).build();
     }

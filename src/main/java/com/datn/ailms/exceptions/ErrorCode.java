@@ -36,7 +36,8 @@ public enum ErrorCode {
     INVALID_PARAM(1030,"Invalid Parameter", HttpStatus.BAD_REQUEST),
     SERIAL_ALREADY_SCANNED(1031,"Serial had been scanned", HttpStatus.CONFLICT),
     BIN_FULL(1032,"No more space in Bin", HttpStatus.CONFLICT),
-    LOCATION_NOT_FOUND(1033, "Location not found", HttpStatus.NOT_FOUND),
+    SERIAL_NOT_FOUND(1033, "Serial not found", HttpStatus.NOT_FOUND),
+    ORDER_ALREADY_COMPLETED(1034,"Order already completed", HttpStatus.CONFLICT),
     ;
 
 

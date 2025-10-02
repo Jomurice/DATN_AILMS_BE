@@ -87,7 +87,7 @@ public class PurchaseOrderItemService implements IPurchaseOrderItemService {
         if (item.getProductDetails().stream().noneMatch(d -> d.getId().equals(saved.getId()))) {
             item.getProductDetails().add(saved);
         }
-
+        _detailRepo.saveAndFlush(detail);
         updateScannedQuantity(item);
 
         return _pdMapper.toResponse(saved);
@@ -167,8 +167,76 @@ public class PurchaseOrderItemService implements IPurchaseOrderItemService {
 
     @Override
     public void updateScannedQuantity(PurchaseOrderItem item) {
-        int scanned = (int) item.getProductDetails().stream() .filter(d -> d.getSerialNumber() != null) .count();
+//        int scanned = (int) item.getProductDetails().stream() .filter(d -> d.getSerialNumber() != null) .count();
+//        item.setScannedQuantity(scanned);
+//        _itemRepo.save(item);
+
+        int scanned = _detailRepo.countScannedByPurchaseOrderItem(item.getId());
         item.setScannedQuantity(scanned);
         _itemRepo.save(item);
+    }
+
+    @Override
+    public ProductDetailResponseDto updateSerial(UUID itemId, UUID serialId, String newSerial, UUID userId) {
+        PurchaseOrderItem item = _itemRepo.findById(itemId)
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+
+        ProductDetail detail = _detailRepo.findById(serialId)
+                .orElseThrow(() -> new AppException(ErrorCode.SERIAL_NOT_FOUND));
+
+        if (!detail.getPurchaseOrderItem().getId().equals(itemId)) {
+            throw new AppException(ErrorCode.INVALID_PARAM);
+        }
+
+        // Kiểm tra newSerial đã tồn tại chưa
+        _detailRepo.findBySerialNumberIgnoreCase(newSerial)
+                .ifPresent(existing -> {
+                    if (!existing.getId().equals(serialId)) {
+                        throw new AppException(ErrorCode.SERIAL_ALREADY_SCANNED);
+                    }
+                });
+
+        detail.setSerialNumber(newSerial.trim());
+        detail.setUpdatedAt(LocalDateTime.now());
+
+        User user = _userRepo.findById(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        detail.setScannedBy(user);
+
+        ProductDetail saved = _detailRepo.save(detail);
+        return _pdMapper.toResponse(saved);
+    }
+
+    @Override
+    public void removeSerial(UUID itemId, UUID serialId) {
+        PurchaseOrderItem item = _itemRepo.findById(itemId)
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+
+        ProductDetail detail = _detailRepo.findById(serialId)
+                .orElseThrow(() -> new AppException(ErrorCode.SERIAL_NOT_FOUND));
+
+        // Kiểm tra serial có thuộc item này không
+        if (!detail.getPurchaseOrderItem().getId().equals(itemId)) {
+            throw new AppException(ErrorCode.INVALID_PARAM);
+        }
+
+        // Nếu order đã COMPLETE thì không cho xoá
+        if ("COMPLETED".equalsIgnoreCase(item.getPurchaseOrder().getStatus())) {
+            throw new AppException(ErrorCode.ORDER_ALREADY_COMPLETED);
+        }
+
+        // Giảm số lượng trong warehouse (nếu cần)
+        if (detail.getWarehouse() != null) {
+            var wh = detail.getWarehouse();
+            wh.setCurrentQuantity(Math.max(0, wh.getCurrentQuantity() - 1));
+            _whRepo.save(wh);
+        }
+
+        // Xoá serial
+        _detailRepo.delete(detail);
+        _detailRepo.flush();
+
+        // Cập nhật lại scannedQuantity
+        updateScannedQuantity(item);
     }
 }

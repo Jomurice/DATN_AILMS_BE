@@ -29,6 +29,8 @@ public class PurchaseOrderItem {
 
     Integer orderQuantity;
 
+    @Column(nullable = false)
+    @Builder.Default
     Integer scannedQuantity = 0;
 
     // FK tới Product
