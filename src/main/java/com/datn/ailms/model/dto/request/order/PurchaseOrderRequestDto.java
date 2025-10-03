@@ -19,5 +19,6 @@ public class PurchaseOrderRequestDto {
     String status;
     LocalDate createdAt;
     UUID createdBy;
+    UUID warehouseId;
     List<PurchaseOrderItemRequestDto> items;
 }
