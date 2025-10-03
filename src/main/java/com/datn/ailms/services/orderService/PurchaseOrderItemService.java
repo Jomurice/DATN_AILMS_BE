@@ -99,42 +99,28 @@ public class PurchaseOrderItemService implements IPurchaseOrderItemService {
 
         if (existing.isPresent()) {
             ProductDetail ed = existing.get();
+
             // Nếu serial đã gắn vào item khác thì chặn
             if (ed.getPurchaseOrderItem() != null && !ed.getPurchaseOrderItem().getId().equals(item.getId())) {
                 throw new AppException(ErrorCode.SERIAL_ALREADY_SCANNED);
             }
 
-            // Nếu serial đã gắn đúng item hiện tại rồi thì cũng chặn (không cho quét lại)
-            if (ed.getPurchaseOrderItem() != null && ed.getPurchaseOrderItem().getId().equals(item.getId())) {
-                throw new AppException(ErrorCode.SERIAL_ALREADY_SCANNED);
-            }
+            // ✅ Gắn lại chắc chắn các quan hệ (override)
+            ed.setProduct(item.getProduct());
+            ed.setPurchaseOrderItem(item);
 
-            // 🔥 Bổ sung quan hệ nếu thiếu
-            if (ed.getProduct() == null) {
-                ed.setProduct(item.getProduct());
-            }
-            if (ed.getWarehouse() == null) {
-                Warehouse wh = _warehouseRuleService.findWarehouseForSerial(normSerial);
-                if (wh.getCurrentQuantity() >= wh.getCapacity()) {
-                    throw new AppException(ErrorCode.BIN_FULL);
-                }
-                wh.setCurrentQuantity(wh.getCurrentQuantity() + 1);
-                _whRepo.save(wh);
-                ed.setWarehouse(wh);
-            }
-            if (ed.getPurchaseOrderItem() == null) {
-                ed.setPurchaseOrderItem(item);
-            }
-            if (ed.getScannedBy() == null) {
-                User currentUser = _userRepo.findById(userId)
-                        .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
-                ed.setScannedBy(currentUser);
-            }
+            Warehouse wh = _warehouseRuleService.findWarehouseForSerial(normSerial);
+            ed.setWarehouse(wh);
+
+            User currentUser = _userRepo.findById(userId)
+                    .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+            ed.setScannedBy(currentUser);
 
             ed.setStatus(SerialStatus.INBOUND);
             ed.setUpdatedAt(LocalDateTime.now());
             return ed;
         }
+
 
         // ===== Nếu chưa tồn tại thì tạo mới =====
         Product product = Optional.ofNullable(item.getProduct())
@@ -147,9 +133,6 @@ public class PurchaseOrderItemService implements IPurchaseOrderItemService {
                 .build();
 
         Warehouse wh = _warehouseRuleService.findWarehouseForSerial(normSerial);
-        if (wh.getCurrentQuantity() >= wh.getCapacity()) {
-            throw new AppException(ErrorCode.BIN_FULL);
-        }
         wh.setCurrentQuantity(wh.getCurrentQuantity() + 1);
         _whRepo.save(wh);
         detail.setWarehouse(wh);

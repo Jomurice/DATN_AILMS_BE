@@ -50,9 +50,6 @@ public class InventoryService implements IInventory {
         if (detail.getWarehouse() == null) {
             Warehouse wh = warehouseRuleService.findWarehouseForSerial(serialNumber);
 
-            if (wh.getCapacity() != null && wh.getCurrentQuantity() >= wh.getCapacity()) {
-                throw new IllegalStateException("Target warehouse full: " + wh.getCode());
-            }
 
             assignToWarehouse(detail, wh);
         }
@@ -69,9 +66,6 @@ public class InventoryService implements IInventory {
         Warehouse target = warehouseRepo.findById(warehouseId)
                 .orElseThrow(() -> new EntityNotFoundException("Warehouse not found: " + warehouseId));
 
-        if (target.getCapacity() != null && target.getCapacity() <= target.getCurrentQuantity()) {
-            throw new IllegalStateException("Target warehouse is full");
-        }
         assignToWarehouse(d, target);
         detailRepo.save(d);
         return pdMapper.toResponse(d);
@@ -102,10 +96,6 @@ public class InventoryService implements IInventory {
                 old.setCurrentQuantity(Math.max(0, old.getCurrentQuantity() - 1));
                 warehouseRepo.save(old);
             }
-        }
-        // tăng warehouse mới
-        if (target.getCapacity() != null) {
-            target.setCurrentQuantity(target.getCurrentQuantity() + 1);
         }
         try {
             warehouseRepo.saveAndFlush(target);

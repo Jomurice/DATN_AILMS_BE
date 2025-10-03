@@ -34,10 +34,6 @@ public class ProductConfirmService implements IProductConfirmService {
             throw new RuntimeException("Serial already scanned or in warehouse");
         }
 
-        if (detail.getStatus() != SerialStatus.AVAILABLE) {
-            throw new RuntimeException("Serial already scanned or in warehouse");
-        }
-
         var warehouse = warehouseRepository.findById(request.getWarehouseId())
                 .orElseThrow(() -> new RuntimeException("Warehouse not found"));
         var user = userRepository.findById(request.getScannedByUserId())
@@ -45,11 +41,12 @@ public class ProductConfirmService implements IProductConfirmService {
 
         detail.setWarehouse(warehouse);
         detail.setScannedBy(user);
-        detail.setStatus(SerialStatus.IN_WAREHOUSE);
+        detail.setStatus(SerialStatus.INBOUND);
         detail.setUpdatedAt(LocalDateTime.now());
 
 
         productDetailRepository.save(detail);
+
 
         PurchaseOrderItem item = detail.getPurchaseOrderItem();
         if (item != null) {
