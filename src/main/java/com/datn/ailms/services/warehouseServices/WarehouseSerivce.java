@@ -39,9 +39,9 @@ public class WarehouseSerivce implements IWarehouseService {
             }
         } else {
             // Warehouse gốc → bắt buộc có locationId
-            if (dto.getLocation() == null) {
-                throw new AppException(ErrorCode.LOCATION_NOT_FOUND);
-            }
+//            if (dto.getLocation() == null) {
+//                throw new AppException(ErrorCode.LOCATION_NOT_FOUND);
+//            }
         }
 
         Warehouse warehouse = _warehouseMapper.toEntity(dto);

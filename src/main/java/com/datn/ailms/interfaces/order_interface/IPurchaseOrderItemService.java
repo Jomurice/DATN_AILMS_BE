@@ -14,4 +14,6 @@ public interface IPurchaseOrderItemService {
     ProductDetailResponseDto scanSerial(UUID itemId, String serialNumber,UUID userId);
     ProductDetail prepareProductDetail(PurchaseOrderItem item, String normSerial, UUID userId);
     void updateScannedQuantity(PurchaseOrderItem item);
+    ProductDetailResponseDto updateSerial(UUID itemId, UUID serialId, String newSerial, UUID userId);
+    void removeSerial(UUID itemId, UUID serialId);
 }
