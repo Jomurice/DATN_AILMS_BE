@@ -41,9 +41,7 @@ public class Warehouse {
     @OneToMany(mappedBy = "parent")
     List<Warehouse> children;
 
-    Integer currentQuantity;
-
-    Integer capacity;
+    Integer currentQuantity = 0;
 
     String location;
 
