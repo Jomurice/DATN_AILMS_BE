@@ -18,4 +18,5 @@ public class ProductDetailRequestDto {
     private UUID productId; // liên kết Product
     private UUID warehouseId;
     private UUID scannedBy;
+    private UUID purchaseOrderItemId;
 }

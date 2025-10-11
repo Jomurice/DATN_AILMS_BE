@@ -14,7 +14,13 @@ import java.util.UUID;
 
 @Repository
 public interface ProductDetailRepository extends JpaRepository<ProductDetail, UUID> {
-    Optional<ProductDetail> findBySerialNumber(String serialNumber);
+    @Query("SELECT p FROM ProductDetail p " +
+            "LEFT JOIN FETCH p.product " +
+            "LEFT JOIN FETCH p.warehouse " +
+            "LEFT JOIN FETCH p.purchaseOrderItem " +
+            "LEFT JOIN FETCH p.scannedBy " +
+            "WHERE p.serialNumber = :serialNumber")
+    Optional<ProductDetail> findBySerialNumber(@Param("serialNumber") String serialNumber);
 
     @Query("SELECT COUNT(p) FROM ProductDetail p ")
     long countProductDetail();

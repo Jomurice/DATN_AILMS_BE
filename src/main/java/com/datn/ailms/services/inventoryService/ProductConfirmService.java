@@ -41,9 +41,8 @@ public class ProductConfirmService implements IProductConfirmService {
 
         detail.setWarehouse(warehouse);
         detail.setScannedBy(user);
-        detail.setStatus(SerialStatus.INBOUND);
+        detail.setStatus(SerialStatus.IN_WAREHOUSE);
         detail.setUpdatedAt(LocalDateTime.now());
-
 
         productDetailRepository.save(detail);
 

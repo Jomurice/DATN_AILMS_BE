@@ -135,6 +135,10 @@ public class PurchaseOrderService implements IPurchaseOrderService {
 
         // cập nhật tất cả ProductDetail về IN_STOCK
         order.getItems().forEach(item -> {
+            // Đếm số serial đã IN_WAREHOUSE hoặc INBOUND (tức là đã scan)
+            long scannedCount = item.getProductDetails().stream()
+                    .filter(d -> d.getStatus() == SerialStatus.INBOUND || d.getStatus() == SerialStatus.IN_WAREHOUSE)
+                    .count();
             item.getProductDetails().forEach(detail -> {
                 if (detail.getStatus() == SerialStatus.INBOUND) {
                     detail.setStatus(SerialStatus.IN_WAREHOUSE);
@@ -143,13 +147,29 @@ public class PurchaseOrderService implements IPurchaseOrderService {
                     added.incrementAndGet();
                 }
             });
+
+            // ✅ Cập nhật scannedQuantity cho item
+            item.setScannedQuantity((int) scannedCount);
+            purchaseOrderItemRepository.save(item);
         });
 
         warehouse.setCurrentQuantity(warehouse.getCurrentQuantity() + added.get());
         _warehouseRepo.save(warehouse);
 
 //        order.setCreatedAt(new LocalDate());
-        order.setStatus("COMPLETED");
+
+        // Kiểm tra xem còn serial nào chưa nhập hết không
+        boolean allCompleted = order.getItems().stream()
+                .flatMap(item -> item.getProductDetails().stream())
+                .allMatch(d -> d.getStatus() == SerialStatus.IN_WAREHOUSE);
+
+        if (allCompleted) {
+            order.setStatus("COMPLETED");
+        } else {
+            order.setStatus("IN_PROGRESS");
+        }
+
+//        order.setStatus("COMPLETED");
         _orderRepo.save(order);
     }
 
