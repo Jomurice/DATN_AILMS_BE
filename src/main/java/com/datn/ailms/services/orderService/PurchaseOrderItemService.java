@@ -84,6 +84,12 @@ public class PurchaseOrderItemService implements IPurchaseOrderItemService {
         ProductDetail detail = prepareProductDetail(item, normSerial, userId);
         ProductDetail saved = _detailRepo.save(detail);
 
+        int scanned = _detailRepo.countScannedByPurchaseOrderItem(itemId);
+        if (scanned >= item.getOrderQuantity()) {
+            throw new AppException(ErrorCode.SERIAL_LIMIT_REACHED);
+        }
+
+
         if (item.getProductDetails().stream().noneMatch(d -> d.getId().equals(saved.getId()))) {
             item.getProductDetails().add(saved);
         }
@@ -116,7 +122,7 @@ public class PurchaseOrderItemService implements IPurchaseOrderItemService {
                     .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
             ed.setScannedBy(currentUser);
 
-            ed.setStatus(SerialStatus.INBOUND);
+            ed.setStatus(SerialStatus.IN_WAREHOUSE);
             ed.setUpdatedAt(LocalDateTime.now());
             return ed;
         }
@@ -140,7 +146,7 @@ public class PurchaseOrderItemService implements IPurchaseOrderItemService {
         User currentUser = _userRepo.findById(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         detail.setScannedBy(currentUser);
-        detail.setStatus(SerialStatus.INBOUND);
+        detail.setStatus(SerialStatus.IN_WAREHOUSE);
         detail.setPurchaseOrderItem(item);
         detail.setUpdatedAt(LocalDateTime.now());
 

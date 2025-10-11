@@ -15,6 +15,7 @@ public interface ProductDetailMapper {
     @Mapping(source = "productId", target = "product.id")
     @Mapping(source = "warehouseId", target = "warehouse.id")
     @Mapping(source = "scannedBy", target = "scannedBy.id")
+    @Mapping(source = "purchaseOrderItemId", target = "purchaseOrderItem.id")
     ProductDetail toEntity(ProductDetailRequestDto request);
 
     @Mapping(source = "product.id", target = "productId")
