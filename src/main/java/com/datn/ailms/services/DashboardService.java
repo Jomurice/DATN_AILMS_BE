@@ -13,9 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,67 +26,82 @@ public class DashboardService implements IDashboardService {
 
     @Override
     public DashboardStatsResponseDto getDashboardStats(DashboardStatsRequestDto requestDto) {
+        UUID warehouseId = requestDto.getWarehouseId();
 
-        String timeframe = requestDto.getTimeframe();
-
-        long inStock = _productDetailRepo.countByStatus(SerialStatus.IN_WAREHOUSE);
-
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime start;
-        switch (timeframe) {
-            case "24H":
-                start = now.minusHours(24);
-                break;
-            case "7D":
-                start = now.minusDays(7);
-                break;
-            case "30D":
-                start = now.minusDays(30);
-                break;
-            case "1M":
-                start = now.minusMonths(1);
-                break;
-            case "1Y":
-                start = now.minusYears(1);
-                break;
-            default:
-                start = now.minusYears(100); // ALL
-                break;
+        long inStock;
+        if (warehouseId != null) {
+            inStock = _productDetailRepo.countByStatusAndWarehouseId(SerialStatus.IN_WAREHOUSE, warehouseId);
+        } else {
+            inStock = _productDetailRepo.countByStatus(SerialStatus.IN_WAREHOUSE);
         }
 
-//        long exported = orderDetailRepository.countExportedBetween(start, now);
         long employees = _userRepo.countUsers();
+
         return DashboardStatsResponseDto.builder()
                 .inStock(inStock)
-//                .exported(exported)
                 .employees(employees)
                 .build();
     }
 
     @Override
-    public InOutSeriesDto getInboundOutboundSeries(LocalDateTime start, LocalDateTime end, String timeframe) {
+    public InOutSeriesDto getInboundOutboundSeries(LocalDateTime start, LocalDateTime end, String timeframe, UUID warehouseId) {
         List<Object[]> inboundRows;
         List<Object[]> outboundRows;
 
-        // Chọn query phù hợp
-        switch (timeframe) {
-            case "24H":
-                inboundRows = dashboardRepository.countByStatusAndHour(SerialStatus.IN_WAREHOUSE, start, end);
-                outboundRows = dashboardRepository.countByStatusAndHour(SerialStatus.OUTBOUND, start, end);
-                break;
-            case "7D":
-            case "30D":
-            case "1M":
-                inboundRows = dashboardRepository.countByStatusAndDay(SerialStatus.IN_WAREHOUSE, start, end);
-                outboundRows = dashboardRepository.countByStatusAndDay(SerialStatus.OUTBOUND, start, end);
-                break;
-            case "1Y":
-            default: // ALL
-                inboundRows = dashboardRepository.countByStatusAndMonth(SerialStatus.IN_WAREHOUSE, start, end);
-                outboundRows = dashboardRepository.countByStatusAndMonth(SerialStatus.OUTBOUND, start, end);
-                break;
+        // Trường hợp có warehouse cụ thể
+        if (warehouseId != null) {
+            switch (timeframe) {
+                case "24H":
+                    inboundRows = dashboardRepository.countByStatusAndHourAndWarehouse(
+                            SerialStatus.IN_WAREHOUSE, start, end, warehouseId);
+                    outboundRows = dashboardRepository.countByStatusAndHourAndWarehouse(
+                            SerialStatus.OUTBOUND, start, end, warehouseId);
+                    break;
+                case "7D":
+                case "30D":
+                case "1M":
+                    inboundRows = dashboardRepository.countByStatusAndDayAndWarehouse(
+                            SerialStatus.IN_WAREHOUSE, start, end, warehouseId);
+                    outboundRows = dashboardRepository.countByStatusAndDayAndWarehouse(
+                            SerialStatus.OUTBOUND, start, end, warehouseId);
+                    break;
+                case "1Y":
+                default:
+                    inboundRows = dashboardRepository.countByStatusAndMonthAndWarehouse(
+                            SerialStatus.IN_WAREHOUSE, start, end, warehouseId);
+                    outboundRows = dashboardRepository.countByStatusAndMonthAndWarehouse(
+                            SerialStatus.OUTBOUND, start, end, warehouseId);
+                    break;
+            }
+        }
+        // Trường hợp không chọn warehouse
+        else {
+            switch (timeframe) {
+                case "24H":
+                    inboundRows = dashboardRepository.countByStatusAndHour(
+                            SerialStatus.IN_WAREHOUSE, start, end);
+                    outboundRows = dashboardRepository.countByStatusAndHour(
+                            SerialStatus.OUTBOUND, start, end);
+                    break;
+                case "7D":
+                case "30D":
+                case "1M":
+                    inboundRows = dashboardRepository.countByStatusAndDay(
+                            SerialStatus.IN_WAREHOUSE, start, end);
+                    outboundRows = dashboardRepository.countByStatusAndDay(
+                            SerialStatus.OUTBOUND, start, end);
+                    break;
+                case "1Y":
+                default:
+                    inboundRows = dashboardRepository.countByStatusAndMonth(
+                            SerialStatus.IN_WAREHOUSE, start, end);
+                    outboundRows = dashboardRepository.countByStatusAndMonth(
+                            SerialStatus.OUTBOUND, start, end);
+                    break;
+            }
         }
 
+        // Gom dữ liệu theo key (ngày, giờ, tháng)
         Map<String, Long> inboundMap = inboundRows.stream()
                 .collect(Collectors.toMap(r -> (String) r[0], r -> (Long) r[1]));
         Map<String, Long> outboundMap = outboundRows.stream()
@@ -116,7 +129,7 @@ public class DashboardService implements IDashboardService {
                 LocalDate cursorDay = start.toLocalDate();
                 LocalDate endDay = end.toLocalDate();
                 while (!cursorDay.isAfter(endDay)) {
-                    String key = cursorDay.toString(); // yyyy-MM-dd
+                    String key = cursorDay.toString();
                     labels.add(key);
                     inbound.add(inboundMap.getOrDefault(key, 0L));
                     outbound.add(outboundMap.getOrDefault(key, 0L));
@@ -125,7 +138,7 @@ public class DashboardService implements IDashboardService {
                 break;
 
             case "1Y":
-            default: // ALL
+            default:
                 LocalDateTime cursorMonth = start.withDayOfMonth(1);
                 while (!cursorMonth.isAfter(end)) {
                     String key = cursorMonth.getYear() + "-" + String.format("%02d", cursorMonth.getMonthValue());
@@ -143,7 +156,4 @@ public class DashboardService implements IDashboardService {
                 .outbound(outbound)
                 .build();
     }
-
-
-
 }
