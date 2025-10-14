@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/dashboard")
@@ -22,9 +23,11 @@ public class DashboardController {
     private final DashboardService _dashboardService;
 
     @GetMapping("/stats")
-    ApiResp<DashboardStatsResponseDto> getDashboardStat(@RequestParam(name="timeframe",defaultValue = "ALL") String timeframe){
+    ApiResp<DashboardStatsResponseDto> getDashboardStat(@RequestParam(name="timeframe",defaultValue = "ALL") String timeframe,
+                                                        @RequestParam(name="warehouseId", required = false) UUID warehouseId){
         DashboardStatsRequestDto requestDto = DashboardStatsRequestDto.builder()
                 .timeframe(timeframe)
+                .warehouseId(warehouseId)
                 .build();
         var result = _dashboardService.getDashboardStats(requestDto);
         return ApiResp.<DashboardStatsResponseDto>builder().result(result).build();
@@ -32,7 +35,8 @@ public class DashboardController {
 
     @GetMapping("/series")
     public ApiResp<InOutSeriesDto> getSeries(
-            @RequestParam(name = "timeframe", defaultValue = "30D") String timeframe
+            @RequestParam(name = "timeframe", defaultValue = "30D") String timeframe,
+            @RequestParam(name="warehouseId", required = false) UUID warehouseId
     ) {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime start;
@@ -60,7 +64,8 @@ public class DashboardController {
         InOutSeriesDto result = _dashboardService.getInboundOutboundSeries(
                 start,
                 now,
-                timeframe
+                timeframe,
+                warehouseId
         );
 
         return ApiResp.<InOutSeriesDto>builder().result(result).build();

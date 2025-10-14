@@ -7,30 +7,31 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
 @Repository
 public interface DashboardRepository extends JpaRepository<ProductDetail, UUID> {
+
+    // --- Không lọc warehouse ---
+
     @Query("""
-    SELECT 
-        FUNCTION('TO_CHAR', pd.createdAt, 'YYYY-MM-DD') as day,
-        COUNT(pd.id) as total
-    FROM ProductDetail pd
-    WHERE pd.status = :status
-      AND pd.createdAt BETWEEN :startDate AND :endDate
-    GROUP BY FUNCTION('TO_CHAR', pd.createdAt, 'YYYY-MM-DD')
-    ORDER BY day
-""")
+        SELECT 
+            FUNCTION('TO_CHAR', pd.createdAt, 'YYYY-MM-DD') as day,
+            COUNT(pd.id) as total
+        FROM ProductDetail pd
+        WHERE pd.status = :status
+          AND pd.createdAt BETWEEN :startDate AND :endDate
+        GROUP BY FUNCTION('TO_CHAR', pd.createdAt, 'YYYY-MM-DD')
+        ORDER BY day
+    """)
     List<Object[]> countByStatusAndDay(
             @Param("status") SerialStatus status,
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate
     );
 
-    // Group by HOUR
     @Query("""
         SELECT 
             FUNCTION('TO_CHAR', pd.createdAt, 'YYYY-MM-DD HH24') as hour,
@@ -47,7 +48,6 @@ public interface DashboardRepository extends JpaRepository<ProductDetail, UUID> 
             @Param("endDate") LocalDateTime endDate
     );
 
-    // Group by MONTH
     @Query("""
         SELECT 
             FUNCTION('TO_CHAR', pd.createdAt, 'YYYY-MM') as month,
@@ -64,4 +64,59 @@ public interface DashboardRepository extends JpaRepository<ProductDetail, UUID> 
             @Param("endDate") LocalDateTime endDate
     );
 
+
+
+    @Query("""
+        SELECT 
+            FUNCTION('TO_CHAR', pd.createdAt, 'YYYY-MM-DD') AS day,
+            COUNT(pd.id) AS total
+        FROM ProductDetail pd
+        WHERE pd.status = :status
+          AND pd.createdAt BETWEEN :start AND :end
+          AND pd.warehouse.id = :warehouseId
+        GROUP BY FUNCTION('TO_CHAR', pd.createdAt, 'YYYY-MM-DD')
+        ORDER BY day
+    """)
+    List<Object[]> countByStatusAndDayAndWarehouse(
+            @Param("status") SerialStatus status,
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end,
+            @Param("warehouseId") UUID warehouseId
+    );
+
+    @Query("""
+        SELECT 
+            FUNCTION('TO_CHAR', pd.createdAt, 'YYYY-MM-DD HH24') AS hour,
+            COUNT(pd.id) AS total
+        FROM ProductDetail pd
+        WHERE pd.status = :status
+          AND pd.createdAt BETWEEN :start AND :end
+          AND pd.warehouse.id = :warehouseId
+        GROUP BY FUNCTION('TO_CHAR', pd.createdAt, 'YYYY-MM-DD HH24')
+        ORDER BY hour
+    """)
+    List<Object[]> countByStatusAndHourAndWarehouse(
+            @Param("status") SerialStatus status,
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end,
+            @Param("warehouseId") UUID warehouseId
+    );
+
+    @Query("""
+        SELECT 
+            FUNCTION('TO_CHAR', pd.createdAt, 'YYYY-MM') AS month,
+            COUNT(pd.id) AS total
+        FROM ProductDetail pd
+        WHERE pd.status = :status
+          AND pd.createdAt BETWEEN :start AND :end
+          AND pd.warehouse.id = :warehouseId
+        GROUP BY FUNCTION('TO_CHAR', pd.createdAt, 'YYYY-MM')
+        ORDER BY month
+    """)
+    List<Object[]> countByStatusAndMonthAndWarehouse(
+            @Param("status") SerialStatus status,
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end,
+            @Param("warehouseId") UUID warehouseId
+    );
 }
