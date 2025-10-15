@@ -1,6 +1,5 @@
 package com.datn.ailms.model.entities.topo_entities;
 
-import com.datn.ailms.model.entities.Location;
 import com.datn.ailms.model.entities.product_entities.ProductDetail;
 import jakarta.persistence.*;
 import lombok.*;
@@ -42,14 +41,9 @@ public class Warehouse {
     @OneToMany(mappedBy = "parent")
     List<Warehouse> children;
 
-    Integer currentQuantity;
+    Integer currentQuantity = 0;
 
-    Integer capacity;
-
-
-    @ManyToOne
-    @JoinColumn(name = "location_id")
-    Location location;
+    String location;
 
     @OneToMany(mappedBy = "warehouse")
     List<ProductDetail> productDetails;

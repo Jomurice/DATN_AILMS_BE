@@ -45,5 +45,25 @@ public class PurchaseOrderItemController {
         return ApiResp.<ProductDetailResponseDto>builder().result(result).build();
     }
 
+    @PutMapping("/{itemId}/serials/{serialId}")
+    public ApiResp<ProductDetailResponseDto> updateSerial(
+            @PathVariable UUID itemId,
+            @PathVariable UUID serialId,
+            @RequestParam String newSerial,
+            @RequestParam UUID userId
+    ) {
+        var result = _itemService.updateSerial(itemId, serialId, newSerial, userId);
+        return ApiResp.<ProductDetailResponseDto>builder().result(result).build();
+    }
+
+    @DeleteMapping("/{itemId}/serials/{serialId}")
+    public ApiResp<Void> removeSerial(
+            @PathVariable UUID itemId,
+            @PathVariable UUID serialId
+    ) {
+        _itemService.removeSerial(itemId, serialId);
+        return ApiResp.<Void>builder().build();
+    }
+
 
 }

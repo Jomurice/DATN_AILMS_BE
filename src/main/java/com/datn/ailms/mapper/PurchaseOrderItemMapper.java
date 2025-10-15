@@ -8,9 +8,10 @@ import org.mapstruct.Mapping;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring",uses = { ProductMapper.class })
+@Mapper(componentModel = "spring",uses = { ProductMapper.class, ProductDetailMapper.class })
 public interface PurchaseOrderItemMapper {
     @Mapping(source = "product", target = "product")
+    @Mapping(source = "productDetails", target = "productDetails")
     PurchaseOrderItemResponseDto toDto(PurchaseOrderItem entity);
 
     @Mapping(source = "productId", target = "product.id")

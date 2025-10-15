@@ -25,7 +25,7 @@ public interface IWarehouseService {
     List<WarehouseResponseDto> findAll();
 
     // Lấy tree warehouse theo location (zone → aisle → shelf → bin)
-    List<WarehouseResponseDto> findTreeByLocation(UUID  locationId);
+    List<WarehouseResponseDto> findTreeByLocation(String  location);
 
     // Lấy con trực tiếp
     List<WarehouseResponseDto> findChildren(UUID parentId);

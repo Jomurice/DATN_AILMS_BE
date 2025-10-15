@@ -7,9 +7,7 @@ import com.datn.ailms.mapper.WarehouseMapper;
 import com.datn.ailms.model.dto.request.warehouse_request.CreateWarehouseRequestDto;
 import com.datn.ailms.model.dto.request.warehouse_request.UpdateWarehouseRequestDto;
 import com.datn.ailms.model.dto.response.warehouse_response.WarehouseResponseDto;
-import com.datn.ailms.model.entities.Location;
 import com.datn.ailms.model.entities.topo_entities.Warehouse;
-import com.datn.ailms.repositories.LocationRepository;
 import com.datn.ailms.repositories.warehousetopology.WarehouseRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -25,12 +23,10 @@ import java.util.UUID;
 public class WarehouseSerivce implements IWarehouseService {
 
     private final WarehouseRepository _warehouseRepository;
-    private final LocationRepository _locationRepository;
     private final WarehouseMapper _warehouseMapper;
 
     @Override
     public WarehouseResponseDto create(CreateWarehouseRequestDto dto) {
-        Location location;
         Warehouse parent = null;
 
         // Nếu có parentId
@@ -38,23 +34,18 @@ public class WarehouseSerivce implements IWarehouseService {
             parent = _warehouseRepository.findById(dto.getParentId())
                     .orElseThrow(() -> new EntityNotFoundException("Parent warehouse not found: " + dto.getParentId()));
             // Nếu không truyền locationId → lấy location từ parent
-            if (dto.getLocationId() == null) {
-                location = parent.getLocation();
-            } else {
-                location = _locationRepository.findById(dto.getLocationId())
-                        .orElseThrow(() -> new AppException(ErrorCode.LOCATION_NOT_FOUND));
+            if (dto.getLocation() == null) {
+                dto.setLocation(parent.getLocation());
             }
         } else {
             // Warehouse gốc → bắt buộc có locationId
-            if (dto.getLocationId() == null) {
-                throw new AppException(ErrorCode.LOCATION_NOT_FOUND);
-            }
-            location = _locationRepository.findById(dto.getLocationId())
-                    .orElseThrow(() -> new AppException(ErrorCode.LOCATION_NOT_FOUND));
+//            if (dto.getLocation() == null) {
+//                throw new AppException(ErrorCode.LOCATION_NOT_FOUND);
+//            }
         }
 
         Warehouse warehouse = _warehouseMapper.toEntity(dto);
-        warehouse.setLocation(location);
+//        warehouse.setLocation(dto.getLo);
         warehouse.setParent(parent);
 
         return _warehouseMapper.toResponse(_warehouseRepository.save(warehouse));
@@ -68,12 +59,7 @@ public class WarehouseSerivce implements IWarehouseService {
         warehouse.setName(dto.getName());
         warehouse.setCode(dto.getCode());
         warehouse.setType(dto.getType());
-
-        if (dto.getLocationId() != null) {
-            Location location = _locationRepository.findById(dto.getLocationId())
-                    .orElseThrow(() -> new EntityNotFoundException("Location not found: " + dto.getLocationId()));
-            warehouse.setLocation(location);
-        }
+        warehouse.setLocation(dto.getLocation());
 
         if (dto.getParentId() != null) {
             Warehouse parent = _warehouseRepository.findById(dto.getParentId())
@@ -107,8 +93,8 @@ public class WarehouseSerivce implements IWarehouseService {
     }
 
     @Override
-    public List<WarehouseResponseDto> findTreeByLocation(UUID  locationId) {
-        List<Warehouse> roots = _warehouseRepository.findByLocationIdAndParentIsNull(locationId);
+    public List<WarehouseResponseDto> findTreeByLocation(String  location) {
+        List<Warehouse> roots = _warehouseRepository.findByLocationAndParentIsNull(location);
         return _warehouseMapper.toResponseList(roots);
     }
 

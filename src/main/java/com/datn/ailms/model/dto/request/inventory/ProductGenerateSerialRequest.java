@@ -1,6 +1,5 @@
 package com.datn.ailms.model.dto.request.inventory;
 
-import com.datn.ailms.model.entities.enums.SerialStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,11 +11,8 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ProductDetailRequestDto {
-    private String serialNumber;
-    private SerialStatus status;
-    private UUID productId; // liên kết Product
-    private UUID warehouseId;
-    private UUID scannedBy;
+public class ProductGenerateSerialRequest {
     private UUID purchaseOrderItemId;
+    private UUID scannedByUserId; // User thực hiện scan (thường là nhân viên kho)
+    private String serialNumber;
 }

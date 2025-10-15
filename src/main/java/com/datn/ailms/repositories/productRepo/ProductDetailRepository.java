@@ -1,22 +1,33 @@
 package com.datn.ailms.repositories.productRepo;
 
 import com.datn.ailms.model.dto.response.ProductDetailSerialDto;
+import com.datn.ailms.model.entities.enums.SerialStatus;
 import com.datn.ailms.model.entities.product_entities.ProductDetail;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 @Repository
 public interface ProductDetailRepository extends JpaRepository<ProductDetail, UUID> {
-    Optional<ProductDetail> findBySerialNumber(String serialNumber);
+    @Query("SELECT p FROM ProductDetail p " +
+            "LEFT JOIN FETCH p.product " +
+            "LEFT JOIN FETCH p.warehouse " +
+            "LEFT JOIN FETCH p.purchaseOrderItem " +
+            "LEFT JOIN FETCH p.scannedBy " +
+            "WHERE p.serialNumber = :serialNumber")
+    Optional<ProductDetail> findBySerialNumber(@Param("serialNumber") String serialNumber);
 
-    @Query("SELECT COUNT(p) FROM ProductDetail p")
+    @Query("SELECT COUNT(p) FROM ProductDetail p ")
     long countProductDetail();
+
+    @Query("SELECT COUNT(p) FROM ProductDetail p WHERE p.status = :status")
+    long countByStatus(@Param("status") SerialStatus status);
 
     List<ProductDetail> findByProductId(UUID productId);
 
@@ -27,6 +38,23 @@ public interface ProductDetailRepository extends JpaRepository<ProductDetail, UU
             "JOIN FETCH p.product prod")
     List<ProductDetail> findAllWithPOAndProduct();
 
+    boolean existsBySerialNumber(String serialNumber);
+//    ProductDetail findBySerialNumber(String serialNumber);
+
+    @Query("SELECT COUNT(p) FROM ProductDetail p WHERE p.purchaseOrderItem.id = :itemId AND p.status = 'IN_WAREHOUSE'")
+    int countScannedByPurchaseOrderItem(@Param("itemId") UUID itemId);
 
 
+    // --- Có lọc warehouse ---
+
+    @Query("""
+        SELECT COUNT(pd)
+        FROM ProductDetail pd
+        WHERE pd.status = :status
+          AND pd.warehouse.id = :warehouseId
+    """)
+    long countByStatusAndWarehouseId(
+            @Param("status") SerialStatus status,
+            @Param("warehouseId") UUID warehouseId
+    );
 }

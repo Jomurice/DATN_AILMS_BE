@@ -20,6 +20,7 @@ import com.datn.ailms.repositories.orderRepo.PurchaseOrderRepository;
 import com.datn.ailms.repositories.productRepo.ProductDetailRepository;
 import com.datn.ailms.repositories.productRepo.ProductRepository;
 import com.datn.ailms.repositories.userRepo.UserRepository;
+import com.datn.ailms.repositories.warehousetopology.WarehouseRepository;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 @RequiredArgsConstructor
@@ -42,6 +44,7 @@ public class PurchaseOrderService implements IPurchaseOrderService {
     final UserRepository _userRepository;
     final ProductDetailRepository _detailRepo;
     final PurchaseOrderItemRepository purchaseOrderItemRepository;
+    final WarehouseRepository _warehouseRepo;
     @Override
     public PurchaseOrderResponseDto create(PurchaseOrderRequestDto request) {
         PurchaseOrder order = _orderMapper.toEntity(request);
@@ -49,6 +52,15 @@ public class PurchaseOrderService implements IPurchaseOrderService {
         User user = _userRepository.findById(request.getCreatedBy())
                 .orElseThrow(() -> new RuntimeException("User not found: " + request.getCreatedBy()));
         order.setCreatedBy(user);
+
+        // Set warehouse
+        if (request.getWarehouseId() == null) {
+            throw new RuntimeException("Warehouse is required for Purchase Order");
+        }
+        order.setWarehouse(
+                _warehouseRepo.findById(request.getWarehouseId())
+                        .orElseThrow(() -> new RuntimeException("Warehouse not found: " + request.getWarehouseId()))
+        );
 
         // Gắn quan hệ 2 chiều: mỗi item phải biết order cha
         if (order.getItems() != null) {
@@ -92,6 +104,14 @@ public class PurchaseOrderService implements IPurchaseOrderService {
         existing.setSupplier(request.getSupplier());
         existing.setStatus(request.getStatus());
         existing.setCreatedAt(request.getCreatedAt());
+
+        // Update warehouse nếu có
+        if (request.getWarehouseId() != null) {
+            existing.setWarehouse(
+                    _warehouseRepo.findById(request.getWarehouseId())
+                            .orElseThrow(() -> new RuntimeException("Warehouse not found: " + request.getWarehouseId()))
+            );
+        }
         // Items update có thể phức tạp → cần xử lý thêm
         return _orderMapper.toDto(_orderRepo.save(existing));
     }
@@ -107,22 +127,50 @@ public class PurchaseOrderService implements IPurchaseOrderService {
                 .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
 
         // check user tồn tại
-        _userRepository.findById(userId)
+        User user = _userRepository.findById(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        var warehouse = order.getWarehouse();
+        AtomicInteger added = new AtomicInteger(0);
 
         // cập nhật tất cả ProductDetail về IN_STOCK
         order.getItems().forEach(item -> {
+            // Đếm số serial đã IN_WAREHOUSE hoặc INBOUND (tức là đã scan)
+            long scannedCount = item.getProductDetails().stream()
+                    .filter(d -> d.getStatus() == SerialStatus.INBOUND || d.getStatus() == SerialStatus.IN_WAREHOUSE)
+                    .count();
             item.getProductDetails().forEach(detail -> {
                 if (detail.getStatus() == SerialStatus.INBOUND) {
-                    detail.setStatus(SerialStatus.IN_STOCK);
+                    detail.setStatus(SerialStatus.IN_WAREHOUSE);
                     detail.setUpdatedAt(LocalDateTime.now());
+                    detail.setScannedBy(user);
                     _detailRepo.save(detail);
+                    added.incrementAndGet();
                 }
             });
+
+            // ✅ Cập nhật scannedQuantity cho item
+            item.setScannedQuantity((int) scannedCount);
+            purchaseOrderItemRepository.save(item);
         });
 
+        warehouse.setCurrentQuantity(warehouse.getCurrentQuantity() + added.get());
+        _warehouseRepo.save(warehouse);
+
 //        order.setCreatedAt(new LocalDate());
-        order.setStatus("COMPLETED");
+
+        // Kiểm tra xem còn serial nào chưa nhập hết không
+        boolean allCompleted = order.getItems().stream()
+                .flatMap(item -> item.getProductDetails().stream())
+                .allMatch(d -> d.getStatus() == SerialStatus.IN_WAREHOUSE);
+
+        if (allCompleted) {
+            order.setStatus("COMPLETED");
+        } else {
+            order.setStatus("IN_PROGRESS");
+        }
+
+//        order.setStatus("COMPLETED");
         _orderRepo.save(order);
     }
 

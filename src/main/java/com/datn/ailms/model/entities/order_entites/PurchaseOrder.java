@@ -2,6 +2,7 @@ package com.datn.ailms.model.entities.order_entites;
 
 import com.datn.ailms.model.entities.account_entities.User;
 import com.datn.ailms.model.entities.product_entities.Product;
+import com.datn.ailms.model.entities.topo_entities.Warehouse;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -38,6 +39,10 @@ public class PurchaseOrder {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
     private Product product;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "warehouse_id", nullable = false)
+    private Warehouse warehouse;
 
     // 👉 User tạo đơn hàng
     @ManyToOne(fetch = FetchType.LAZY)

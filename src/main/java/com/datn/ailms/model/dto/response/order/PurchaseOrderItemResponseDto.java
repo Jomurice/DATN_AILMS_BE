@@ -21,5 +21,5 @@ public class PurchaseOrderItemResponseDto {
     private Integer scannedQuantity;
 
     private ProductResponseDto product;
-    List<ProductDetailResponseDto> scannedSerials;
+    List<ProductDetailResponseDto> productDetails;
 }
