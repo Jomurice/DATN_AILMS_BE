@@ -127,7 +127,7 @@ public class PurchaseOrderService implements IPurchaseOrderService {
                 .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
 
         // check user tồn tại
-        _userRepository.findById(userId)
+        User user = _userRepository.findById(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         var warehouse = order.getWarehouse();
@@ -143,6 +143,7 @@ public class PurchaseOrderService implements IPurchaseOrderService {
                 if (detail.getStatus() == SerialStatus.INBOUND) {
                     detail.setStatus(SerialStatus.IN_WAREHOUSE);
                     detail.setUpdatedAt(LocalDateTime.now());
+                    detail.setScannedBy(user);
                     _detailRepo.save(detail);
                     added.incrementAndGet();
                 }

@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -44,6 +45,16 @@ public interface ProductDetailRepository extends JpaRepository<ProductDetail, UU
     int countScannedByPurchaseOrderItem(@Param("itemId") UUID itemId);
 
 
+    // --- Có lọc warehouse ---
 
-
+    @Query("""
+        SELECT COUNT(pd)
+        FROM ProductDetail pd
+        WHERE pd.status = :status
+          AND pd.warehouse.id = :warehouseId
+    """)
+    long countByStatusAndWarehouseId(
+            @Param("status") SerialStatus status,
+            @Param("warehouseId") UUID warehouseId
+    );
 }
