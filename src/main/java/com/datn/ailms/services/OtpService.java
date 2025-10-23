@@ -28,7 +28,7 @@ public class OtpService {
         otpEntity.setUserId(userId);
         otpEntity.setOtpCode(otp);
         otpEntity.setCreatedAt(LocalDateTime.now());
-        otpEntity.setExpiryTime(LocalDateTime.now().plusMinutes(1));
+        otpEntity.setExpiryTime(LocalDateTime.now().plusMinutes(3));
 
         _otpRepository.save(otpEntity);
         return otp;
