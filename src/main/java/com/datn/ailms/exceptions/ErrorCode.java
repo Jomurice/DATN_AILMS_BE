@@ -39,6 +39,7 @@ public enum ErrorCode {
     SERIAL_NOT_FOUND(1033, "Serial not found", HttpStatus.NOT_FOUND),
     ORDER_ALREADY_COMPLETED(1034,"Order already completed", HttpStatus.CONFLICT),
     SERIAL_LIMIT_REACHED(1035, "Out of limit", HttpStatus.CONFLICT),
+    STOCK_NOT_ENOUGH(1036, "Insufficient inventory", HttpStatus.CONFLICT)
     ;
 
 
