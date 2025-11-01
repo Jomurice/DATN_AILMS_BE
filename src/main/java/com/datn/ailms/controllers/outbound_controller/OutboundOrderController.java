@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -16,6 +17,7 @@ import java.util.List;
 public class OutboundOrderController {
 
     final OutboundOrderService _outOrderService;
+
 
     @GetMapping
     public ApiResp<List<OutboundOrderResponseDto>> getAll(){
@@ -27,4 +29,32 @@ public class OutboundOrderController {
         var result = _outOrderService.create(requestDto);
         return ApiResp.<OutboundOrderResponseDto>builder().result(result).build();
     }
+
+    @GetMapping("/{id}")
+    public ApiResp<OutboundOrderResponseDto> getById(@PathVariable UUID id){
+        return ApiResp.<OutboundOrderResponseDto>builder()
+                .code(0)
+                .message("success")
+                .result(_outOrderService.getById(id))
+                .build();
+    }
+
+    @GetMapping("/status/{status}")
+    public ApiResp<List<OutboundOrderResponseDto>> getAllByStatus(@PathVariable String status){
+        return ApiResp.<List<OutboundOrderResponseDto>>builder()
+                .code(0)
+                .message("success")
+                .result(_outOrderService.getAllByStatus(status))
+                .build();
+    }
+
+    @GetMapping("/product/{productId}")
+    public ApiResp<List<OutboundOrderResponseDto>> getAllByProductId(@PathVariable UUID product){
+        return ApiResp.<List<OutboundOrderResponseDto>>builder()
+                .code(0)
+                .message("success")
+                .result(_outOrderService.getAllByProductId(product))
+                .build();
+    }
+
 }
