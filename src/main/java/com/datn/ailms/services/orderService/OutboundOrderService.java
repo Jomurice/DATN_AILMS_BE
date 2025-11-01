@@ -19,7 +19,6 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -70,7 +69,9 @@ public class OutboundOrderService implements IOutboundOrderService {
 
     @Override
     public List<OutboundOrderResponseDto> getAll() {
-        return _outboundOrderMapper.toResponseList(_outboundOrderRepo.findAll());
+        List<OutboundOrder> orders = _outboundOrderRepo.findAll();
+        return _outboundOrderMapper.toResponseList(orders);
+
     }
 
     @Override
@@ -93,4 +94,21 @@ public class OutboundOrderService implements IOutboundOrderService {
 //
         return null;
     }
+
+    @Override
+    public List<OutboundOrderResponseDto> getAllByStatus(String status) {
+        if (status == null || status.trim().isEmpty()) {
+            return getAll();
+        }
+        List<OutboundOrder> orders = _outboundOrderRepo.findByStatus(status);
+        return _outboundOrderMapper.toResponseList(orders);
+    }
+
+    @Override
+    public List<OutboundOrderResponseDto> getAllByProductId(UUID productId) {
+        List<OutboundOrder> orders = _outboundOrderRepo.findByProductId(productId);
+        return _outboundOrderMapper.toResponseList(orders);
+    }
+
+
 }
