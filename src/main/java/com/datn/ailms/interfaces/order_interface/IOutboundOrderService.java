@@ -11,7 +11,7 @@ public interface IOutboundOrderService {
     OutboundOrderResponseDto getById (UUID id);
     List<OutboundOrderResponseDto> getAll();
     OutboundOrderResponseDto update(OutboundOrderRequestDto request, UUID id);
-
+    OutboundOrderResponseDto confirmOrder(OutboundOrderRequestDto request,UUID orderId);
     List<OutboundOrderResponseDto> getAllByStatus(String status);
     List<OutboundOrderResponseDto> getAllByProductId(UUID productId);
 }

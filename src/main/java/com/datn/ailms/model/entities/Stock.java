@@ -1,6 +1,7 @@
 package com.datn.ailms.model.entities;
 
 import com.datn.ailms.model.entities.product_entities.Product;
+import com.datn.ailms.model.entities.product_entities.ProductDetail;
 import com.datn.ailms.model.entities.topo_entities.Warehouse;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -21,8 +22,8 @@ public class Stock {
     UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id")
-    private Product product;
+    @JoinColumn(name = "productDetail_id")
+    private ProductDetail productDetail;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "warehouse_id")

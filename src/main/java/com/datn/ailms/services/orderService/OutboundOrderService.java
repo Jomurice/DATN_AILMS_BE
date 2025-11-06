@@ -8,6 +8,7 @@ import com.datn.ailms.model.dto.request.order.OutboundOrderRequestDto;
 import com.datn.ailms.model.dto.response.order.OutboundOrderItemResponseDto;
 import com.datn.ailms.model.dto.response.order.OutboundOrderResponseDto;
 import com.datn.ailms.model.entities.account_entities.User;
+import com.datn.ailms.model.entities.enums.OrderStatus;
 import com.datn.ailms.model.entities.order_entites.OutboundOrder;
 import com.datn.ailms.repositories.orderRepo.OutboundOrderRepository;
 import com.datn.ailms.repositories.productRepo.ProductRepository;
@@ -16,9 +17,11 @@ import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
 
@@ -42,22 +45,13 @@ public class OutboundOrderService implements IOutboundOrderService {
         OutboundOrder outbound = _outboundOrderMapper.toEntity(request);
 
         outbound.setCreatedBy(user);
-        outbound.setStatus("processing");
+        outbound.setStatus(OrderStatus.DRAFT.name());
         outbound.setCreateAt(LocalDateTime.now());
         outbound.setCustomer(request.getCustomer());
+        outbound.setCode(generateOrderCode());
 
         outbound = _outboundOrderRepo.save(outbound);
-
-        List<OutboundOrderItemResponseDto> addedItems = null;
-        if (request.getItems() != null && !request.getItems().isEmpty()) {
-            addedItems = _outItemService.addItem(request.getItems(), outbound.getId());
-        }
-
-        // Map lại OutboundOrder -> Response DTO
-        OutboundOrderResponseDto response = _outboundOrderMapper.toDto(outbound);
-        response.setItems(addedItems);
-
-        return response;
+        return _outboundOrderMapper.toDto(outbound);
     }
 
     @Override
@@ -69,30 +63,40 @@ public class OutboundOrderService implements IOutboundOrderService {
 
     @Override
     public List<OutboundOrderResponseDto> getAll() {
-        List<OutboundOrder> orders = _outboundOrderRepo.findAll();
+        List<OutboundOrder> orders = _outboundOrderRepo.findAll("DRAFT");
         return _outboundOrderMapper.toResponseList(orders);
 
     }
 
     @Override
-    public OutboundOrderResponseDto update(OutboundOrderRequestDto request, UUID id) {
-//        OutboundOrder existing = _outboundOrderRepo.findById(id)
-//                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
-//
-//        existing.setCustomer(request.getCustomer());
-//        existing.setStatus(request.getStatus());
-//        existing.setUpdateAt(new Date());
-//
-//        if(request.getItems() != null && !request.getItems().isEmpty()){
-//            _outItemService.removeItem(id);
-//            _outItemService.addItem(request.getItems(),id);
-//        }
-//
-//        existing = _outboundOrderRepo.save(existing);
-//        OutboundOrderResponseDto responseDto = _outboundOrderMapper.toDto(existing);
-//        responseDto.setItems(_outItemService.get);
-//
-        return null;
+    public OutboundOrderResponseDto update(OutboundOrderRequestDto request, UUID outboundOrderId) {
+        OutboundOrder existing = _outboundOrderRepo.findById(outboundOrderId)
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+
+        existing.setCustomer(request.getCustomer());
+        existing.setStatus(request.getStatus());
+        existing.setUpdateAt(LocalDateTime.now());
+        _outboundOrderRepo.save(existing);
+
+        return _outboundOrderMapper.toDto(existing);
+    }
+
+    @Override
+    public OutboundOrderResponseDto confirmOrder(OutboundOrderRequestDto request,UUID orderId) {
+        OutboundOrder outOrder = _outboundOrderRepo.findById(orderId)
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+
+        if(!OrderStatus.DRAFT.name().equals(outOrder.getStatus())){
+            throw new AppException(ErrorCode.INVALID_ORDER_STATUS);
+        }
+
+        _outItemService.checkAndReserveItems(outOrder.getItems());
+
+        outOrder.setCustomer(request.getCustomer());
+        outOrder.setStatus(OrderStatus.CONFIRMED.name());
+        outOrder.setUpdateAt(LocalDateTime.now());
+        _outboundOrderRepo.save(outOrder);
+        return _outboundOrderMapper.toDto(outOrder);
     }
 
     @Override
@@ -109,6 +113,23 @@ public class OutboundOrderService implements IOutboundOrderService {
         List<OutboundOrder> orders = _outboundOrderRepo.findByProductId(productId);
         return _outboundOrderMapper.toResponseList(orders);
     }
+
+    @Scheduled(cron = "0 0 * * * *") // chạy mỗi giờ
+    public void deleteExpiredDraftOrders() {
+        LocalDateTime cutoffTime = LocalDateTime.now().minusHours(24);
+        List<OutboundOrder> expiredOrders = _outboundOrderRepo.findByStatusAndCreateAtBefore("DRAFT", cutoffTime);
+
+        if (expiredOrders.isEmpty()) return;
+
+        _outboundOrderRepo.deleteAll(expiredOrders);
+    }
+
+    private String generateOrderCode() {
+        long count = _outboundOrderRepo.count() + 1;
+        String datePart = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        return String.format("OUT_HD-%s-%04d", datePart, count);
+    }
+
 
 
 }

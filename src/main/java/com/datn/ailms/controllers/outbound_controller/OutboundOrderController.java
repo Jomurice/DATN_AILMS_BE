@@ -13,7 +13,7 @@ import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/outbound")
+@RequestMapping("/api/outbound-orders")
 public class OutboundOrderController {
 
     final OutboundOrderService _outOrderService;
@@ -28,6 +28,16 @@ public class OutboundOrderController {
     public ApiResp<OutboundOrderResponseDto> create(@RequestBody OutboundOrderRequestDto requestDto){
         var result = _outOrderService.create(requestDto);
         return ApiResp.<OutboundOrderResponseDto>builder().result(result).build();
+    }
+
+    @PatchMapping("/{orderId}/confirm")
+    public ApiResp<OutboundOrderResponseDto> confirmOrder(
+            @RequestBody OutboundOrderRequestDto request, @PathVariable UUID orderId){
+
+        var result = _outOrderService.confirmOrder(request,orderId);
+        return ApiResp.<OutboundOrderResponseDto>builder()
+                .result(result)
+                .build();
     }
 
     @GetMapping("/{id}")
@@ -54,6 +64,14 @@ public class OutboundOrderController {
                 .code(0)
                 .message("success")
                 .result(_outOrderService.getAllByProductId(product))
+                .build();
+    }
+
+    @DeleteMapping("/cleanup-draft")
+    public ApiResp<String> cleanupDraftOrders() {
+        _outOrderService.deleteExpiredDraftOrders();
+        return ApiResp.<String>builder()
+                .result("Cleanup completed")
                 .build();
     }
 
