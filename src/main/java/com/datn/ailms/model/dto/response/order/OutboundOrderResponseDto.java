@@ -14,6 +14,7 @@ import java.util.UUID;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class OutboundOrderResponseDto {
+    UUID id;
     String code;
     LocalDate createAt;
     UUID createdBy;

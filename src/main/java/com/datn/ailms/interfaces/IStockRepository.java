@@ -9,6 +9,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface IStockRepository extends JpaRepository<Stock, UUID> {
-    @Query("SELECT s.quantity FROM Stock s WHERE s.product.id = :productId ")
+    @Query("SELECT SUM(s.quantity) FROM Stock s WHERE s.productDetail.product.id = :productId")
     Optional<Integer> findQuantity(@Param("productId") UUID productId);
+
+
 }

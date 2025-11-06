@@ -6,10 +6,14 @@ import com.datn.ailms.interfaces.IStockRepository;
 import com.datn.ailms.interfaces.order_interface.IOutboundOrderItemService;
 import com.datn.ailms.mapper.OutboundOrderItemMapper;
 import com.datn.ailms.model.dto.request.order.OutboundOrderItemRequestDto;
+import com.datn.ailms.model.dto.request.order.OutboundOrderRequestDto;
 import com.datn.ailms.model.dto.response.order.OutboundOrderItemResponseDto;
+import com.datn.ailms.model.entities.enums.OrderStatus;
+import com.datn.ailms.model.entities.enums.SerialStatus;
 import com.datn.ailms.model.entities.order_entites.OutboundOrder;
 import com.datn.ailms.model.entities.order_entites.OutboundOrderItem;
 import com.datn.ailms.model.entities.product_entities.Product;
+import com.datn.ailms.model.entities.product_entities.ProductDetail;
 import com.datn.ailms.repositories.orderRepo.OutboundOrderItemRepository;
 import com.datn.ailms.repositories.orderRepo.OutboundOrderRepository;
 import com.datn.ailms.repositories.productRepo.ProductDetailRepository;
@@ -21,8 +25,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,46 +37,195 @@ public class OutboundOrderItemService implements IOutboundOrderItemService {
     final ProductRepository _productRepository;
     final ProductDetailRepository _productDetailRepository;
     final IStockRepository _stockRepository;
-    final OutboundOrderRepository _outOutboundOrderRepository;
+    final OutboundOrderRepository _outboundOrderRepository;
     final OutboundOrderItemRepository _itemRepo;
     final OutboundOrderItemMapper _itemMapper;
     final StockService _stockService;
 
     @Override
-    public List<OutboundOrderItemResponseDto> addItem(List<OutboundOrderItemRequestDto> request, UUID outboundOrder) {
+    public List<OutboundOrderItemResponseDto> addItem(OutboundOrderRequestDto requests, UUID outboundOrderId) {
 
-            OutboundOrder order = _outOutboundOrderRepository.findById(outboundOrder)
-                    .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+        OutboundOrder order = _outboundOrderRepository.findById(outboundOrderId)
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
 
-            List<OutboundOrderItem> itemsToSave = request.stream()
-                    .map(req -> {
-                        Product product = _productRepository.findById(req.getProductId())
-                                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+        // findAll item theo outboundOrderId
+        Map<UUID,OutboundOrderItem> existingItemMap = _itemRepo.findByOutboundOrderId(outboundOrderId)
+                .stream()
+                .collect(Collectors.toMap(i -> i.getProduct().getId(), i -> i));
 
-                        int available = _stockService.getAvailableQuantity(req.getProductId());
-                        if (req.getOrderQuantity() > available) throw new AppException(ErrorCode.STOCK_NOT_ENOUGH);
+        // lọc trùng id
+        Set<UUID> newProductIds = requests.getItems().stream()
+                .map(OutboundOrderItemRequestDto::getProductId)
+                .collect(Collectors.toSet());
 
-                        return OutboundOrderItem.builder()
-                                .orderQuantity(req.getOrderQuantity())
-                                .outboundOrder(order)
-                                .product(product)
-                                .build();
+        List<ProductDetail> serialsToSave = new ArrayList<>();
+        List<OutboundOrderItem> itemsToSave = new ArrayList<>();
 
-                    })
-                    .collect(Collectors.toList());
-            List<OutboundOrderItem> savedItems = _itemRepo.saveAll(itemsToSave);
-        return savedItems.stream()
+        // xóa các item k còn trong req
+        removeItem(newProductIds,existingItemMap);
+
+        // Thêm hoặc update item
+        for(OutboundOrderItemRequestDto req : requests.getItems()){
+            Product product = _productRepository.findById(req.getProductId())
+                    .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+
+            OutboundOrderItem item = existingItemMap.getOrDefault(product.getId(),
+                    OutboundOrderItem.builder()
+                            .orderQuantity(req.getOrderQuantity())
+                            .outboundOrder(order)
+                            .product(product)
+                            .build()
+                    );
+
+            item.setOrderQuantity(req.getOrderQuantity());
+            itemsToSave.add(item);
+
+
+        }
+        _itemRepo.saveAll(itemsToSave);
+        if (order.getStatus().equals(OrderStatus.CONFIRMED)) {
+            _productDetailRepository.saveAll(serialsToSave);
+        }
+
+        return itemsToSave
+                .stream()
                 .map(_itemMapper::toDto)
                 .toList();
     }
 
     @Override
-    public List<OutboundOrderItemResponseDto> update(OutboundOrderItemRequestDto request, UUID id) {
-        return null;
+    public void removeItem(Set<UUID> productIds, Map<UUID, OutboundOrderItem> existingItemMap) {
+        List<OutboundOrderItem> itemsToDelete = existingItemMap.values().stream()
+                .filter(i -> !productIds.contains(i.getProduct().getId()))
+                .toList();
+        for(OutboundOrderItem item: itemsToDelete){
+            List<ProductDetail> serials = _productDetailRepository.findByOutboundOrderItemId(item.getId());
+            serials.forEach(pd -> pd.setStatus(SerialStatus.IN_WAREHOUSE));
+            _productDetailRepository.saveAll(serials);
+        }
+        _itemRepo.deleteAll(itemsToDelete);
+    }
+
+    // chỉ xử lý khi status order đã Confirmed
+//    @Override
+//    public OutboundOrderItemResponseDto addSingleItem(OutboundOrderItemRequestDto request, UUID orderId) {
+//        OutboundOrder outOrder = _outboundOrderRepository.findById(orderId)
+//                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+//
+//        if(!outOrder.getStatus().equals(OrderStatus.CONFIRMED)){
+//            throw new AppException(ErrorCode.ORDER_ALREADY_COMPLETED);
+//        }
+//
+//        Product product = _productRepository.findById(request.getProductId())
+//                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+//
+//        // check tồn kho
+//        long available = _stockService.getAvailableQuantity(product.getId());
+//        if (request.getOrderQuantity() > available)
+//            throw new AppException(ErrorCode.STOCK_NOT_ENOUGH);
+//
+//        OutboundOrderItem item = OutboundOrderItem.builder()
+//                .outboundOrder(outOrder)
+//                .product(product)
+//                .orderQuantity(request.getOrderQuantity())
+//                .build();
+//
+//        _itemRepo.save(item);
+//
+//        // Lấy serials và cập nhật trạng thái
+//        List<ProductDetail> serials = _productDetailRepository
+//                .findByProductIdAndStatus(product.getId(), SerialStatus.IN_WAREHOUSE)
+//                .stream()
+//                .limit(request.getOrderQuantity()) // Chỉ lấy số lượng SP = vs số lượng SP trong req
+//                .toList();
+//
+//        final OutboundOrderItem finalItem = item;
+//        assignSerialsToItem(serials, finalItem);
+//
+//        _productDetailRepository.saveAll(serials);
+//        return _itemMapper.toDto(finalItem);
+//
+//    }
+
+
+    @Override
+    public OutboundOrderItemResponseDto update(OutboundOrderItemRequestDto request, UUID outboundOrderId) {
+        OutboundOrderItem item = _itemRepo.findByOutboundOrderIdAndProductId(outboundOrderId, request.getProductId())
+                .orElseThrow(() -> new AppException(ErrorCode.ITEM_NOT_FOUND));
+
+        item.setOrderQuantity(request.getOrderQuantity());
+        _itemRepo.save(item);
+
+        if (item.getOutboundOrder().getStatus().equals(OrderStatus.CONFIRMED)) {
+            // Reset serial cũ về kho
+            List<ProductDetail> oldSerials = _productDetailRepository.findByOutboundOrderItemId(item.getId());
+            oldSerials.forEach(pd -> pd.setStatus(SerialStatus.IN_WAREHOUSE));
+            _productDetailRepository.saveAll(oldSerials);
+
+            // Lấy lại serials mới
+            List<ProductDetail> newSerials = _productDetailRepository
+                    .findByProductIdAndStatus(request.getProductId(), SerialStatus.IN_WAREHOUSE)
+                    .stream()
+                    .limit(request.getOrderQuantity())
+                    .toList();
+
+            newSerials.forEach(pd -> {
+                pd.setStatus(SerialStatus.OUTBOUND);
+                pd.setOutboundOrderItem(item);
+            });
+            _productDetailRepository.saveAll(newSerials);
+        }
+
+        return _itemMapper.toDto(item);
     }
 
     @Override
-    public void removeItem(UUID itemId) {
+    public void deleteItem(UUID productId, UUID outOrderId) {
+        OutboundOrderItem item = _itemRepo.findByOutboundOrderIdAndProductId(outOrderId,productId)
+                .orElseThrow(() -> new AppException(ErrorCode.ITEM_NOT_FOUND));
+
+        List<ProductDetail> serials = _productDetailRepository.findByOutboundOrderItemId(item.getId());
+        serials.forEach(pd -> pd.setStatus(SerialStatus.IN_WAREHOUSE));
+        _productDetailRepository.saveAll(serials);
+        _itemRepo.delete(item);
 
     }
+
+    @Override
+    public List<OutboundOrderItemResponseDto> getItemsByOrderId(UUID outboundOrderId) {
+        return _itemRepo.findByOutboundOrderId(outboundOrderId)
+                .stream()
+                .map(_itemMapper::toDto)
+                .toList();
+    }
+
+    private List<ProductDetail> assignSerialsToItem(List<ProductDetail> serials, OutboundOrderItem item) {
+        serials.forEach(pd -> {
+            pd.setStatus(SerialStatus.RESERVED);
+            pd.setOutboundOrderItem(item);
+        });
+        return serials;
+    }
+
+    public void checkAndReserveItems(List<OutboundOrderItem> items){
+        for(OutboundOrderItem item : items){
+            Product product = item.getProduct();
+
+            long available = _stockService.getAvailableQuantity(product.getId());
+            if (item.getOrderQuantity() > available)
+                throw new AppException(ErrorCode.STOCK_NOT_ENOUGH);
+
+
+            List<ProductDetail> serials = _productDetailRepository
+                    .findByProductIdAndStatus(product.getId(), SerialStatus.IN_WAREHOUSE)
+                    .stream()
+                    .limit(item.getOrderQuantity()) // Chỉ lấy số lượng SP = vs số lượng SP trong req
+                    .toList();
+
+            final OutboundOrderItem finalItem = item;
+            assignSerialsToItem(serials, finalItem);
+        }
+    }
+
+
 }

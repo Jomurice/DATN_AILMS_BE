@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface OutboundOrderItemRepository extends JpaRepository<OutboundOrderItem, UUID> {
@@ -14,4 +15,6 @@ public interface OutboundOrderItemRepository extends JpaRepository<OutboundOrder
 
     @EntityGraph(attributePaths = {"product"})
     List<OutboundOrderItem> findByProductId(UUID productId);
+
+    Optional<OutboundOrderItem> findByOutboundOrderIdAndProductId(UUID outboundOrderId, UUID productId);
 }
