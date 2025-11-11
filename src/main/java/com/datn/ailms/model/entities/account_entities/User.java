@@ -64,6 +64,9 @@ public class User {
     @OneToMany(mappedBy = "createdBy")
     private Set<OutboundOrder> createOutbound;
 
+    @OneToMany(mappedBy = "exportedBy")
+    private Set<OutboundOrder> exportedOutbound;
+
     @OneToMany(mappedBy = "scannedBy")
     private Set<ProductDetail> scannedItems;
 }

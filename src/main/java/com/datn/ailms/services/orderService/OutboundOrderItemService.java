@@ -5,8 +5,11 @@ import com.datn.ailms.exceptions.ErrorCode;
 import com.datn.ailms.interfaces.IStockRepository;
 import com.datn.ailms.interfaces.order_interface.IOutboundOrderItemService;
 import com.datn.ailms.mapper.OutboundOrderItemMapper;
+import com.datn.ailms.mapper.ProductDetailMapper;
 import com.datn.ailms.model.dto.request.order.OutboundOrderItemRequestDto;
 import com.datn.ailms.model.dto.request.order.OutboundOrderRequestDto;
+import com.datn.ailms.model.dto.response.ProductDetailSerialDto;
+import com.datn.ailms.model.dto.response.inventory.ProductDetailResponseDto;
 import com.datn.ailms.model.dto.response.order.OutboundOrderItemResponseDto;
 import com.datn.ailms.model.entities.enums.OrderStatus;
 import com.datn.ailms.model.entities.enums.SerialStatus;
@@ -36,7 +39,7 @@ public class OutboundOrderItemService implements IOutboundOrderItemService {
 
     final ProductRepository _productRepository;
     final ProductDetailRepository _productDetailRepository;
-    final IStockRepository _stockRepository;
+    final ProductDetailMapper _productDetailMapper;
     final OutboundOrderRepository _outboundOrderRepository;
     final OutboundOrderItemRepository _itemRepo;
     final OutboundOrderItemMapper _itemMapper;
@@ -190,6 +193,7 @@ public class OutboundOrderItemService implements IOutboundOrderItemService {
         _itemRepo.delete(item);
 
     }
+
 
     @Override
     public List<OutboundOrderItemResponseDto> getItemsByOrderId(UUID outboundOrderId) {

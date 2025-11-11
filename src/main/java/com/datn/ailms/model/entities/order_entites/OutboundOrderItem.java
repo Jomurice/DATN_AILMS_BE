@@ -23,6 +23,7 @@ public class OutboundOrderItem {
     UUID id;
 
     Integer orderQuantity;
+    Integer scannedQuantity;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "outboundOrder_id", nullable = true)
