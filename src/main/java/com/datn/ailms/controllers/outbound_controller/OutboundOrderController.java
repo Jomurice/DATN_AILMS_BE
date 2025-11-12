@@ -1,11 +1,16 @@
 package com.datn.ailms.controllers.outbound_controller;
 
+import com.datn.ailms.model.dto.request.inventory.ProductConfirmRequestDto;
+import com.datn.ailms.model.dto.request.order.ExportRequestDto;
 import com.datn.ailms.model.dto.request.order.OutboundOrderRequestDto;
 import com.datn.ailms.model.dto.response.ApiResp;
 
+import com.datn.ailms.model.dto.response.inventory.ProductDetailResponseDto;
 import com.datn.ailms.model.dto.response.order.OutboundOrderResponseDto;
+import com.datn.ailms.services.orderService.OutboundOrderItemService;
 import com.datn.ailms.services.orderService.OutboundOrderService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.repository.query.Param;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,6 +33,24 @@ public class OutboundOrderController {
     public ApiResp<OutboundOrderResponseDto> create(@RequestBody OutboundOrderRequestDto requestDto){
         var result = _outOrderService.create(requestDto);
         return ApiResp.<OutboundOrderResponseDto>builder().result(result).build();
+    }
+
+    @PostMapping("/{orderId}/scanned")
+    public ApiResp<List<ProductDetailResponseDto>> scanned(
+            @PathVariable UUID orderId, @RequestBody ProductConfirmRequestDto request){
+        var result = _outOrderService.scanned(orderId, request);
+        return ApiResp.<List<ProductDetailResponseDto>>builder()
+                .result(result)
+                .build();
+    }
+
+    @PostMapping("/{orderId}/confirm-export")
+    public ApiResp<OutboundOrderResponseDto> confirmExport(
+            @PathVariable UUID orderId, @RequestBody ExportRequestDto request){
+        var result = _outOrderService.confirmExport(orderId, request.getExportedBy());
+        return ApiResp.<OutboundOrderResponseDto>builder()
+                .result(result)
+                .build();
     }
 
     @PatchMapping("/{orderId}/confirm")
@@ -55,6 +78,15 @@ public class OutboundOrderController {
                 .code(0)
                 .message("success")
                 .result(_outOrderService.getAllByStatus(status))
+                .build();
+    }
+
+    @GetMapping("/{orderId}/serials")
+    public ApiResp<List<ProductDetailResponseDto>> getSerials(
+            @PathVariable UUID orderId, @Param("sku") String sku){
+        var result = _outOrderService.getByOrderIdAndSKU(orderId, sku);
+        return ApiResp.<List<ProductDetailResponseDto>>builder()
+                .result(result)
                 .build();
     }
 

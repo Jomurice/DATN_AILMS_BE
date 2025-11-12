@@ -4,13 +4,22 @@ import com.datn.ailms.exceptions.AppException;
 import com.datn.ailms.exceptions.ErrorCode;
 import com.datn.ailms.interfaces.order_interface.IOutboundOrderService;
 import com.datn.ailms.mapper.OutboundOrderMapper;
+import com.datn.ailms.mapper.ProductDetailMapper;
+import com.datn.ailms.model.dto.request.inventory.ProductConfirmRequestDto;
 import com.datn.ailms.model.dto.request.order.OutboundOrderRequestDto;
+import com.datn.ailms.model.dto.response.inventory.ProductDetailResponseDto;
 import com.datn.ailms.model.dto.response.order.OutboundOrderItemResponseDto;
 import com.datn.ailms.model.dto.response.order.OutboundOrderResponseDto;
 import com.datn.ailms.model.entities.account_entities.User;
 import com.datn.ailms.model.entities.enums.OrderStatus;
+import com.datn.ailms.model.entities.enums.SerialStatus;
 import com.datn.ailms.model.entities.order_entites.OutboundOrder;
+import com.datn.ailms.model.entities.order_entites.OutboundOrderItem;
+import com.datn.ailms.model.entities.product_entities.Product;
+import com.datn.ailms.model.entities.product_entities.ProductDetail;
+import com.datn.ailms.repositories.orderRepo.OutboundOrderItemRepository;
 import com.datn.ailms.repositories.orderRepo.OutboundOrderRepository;
+import com.datn.ailms.repositories.productRepo.ProductDetailRepository;
 import com.datn.ailms.repositories.productRepo.ProductRepository;
 import com.datn.ailms.repositories.userRepo.UserRepository;
 import jakarta.transaction.Transactional;
@@ -20,9 +29,11 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import javax.swing.text.html.Option;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -32,9 +43,12 @@ import java.util.UUID;
 public class OutboundOrderService implements IOutboundOrderService {
 
     final UserRepository _userRepository;
-    final ProductRepository _productRepository;
+    final ProductRepository _productRepo;
+    final ProductDetailRepository _productDetailRepo;
     final OutboundOrderRepository _outboundOrderRepo;
+    final OutboundOrderItemRepository _outOrderItemRepo;
     final OutboundOrderMapper _outboundOrderMapper;
+    final ProductDetailMapper _productDetailMapper;
     final OutboundOrderItemService _outItemService;
 
     @Override
@@ -100,6 +114,104 @@ public class OutboundOrderService implements IOutboundOrderService {
     }
 
     @Override
+    public OutboundOrderResponseDto confirmExport(UUID orderId, UUID userId) {
+        User user = _userRepository.findById(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        OutboundOrder outOrder = _outboundOrderRepo.findById(orderId)
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+
+        if(!OrderStatus.CONFIRMED.name().equals(outOrder.getStatus())){
+            throw new AppException(ErrorCode.INVALID_ORDER_STATUS);
+        }
+
+        boolean allScanned = outOrder.getItems().stream()
+                .allMatch(i -> Optional.ofNullable(i.getScannedQuantity()).orElse(0) >= i.getOrderQuantity());
+
+
+        if(!allScanned){
+
+        }
+
+        List<ProductDetail> details = _productDetailRepo.findByOutboundOrderId(orderId);
+
+        details.forEach(d -> {
+            d.setStatus(SerialStatus.OUTBOUND);
+            d.setUpdatedAt(LocalDateTime.now());
+            d.setOutboundOrderItem(
+                    outOrder.getItems().stream()
+                            .filter(i -> i.getProduct().getId().equals(d.getProduct().getId()))
+                            .findFirst()
+                            .orElseThrow(() -> new AppException(ErrorCode.SERIAL_NOT_IN_ORDER))
+            );
+        });
+        _productDetailRepo.saveAll(details);
+
+        outOrder.setStatus(OrderStatus.EXPORT.name());
+        outOrder.setUpdateAt(LocalDateTime.now());
+        outOrder.setExportedBy(user);
+
+        _outboundOrderRepo.save(outOrder);
+        return _outboundOrderMapper.toDto(outOrder);
+
+    }
+
+    @Override
+    public List<ProductDetailResponseDto> getByOrderIdAndSKU(UUID orderId, String sku) {
+        OutboundOrder outOrder = _outboundOrderRepo.findById(orderId)
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+
+        Product product = _productRepo.findBySku(sku)
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        List<ProductDetail> productDetails = _productDetailRepo.findByOrderIdAndSku(orderId,sku);
+
+        return _productDetailMapper.toResponseList(productDetails);
+    }
+
+    @Override
+    public List<ProductDetailResponseDto> scanned(UUID orderId, ProductConfirmRequestDto request) {
+        User user = _userRepository.findById(request.getScannedByUserId())
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        OutboundOrder outOrder = _outboundOrderRepo.findById(orderId)
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+
+        ProductDetail productDetail = _productDetailRepo.findBySerialNumber(request.getSerialNumber())
+                .orElseThrow(() -> new AppException(ErrorCode.SERIAL_NOT_FOUND));
+
+        //Ktr xem serialNumber trong order k
+        OutboundOrderItem item = outOrder.getItems().stream()
+                                .filter(i -> i.getProduct().getId().equals(productDetail.getProduct().getId()))
+                                .findFirst()
+                                .orElseThrow(() -> new AppException(ErrorCode.SERIAL_NOT_IN_ORDER));
+
+        //Ktr xem serialNumber đã quét chưa
+        if(productDetail.getStatus() == SerialStatus.SCANNED){
+            throw new AppException(ErrorCode.SERIAL_ALREADY_SCANNED);
+        }
+
+        int scannedQty = Optional.ofNullable(item.getScannedQuantity()).orElse(0);
+        if (scannedQty >= item.getOrderQuantity()) {
+            throw new AppException(ErrorCode.QUANTITY_EXCEEDED);
+        }
+
+        // cập nhật status sp
+        productDetail.setStatus(SerialStatus.SCANNED);
+        productDetail.setScannedBy(user);
+        productDetail.setOutboundOrderItem(item);
+        productDetail.setUpdatedAt(LocalDateTime.now());
+        _productDetailRepo.save(productDetail);
+
+        // cập nhật sl đã quét
+        item.setScannedQuantity(scannedQty +1);
+        _outOrderItemRepo.save(item);
+
+        List<ProductDetail> scannedList = _productDetailRepo.findByOutboundOrderId(orderId);
+        return _productDetailMapper.toResponseList(scannedList);
+    }
+
+    @Override
     public List<OutboundOrderResponseDto> getAllByStatus(String status) {
         if (status == null || status.trim().isEmpty()) {
             return getAll();
@@ -113,6 +225,8 @@ public class OutboundOrderService implements IOutboundOrderService {
         List<OutboundOrder> orders = _outboundOrderRepo.findByProductId(productId);
         return _outboundOrderMapper.toResponseList(orders);
     }
+
+
 
     @Scheduled(cron = "0 0 * * * *") // chạy mỗi giờ
     public void deleteExpiredDraftOrders() {

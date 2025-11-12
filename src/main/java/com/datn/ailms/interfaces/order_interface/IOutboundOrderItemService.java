@@ -2,6 +2,8 @@ package com.datn.ailms.interfaces.order_interface;
 
 import com.datn.ailms.model.dto.request.order.OutboundOrderItemRequestDto;
 import com.datn.ailms.model.dto.request.order.OutboundOrderRequestDto;
+import com.datn.ailms.model.dto.response.ProductDetailSerialDto;
+import com.datn.ailms.model.dto.response.inventory.ProductDetailResponseDto;
 import com.datn.ailms.model.dto.response.order.OutboundOrderItemResponseDto;
 import com.datn.ailms.model.dto.response.order.OutboundOrderResponseDto;
 import com.datn.ailms.model.entities.order_entites.OutboundOrder;

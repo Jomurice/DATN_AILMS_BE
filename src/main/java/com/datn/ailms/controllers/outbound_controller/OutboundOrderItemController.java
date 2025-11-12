@@ -5,6 +5,7 @@ import com.datn.ailms.exceptions.ErrorCode;
 import com.datn.ailms.model.dto.request.order.OutboundOrderItemRequestDto;
 import com.datn.ailms.model.dto.request.order.OutboundOrderRequestDto;
 import com.datn.ailms.model.dto.response.ApiResp;
+import com.datn.ailms.model.dto.response.inventory.ProductDetailResponseDto;
 import com.datn.ailms.model.dto.response.order.OutboundOrderItemResponseDto;
 import com.datn.ailms.model.entities.enums.OrderStatus;
 import com.datn.ailms.model.entities.order_entites.OutboundOrder;
@@ -14,6 +15,7 @@ import com.datn.ailms.services.orderService.OutboundOrderItemService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.repository.query.Param;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -50,15 +52,6 @@ public class OutboundOrderItemController {
 
     }
 
-
-    @PostMapping("/{orderId}/items")
-    public ApiResp<OutboundOrderItemResponseDto> createItem(
-            @PathVariable UUID orderId, @RequestBody OutboundOrderItemRequestDto request){
-        var result = _outboundItemService.addSingleItem(request, orderId);
-        return ApiResp.<OutboundOrderItemResponseDto>builder()
-                .result(result)
-                .build();
-    }
 
     @PutMapping("/{orderId}")
     public ApiResp<OutboundOrderItemResponseDto> updateItem(
