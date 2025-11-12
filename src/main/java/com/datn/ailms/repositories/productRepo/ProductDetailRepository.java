@@ -45,12 +45,27 @@ public interface ProductDetailRepository extends JpaRepository<ProductDetail, UU
     int countScannedByPurchaseOrderItem(@Param("itemId") UUID itemId);
 
     @Query("""
+    SELECT pd FROM ProductDetail pd
+    JOIN pd.product p
+    JOIN pd.outboundOrderItem oi
+    WHERE p.sku = :sku
+      AND oi.outboundOrder.id = :orderId
+""")
+    List<ProductDetail> findByOrderIdAndSku( UUID orderId, @Param("sku") String sku);
+
+    @Query("""
     SELECT COUNT(pd)
     FROM ProductDetail pd
     WHERE pd.product.id = :productId
       AND pd.status = 'IN_WAREHOUSE'
 """)
     long countAvailableByProductId(@Param("productId") UUID productId);
+
+    @Query("""
+    SELECT pd FROM ProductDetail pd
+    WHERE pd.outboundOrderItem.outboundOrder.id = :orderId
+""")
+    List<ProductDetail> findByOutboundOrderId(@Param("orderId") UUID orderId);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     List<ProductDetail> findByProductIdAndStatus(UUID productId, SerialStatus status);

@@ -1,6 +1,7 @@
 package com.datn.ailms.repositories.orderRepo;
 
 import com.datn.ailms.model.entities.order_entites.OutboundOrderItem;
+import com.datn.ailms.model.entities.product_entities.ProductDetail;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -15,6 +16,5 @@ public interface OutboundOrderItemRepository extends JpaRepository<OutboundOrder
 
     @EntityGraph(attributePaths = {"product"})
     List<OutboundOrderItem> findByProductId(UUID productId);
-
     Optional<OutboundOrderItem> findByOutboundOrderIdAndProductId(UUID outboundOrderId, UUID productId);
 }

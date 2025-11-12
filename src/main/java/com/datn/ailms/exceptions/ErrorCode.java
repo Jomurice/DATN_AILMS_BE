@@ -42,10 +42,13 @@ public enum ErrorCode {
     STOCK_NOT_ENOUGH(1036, "Insufficient inventory", HttpStatus.CONFLICT),
     ITEM_NOT_FOUND(1037, "Item not found", HttpStatus.NOT_FOUND),
     INVALID_ORDER_STATUS(1038, "Order is not in DRAFT status", HttpStatus.CONFLICT),
+    SERIAL_NOT_IN_ORDER(1039, "Serial not in order", HttpStatus.NOT_FOUND),
+    SERIAL_ALREADY_ASSIGNED_TO_OTHER_ORDER(1040, "Serial already assigned to other order", HttpStatus.CONFLICT),
+    QUANTITY_EXCEEDED(1041, "Quantity exceeded", HttpStatus.CONFLICT),
     // Thêm mới cho CheckInventory (tiếp tục numbering)
-    INVALID_INPUT(1039, "Invalid input", HttpStatus.BAD_REQUEST),
-    WAREHOUSE_NOT_FOUND(1040, "Warehouse not found", HttpStatus.NOT_FOUND),
-    CHECK_INVENTORY_NOT_FOUND(1041, "Check inventory not found", HttpStatus.NOT_FOUND)
+    INVALID_INPUT(1042, "Invalid input", HttpStatus.BAD_REQUEST),
+    WAREHOUSE_NOT_FOUND(1043, "Warehouse not found", HttpStatus.NOT_FOUND),
+    CHECK_INVENTORY_NOT_FOUND(1044, "Check inventory not found", HttpStatus.NOT_FOUND)
     ;
 
 
