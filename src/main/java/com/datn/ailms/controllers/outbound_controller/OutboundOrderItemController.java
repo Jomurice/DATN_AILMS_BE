@@ -51,14 +51,14 @@ public class OutboundOrderItemController {
     }
 
 
-    @PostMapping("/{orderId}/items")
-    public ApiResp<OutboundOrderItemResponseDto> createItem(
-            @PathVariable UUID orderId, @RequestBody OutboundOrderItemRequestDto request){
-        var result = _outboundItemService.addSingleItem(request, orderId);
-        return ApiResp.<OutboundOrderItemResponseDto>builder()
-                .result(result)
-                .build();
-    }
+//    @PostMapping("/{orderId}/items")
+//    public ApiResp<OutboundOrderItemResponseDto> createItem(
+//            @PathVariable UUID orderId, @RequestBody OutboundOrderItemRequestDto request){
+//        var result = _outboundItemService.addSingleItem(request, orderId);
+//        return ApiResp.<OutboundOrderItemResponseDto>builder()
+//                .result(result)
+//                .build();
+//    }
 
     @PutMapping("/{orderId}")
     public ApiResp<OutboundOrderItemResponseDto> updateItem(
