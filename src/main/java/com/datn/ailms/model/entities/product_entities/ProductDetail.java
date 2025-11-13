@@ -1,6 +1,7 @@
 package com.datn.ailms.model.entities.product_entities;
 
 import com.datn.ailms.model.entities.account_entities.User;
+import com.datn.ailms.model.entities.checkInventory_entities.CheckInventory;
 import com.datn.ailms.model.entities.enums.SerialStatus;
 import com.datn.ailms.model.entities.order_entites.OutboundOrderItem;
 import com.datn.ailms.model.entities.order_entites.PurchaseOrderItem;
@@ -10,6 +11,8 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(
@@ -60,5 +63,9 @@ public class ProductDetail {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "scanned_by")
     private User scannedBy;
+
+    // MappedBy đê JPA biết là quan hệ 2 chiều giữa prDe và CheckInventory
+    @ManyToMany(mappedBy = "productDetails")
+    private Set<CheckInventory> checkInventories = new HashSet<>();
 }
 
