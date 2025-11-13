@@ -27,7 +27,6 @@ public class PurchaseOrder {
 
     String code;
 
-    String supplier;
 
     String status;
 
@@ -48,4 +47,8 @@ public class PurchaseOrder {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by", nullable = false)
     private User createdBy;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "supplier_id")
+    private Supplier supplier;
 }
