@@ -31,6 +31,8 @@ public interface ProductDetailRepository extends JpaRepository<ProductDetail, UU
 
     List<ProductDetail> findByProductId(UUID productId);
 
+    List<ProductDetail> findByWarehouseIdAndStatus(UUID warehouseId, String status);
+
     Optional<ProductDetail> findBySerialNumberIgnoreCase(String serialNumber);
 
     @Query("SELECT p FROM ProductDetail p " +

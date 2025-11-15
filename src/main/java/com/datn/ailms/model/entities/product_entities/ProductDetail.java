@@ -1,7 +1,7 @@
 package com.datn.ailms.model.entities.product_entities;
 
 import com.datn.ailms.model.entities.account_entities.User;
-import com.datn.ailms.model.entities.checkInventory_entities.CheckInventory;
+import com.datn.ailms.model.entities.inventory_entities.InventoryCheckItem;
 import com.datn.ailms.model.entities.enums.SerialStatus;
 import com.datn.ailms.model.entities.order_entites.OutboundOrderItem;
 import com.datn.ailms.model.entities.order_entites.PurchaseOrderItem;
@@ -65,7 +65,10 @@ public class ProductDetail {
     private User scannedBy;
 
     // MappedBy đê JPA biết là quan hệ 2 chiều giữa prDe và CheckInventory
-    @ManyToMany(mappedBy = "productDetails")
-    private Set<CheckInventory> checkInventories = new HashSet<>();
+//    @ManyToMany(mappedBy = "productDetails")
+//    private Set<InventoryCheckItem> checkInventories = new HashSet<>();
+
+    @OneToMany(mappedBy = "productDetail", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Set<InventoryCheckItem> inventoryCheckItems; // Đặt tên mới để tránh nhầm lẫn
 }
 
