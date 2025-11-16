@@ -18,6 +18,10 @@ public interface IInventoryCheckService {
 
     InventoryCheckResponseDto startCheck(UUID checkId, UUID checkedByUserId);
     InventoryCheckResponseDto completeCheck(UUID checkId);
+
+    // ✅ BỔ SUNG: Chốt sổ phiếu kiểm kê (CLOSE)
+    InventoryCheckResponseDto closeCheck(UUID checkId);
+
     //API MỚI: Gợi ý Serial trong phiếu (cho Autocomplete)
     List<String> suggestSerials(UUID checkId, String query);
     // Quét Serial

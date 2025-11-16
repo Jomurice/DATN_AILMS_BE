@@ -180,11 +180,29 @@ public class InventoryCheckService implements IInventoryCheckService {
             item.setUpdatedAt(LocalDateTime.now());
         }
 
-        check.setStatus("COMPLETED");
+        // SỬA ĐỔI: Chuyển sang trạng thái Chờ Xử lý Chênh lệch
+        check.setStatus("PENDING_RECONCILIATION");
         check.setUpdatedAt(LocalDateTime.now());
 
         return mapper.toResponse(checkRepo.save(check));
     }
+
+    @Override
+    public InventoryCheckResponseDto closeCheck(UUID checkId) {
+        InventoryCheck check = checkRepo.findById(checkId)
+                .orElseThrow(() -> new AppException(ErrorCode.INVENTORY_CHECK_NOT_FOUND));
+
+        // Kiểm tra trạng thái hiện tại phải là PENDING_RECONCILIATION
+        if (!"PENDING_RECONCILIATION".equals(check.getStatus())) {
+            throw new AppException(ErrorCode.INVALID_ORDER_STATUS);
+        }
+
+        check.setStatus("CLOSED");
+        check.setUpdatedAt(LocalDateTime.now());
+
+        return mapper.toResponse(checkRepo.save(check));
+    }
+
 
     // --- Quét Serial (Check Count) ---
 
@@ -204,17 +222,16 @@ public class InventoryCheckService implements IInventoryCheckService {
         check.getItems().add(item);
         return item;
     }
+
     @Override
     public List<String> suggestSerials(UUID checkId, String query) {
         if (query == null || query.trim().isEmpty()) return List.of();
 
-        // 1. Lấy tất cả Serial numbers từ phiếu kiểm kê hiện tại
         InventoryCheck check = checkRepo.findById(checkId)
                 .orElseThrow(() -> new AppException(ErrorCode.INVENTORY_CHECK_NOT_FOUND));
 
         String lowerQuery = query.trim().toLowerCase();
 
-        // 2. Lọc danh sách Serial Number trong bộ nhớ (dễ hơn nếu dữ liệu không quá lớn)
         return check.getItems().stream()
                 .map(InventoryCheckItem::getSerialNumber)
                 .filter(serial -> serial != null && serial.toLowerCase().contains(lowerQuery))
@@ -222,6 +239,7 @@ public class InventoryCheckService implements IInventoryCheckService {
                 .limit(10) // Giới hạn kết quả trả về
                 .collect(Collectors.toList());
     }
+
     @Override
     public InventoryCheckItemResponseDto scanSerial(UUID checkId, String serialNumber, UUID scannedByUserId) {
         InventoryCheck check = checkRepo.findById(checkId)
@@ -250,27 +268,16 @@ public class InventoryCheckService implements IInventoryCheckService {
     }
 
     // --- Chi tiết Item (Manual CRUD) ---
+
     @Override
     public List<InventoryCheckItemResponseDto> getItemsByCheckId(UUID checkId) {
-        // Không cần fetch InventoryCheck nếu chỉ cần Items
-        // checkRepo.findById(checkId).orElseThrow(() -> new AppException(ErrorCode.INVENTORY_CHECK_NOT_FOUND));
-
-        // ✅ FIX: Gọi Repository để sử dụng phương thức
+        // FIX: Gọi Repository để sử dụng phương thức
         List<InventoryCheckItem> items = itemRepo.findByInventoryCheckId(checkId);
 
         return items.stream()
                 .map(mapper::toItemResponse)
                 .collect(Collectors.toList());
     }
-//    @Override
-//    public List<InventoryCheckItemResponseDto> getItemsByCheckId(UUID checkId) {
-//        InventoryCheck check = checkRepo.findById(checkId)
-//                .orElseThrow(() -> new AppException(ErrorCode.INVENTORY_CHECK_NOT_FOUND));
-//
-//        return check.getItems().stream()
-//                .map(mapper::toItemResponse)
-//                .collect(Collectors.toList());
-//    }
 
     @Override
     public InventoryCheckItemResponseDto addItemManual(UUID checkId, InventoryCheckItemRequestDto request) {
