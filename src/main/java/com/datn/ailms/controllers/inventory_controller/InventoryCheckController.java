@@ -64,7 +64,12 @@ public class InventoryCheckController {
     public ApiResp<String> getSummary(@PathVariable UUID id) {
         return ApiResp.<String>builder().result("Summary for Check ID: " + id).build();
     }
-
+    @PostMapping("/{id}/close")
+    public ApiResp<InventoryCheckResponseDto> closeCheck(@PathVariable UUID id) {
+        return ApiResp.<InventoryCheckResponseDto>builder()
+                .result(_checkService.closeCheck(id))
+                .build();
+    }
     // --- Quét Serial ---
 
     @PostMapping("/{id}/scan")
