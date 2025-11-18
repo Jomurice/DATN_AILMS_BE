@@ -13,10 +13,12 @@ import com.datn.ailms.model.entities.account_entities.User;
 import com.datn.ailms.model.entities.enums.SerialStatus;
 import com.datn.ailms.model.entities.order_entites.PurchaseOrder;
 import com.datn.ailms.model.entities.order_entites.PurchaseOrderItem;
+import com.datn.ailms.model.entities.order_entites.Supplier;
 import com.datn.ailms.model.entities.product_entities.Product;
 import com.datn.ailms.model.entities.product_entities.ProductDetail;
 import com.datn.ailms.repositories.orderRepo.PurchaseOrderItemRepository;
 import com.datn.ailms.repositories.orderRepo.PurchaseOrderRepository;
+import com.datn.ailms.repositories.orderRepo.SupplierRepository;
 import com.datn.ailms.repositories.productRepo.ProductDetailRepository;
 import com.datn.ailms.repositories.productRepo.ProductRepository;
 import com.datn.ailms.repositories.userRepo.UserRepository;
@@ -45,6 +47,7 @@ public class PurchaseOrderService implements IPurchaseOrderService {
     final ProductDetailRepository _detailRepo;
     final PurchaseOrderItemRepository purchaseOrderItemRepository;
     final WarehouseRepository _warehouseRepo;
+    final SupplierRepository supplierRepo;
     @Override
     public PurchaseOrderResponseDto create(PurchaseOrderRequestDto request) {
         PurchaseOrder order = _orderMapper.toEntity(request);
@@ -99,9 +102,12 @@ public class PurchaseOrderService implements IPurchaseOrderService {
     public PurchaseOrderResponseDto update(UUID id, PurchaseOrderRequestDto request) {
         PurchaseOrder existing = _orderRepo.findById(id)
                 .orElseThrow(() -> new RuntimeException("PurchaseOrder not found"));
+
+        Supplier supplier = supplierRepo.findById(request.getSupplierId())
+                .orElseThrow(() -> new RuntimeException("Supplier not found"));
         // MapStruct có thể hỗ trợ update nếu bạn khai báo @MappingTarget
         existing.setCode(request.getCode());
-        existing.setSupplier(request.getSupplier());
+        existing.setSupplier(supplier);
         existing.setStatus(request.getStatus());
         existing.setCreatedAt(request.getCreatedAt());
 

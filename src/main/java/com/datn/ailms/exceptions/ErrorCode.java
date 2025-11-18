@@ -48,7 +48,9 @@ public enum ErrorCode {
     // Thêm mới cho CheckInventory (tiếp tục numbering)
     INVALID_INPUT(1042, "Invalid input", HttpStatus.BAD_REQUEST),
     WAREHOUSE_NOT_FOUND(1043, "Warehouse not found", HttpStatus.NOT_FOUND),
-    INVENTORY_CHECK_NOT_FOUND(1044, "Check inventory not found", HttpStatus.NOT_FOUND)
+    INVENTORY_CHECK_NOT_FOUND(1044, "Check inventory not found", HttpStatus.NOT_FOUND),
+
+    SUPPLIER_NOT_EXISTED(1045,"Supplier not existed", HttpStatus.NOT_FOUND),
     ;
 
 

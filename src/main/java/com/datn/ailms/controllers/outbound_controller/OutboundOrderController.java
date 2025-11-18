@@ -7,7 +7,6 @@ import com.datn.ailms.model.dto.response.ApiResp;
 
 import com.datn.ailms.model.dto.response.inventory.ProductDetailResponseDto;
 import com.datn.ailms.model.dto.response.order.OutboundOrderResponseDto;
-import com.datn.ailms.services.orderService.OutboundOrderItemService;
 import com.datn.ailms.services.orderService.OutboundOrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.repository.query.Param;
