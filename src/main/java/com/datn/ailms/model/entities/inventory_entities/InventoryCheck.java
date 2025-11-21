@@ -12,7 +12,9 @@ import java.util.Set;
 import java.util.UUID;
 
 @Entity
-@Data
+//@Data
+@Getter // ✅ SỬA: Dùng Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -48,5 +50,6 @@ public class InventoryCheck {
     String note;
 
     @OneToMany(mappedBy = "inventoryCheck", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @ToString.Exclude
     Set<InventoryCheckItem> items;
 }
