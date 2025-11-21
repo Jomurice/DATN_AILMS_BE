@@ -22,4 +22,6 @@ public class ProductDetailResponseDto {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private UUID scannedByUserId;
+    private String productSku;
+    private String productName;
 }

@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -31,8 +32,11 @@ public interface ProductDetailRepository extends JpaRepository<ProductDetail, UU
 
     List<ProductDetail> findByProductId(UUID productId);
 
+    List<ProductDetail> findByWarehouseId(UUID warehouseId);
+    @Query("SELECT pd FROM ProductDetail pd WHERE pd.warehouse.id = :warehouseId AND pd.status IN :statuses")
+    List<ProductDetail> findByWarehouseIdAndStatusIn(@Param("warehouseId") UUID warehouseId, @Param("statuses") Collection<SerialStatus> statuses);
     List<ProductDetail> findByWarehouseIdAndStatus(UUID warehouseId, String status);
-
+    List<ProductDetail> findByWarehouseIdAndStatus(UUID warehouseId, SerialStatus status);
     Optional<ProductDetail> findBySerialNumberIgnoreCase(String serialNumber);
 
     @Query("SELECT p FROM ProductDetail p " +

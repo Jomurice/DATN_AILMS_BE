@@ -9,7 +9,9 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Data
+//@Data
+@Getter // ✅ SỬA
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
