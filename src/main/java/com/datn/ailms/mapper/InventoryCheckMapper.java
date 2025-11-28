@@ -40,6 +40,8 @@ public interface InventoryCheckMapper {
     // Item Entity -> Item Response
     @Mapping(source = "productDetail.id", target = "productDetailId")
     @Mapping(source = "productDetail.product.sku", target = "productSku")
+    @Mapping(source = "productDetail.createdAt", target = "importDate")
+    @Mapping(source = "productDetail.product.name", target = "productName")
     InventoryCheckItemResponseDto toItemResponse(InventoryCheckItem entity);
 
     // Helper mapping cho quan hệ
