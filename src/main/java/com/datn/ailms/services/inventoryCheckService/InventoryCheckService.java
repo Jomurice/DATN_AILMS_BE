@@ -23,8 +23,8 @@ import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.data.domain.Page;      // ✅ THÊM IMPORT NÀY
-import org.springframework.data.domain.Pageable;  // ✅ THÊM IMPORT NÀY
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -51,7 +51,6 @@ public class InventoryCheckService implements IInventoryCheckService {
         return String.format("INVCHK-%s-%04d", datePart, count);
     }
 
-    // ✅ PHƯƠNG THỨC GET ALL CÓ PHÂN TRANG (ĐÃ SỬA LỖI IMPORT)
     @Override
     public Page<InventoryCheckResponseDto> getAll(String status, Pageable pageable) {
         if (status == null || status.trim().isEmpty() || "ALL".equalsIgnoreCase(status)) {
@@ -60,7 +59,6 @@ public class InventoryCheckService implements IInventoryCheckService {
         return checkRepo.findByStatus(status, pageable).map(mapper::toResponse);
     }
 
-    // (Giữ nguyên phương thức getAll cũ trả về List để tương thích ngược nếu cần, hoặc xóa đi nếu Interface đã đổi)
     @Override
     public List<InventoryCheckResponseDto> getAll() {
         return mapper.toResponseList(checkRepo.findAll());
@@ -73,7 +71,7 @@ public class InventoryCheckService implements IInventoryCheckService {
         return mapper.toResponse(check);
     }
 
-    // --- 1. TẠO PHIẾU NHÁP (DRAFT) ---
+    // ✅ CREATE: TẠO HEADER + SNAPSHOT + TRẠNG THÁI DRAFT (CHƯA KIỂM)
     @Override
     public InventoryCheckResponseDto create(InventoryCheckRequestDto request) {
         try {
@@ -86,57 +84,30 @@ public class InventoryCheckService implements IInventoryCheckService {
             check.setCode(generateCheckCode());
             check.setWarehouse(warehouse);
             check.setCreatedBy(createdBy);
-
             if (request.getCheckedBy() != null) {
                 check.setCheckedBy(userRepository.findById(request.getCheckedBy()).orElse(createdBy));
             } else {
                 check.setCheckedBy(createdBy);
             }
-
             check.setCreatedAt(LocalDateTime.now());
             check.setUpdatedAt(LocalDateTime.now());
+
+            // 🔥 SỬA: Để mặc định là DRAFT (Chưa kiểm)
             check.setStatus("DRAFT");
 
-            return mapper.toResponse(checkRepo.save(check));
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("Lỗi tạo phiếu: " + e.getMessage());
-        }
-    }
+            InventoryCheck savedCheck = checkRepo.save(check);
 
-    // --- 2. BẮT ĐẦU (SNAPSHOT CHUẨN) ---
-    @Override
-    public InventoryCheckResponseDto startCheck(UUID checkId, UUID checkedByUserId) {
-        try {
-            InventoryCheck check = checkRepo.findById(checkId)
-                    .orElseThrow(() -> new AppException(ErrorCode.INVENTORY_CHECK_NOT_FOUND));
-
-            if (!"DRAFT".equals(check.getStatus())) {
-                throw new AppException(ErrorCode.INVALID_ORDER_STATUS);
-            }
-
-            if (checkedByUserId != null) {
-                User u = userRepository.findById(checkedByUserId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
-                check.setCheckedBy(u);
-            }
-
-            // Lấy toàn bộ hàng
-            List<ProductDetail> allInWarehouse = productDetailRepo.findByWarehouseId(check.getWarehouse().getId());
+            // Snapshot dữ liệu
+            List<ProductDetail> allInWarehouse = productDetailRepo.findByWarehouseId(warehouse.getId());
             if (allInWarehouse == null) allInWarehouse = new ArrayList<>();
 
-            // Lọc trạng thái hợp lệ
-            List<SerialStatus> validStatuses = List.of(
-                    SerialStatus.IN_WAREHOUSE,
-                    SerialStatus.AVAILABLE,
-                    SerialStatus.IN_STOCK
-            );
-
+            List<SerialStatus> validStatuses = List.of(SerialStatus.IN_WAREHOUSE, SerialStatus.AVAILABLE, SerialStatus.IN_STOCK);
             List<InventoryCheckItem> itemsToSave = new ArrayList<>();
 
             for (ProductDetail pd : allInWarehouse) {
                 if (pd.getStatus() != null && validStatuses.contains(pd.getStatus())) {
                     InventoryCheckItem item = InventoryCheckItem.builder()
-                            .inventoryCheck(check)
+                            .inventoryCheck(savedCheck)
                             .productDetail(pd)
                             .serialNumber(pd.getSerialNumber())
                             .systemQuantity(1)
@@ -153,32 +124,37 @@ public class InventoryCheckService implements IInventoryCheckService {
                 itemRepo.saveAll(itemsToSave);
             }
 
-            check.setStatus("IN_PROGRESS");
-            check.setUpdatedAt(LocalDateTime.now());
-            return mapper.toResponse(checkRepo.save(check));
+            return mapper.toResponse(savedCheck);
 
         } catch (Exception e) {
             e.printStackTrace();
-            throw new RuntimeException("Lỗi Start Check: " + e.getMessage());
+            throw new RuntimeException("Lỗi tạo phiếu: " + e.getMessage());
         }
     }
 
-    // --- 3. SCAN SERIAL ---
+    // --- SCAN SERIAL (SỬA ĐỂ TỰ ĐỘNG CHUYỂN TRẠNG THÁI) ---
     @Override
     public InventoryCheckItemResponseDto scanSerial(UUID checkId, String serialNumber, UUID scannedByUserId) {
         InventoryCheck check = checkRepo.findById(checkId).orElseThrow(() -> new AppException(ErrorCode.INVENTORY_CHECK_NOT_FOUND));
-        if (!"IN_PROGRESS".equals(check.getStatus())) throw new AppException(ErrorCode.INVALID_ORDER_STATUS);
 
-        String cleanSerial = serialNumber.trim(); // Cắt khoảng trắng
+        // ✅ Logic mới: Nếu đang DRAFT -> Tự động chuyển sang IN_PROGRESS
+        if ("DRAFT".equals(check.getStatus())) {
+            check.setStatus("IN_PROGRESS");
+            check.setUpdatedAt(LocalDateTime.now());
+            checkRepo.save(check);
+        }
+        // Nếu không phải DRAFT và cũng không phải IN_PROGRESS -> Lỗi
+        else if (!"IN_PROGRESS".equals(check.getStatus())) {
+            throw new AppException(ErrorCode.INVALID_ORDER_STATUS);
+        }
 
+        String cleanSerial = serialNumber.trim();
         InventoryCheckItem item = itemRepo.findByInventoryCheckIdAndSerialNumber(checkId, cleanSerial).orElse(null);
 
         if (item == null) {
             ProductDetail pd = productDetailRepo.findBySerialNumberIgnoreCase(cleanSerial).orElse(null);
             item = InventoryCheckItem.builder()
-                    .inventoryCheck(check)
-                    .productDetail(pd)
-                    .serialNumber(cleanSerial)
+                    .inventoryCheck(check).productDetail(pd).serialNumber(cleanSerial)
                     .systemQuantity(0).countedQuantity(0).status("OVERAGE")
                     .createdAt(LocalDateTime.now()).updatedAt(LocalDateTime.now()).build();
             item = itemRepo.save(item);
@@ -190,11 +166,16 @@ public class InventoryCheckService implements IInventoryCheckService {
         return mapper.toItemResponse(itemRepo.save(item));
     }
 
-    // ... (Các phương thức còn lại: update, delete, complete, close, suggest...) GIỮ NGUYÊN
+    // ... (Các hàm khác giữ nguyên) ...
+
+    @Override
+    public InventoryCheckResponseDto startCheck(UUID checkId, UUID checkedByUserId) { return getById(checkId); }
+
     @Override
     public InventoryCheckResponseDto update(UUID id, InventoryCheckRequestDto request) {
         InventoryCheck existing = checkRepo.findById(id).orElseThrow(() -> new AppException(ErrorCode.INVENTORY_CHECK_NOT_FOUND));
-        if (!"DRAFT".equals(existing.getStatus())) throw new AppException(ErrorCode.INVALID_ORDER_STATUS);
+        if (!"DRAFT".equals(existing.getStatus()) && !"IN_PROGRESS".equals(existing.getStatus()))
+            throw new AppException(ErrorCode.INVALID_ORDER_STATUS);
         existing.setNote(request.getNote()); existing.setDeadline(request.getDeadline()); existing.setUpdatedAt(LocalDateTime.now());
         return mapper.toResponse(checkRepo.save(existing));
     }
