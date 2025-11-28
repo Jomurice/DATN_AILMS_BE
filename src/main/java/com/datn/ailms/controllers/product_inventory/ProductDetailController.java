@@ -92,14 +92,15 @@ public class ProductDetailController {
     }
     @GetMapping("/warehouse/{warehouseId}")
     public ApiResp<List<ProductDetailResponseDto>> getByWarehouseId(@PathVariable UUID warehouseId) {
-        // ✅ SỬA LẠI: Chỉ lấy những trạng thái thực sự đang ở trong kho
+        // Định nghĩa trạng thái "Đang tồn kho"
         List<SerialStatus> validStatuses = List.of(
                 SerialStatus.IN_WAREHOUSE,
                 SerialStatus.AVAILABLE,
                 SerialStatus.IN_STOCK
         );
 
-        // Gọi phương thức findByWarehouseIdAndStatusIn trong Repository
+        // Gọi Repo lọc theo WarehouseID VÀ Status
+        // Đảm bảo ProductDetailRepository đã có phương thức findByWarehouseIdAndStatusIn
         List<ProductDetail> result = _productDetailRepository.findByWarehouseIdAndStatusIn(warehouseId, validStatuses);
 
         return ApiResp.<List<ProductDetailResponseDto>>builder()

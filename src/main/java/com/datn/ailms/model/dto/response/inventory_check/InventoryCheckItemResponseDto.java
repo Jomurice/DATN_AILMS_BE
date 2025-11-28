@@ -15,9 +15,12 @@ public class InventoryCheckItemResponseDto {
     UUID productDetailId;
     String serialNumber;
     String productSku;
+    String productName;
     Integer systemQuantity;
     Integer countedQuantity;
     String status;
     String note;
     LocalDateTime checkedTime;
+    // Ngày nhập kho (Lấy từ ProductDetail)
+    LocalDateTime importDate;
 }
