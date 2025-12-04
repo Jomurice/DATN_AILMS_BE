@@ -26,7 +26,7 @@ public interface IInventoryCheckService {
     InventoryCheckResponseDto startCheck(UUID checkId, UUID checkedByUserId);
     InventoryCheckResponseDto completeCheck(UUID checkId);
     InventoryCheckResponseDto closeCheck(UUID checkId);
-
+//    InventoryCheckResponseDto closeCheck(UUID checkId, UUID userId);
     List<String> suggestSerials(UUID checkId, String query);
     InventoryCheckItemResponseDto scanSerial(UUID checkId, String serialNumber, UUID scannedByUserId);
     List<InventoryCheckItemResponseDto> getItemsByCheckId(UUID checkId);

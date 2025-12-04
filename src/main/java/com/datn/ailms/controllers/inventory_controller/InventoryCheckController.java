@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -73,6 +74,7 @@ public class InventoryCheckController {
         return ApiResp.<String>builder().result("Summary for Check ID: " + id).build();
     }
     @PostMapping("/{id}/close")
+//    @PreAuthorize("hasAuthority('ADMIN')")
     public ApiResp<InventoryCheckResponseDto> closeCheck(@PathVariable UUID id) {
         return ApiResp.<InventoryCheckResponseDto>builder()
                 .result(_checkService.closeCheck(id))
