@@ -135,38 +135,59 @@ public class InventoryCheckService implements IInventoryCheckService {
     // --- SCAN SERIAL (SỬA ĐỂ TỰ ĐỘNG CHUYỂN TRẠNG THÁI) ---
     @Override
     public InventoryCheckItemResponseDto scanSerial(UUID checkId, String serialNumber, UUID scannedByUserId) {
-        InventoryCheck check = checkRepo.findById(checkId).orElseThrow(() -> new AppException(ErrorCode.INVENTORY_CHECK_NOT_FOUND));
+        InventoryCheck check = checkRepo.findById(checkId)
+                .orElseThrow(() -> new AppException(ErrorCode.INVENTORY_CHECK_NOT_FOUND));
 
-        // ✅ Logic mới: Nếu đang DRAFT -> Tự động chuyển sang IN_PROGRESS
+        // 1. Tự động chuyển trạng thái
         if ("DRAFT".equals(check.getStatus())) {
             check.setStatus("IN_PROGRESS");
             check.setUpdatedAt(LocalDateTime.now());
             checkRepo.save(check);
-        }
-        // Nếu không phải DRAFT và cũng không phải IN_PROGRESS -> Lỗi
-        else if (!"IN_PROGRESS".equals(check.getStatus())) {
+        } else if (!"IN_PROGRESS".equals(check.getStatus())) {
             throw new AppException(ErrorCode.INVALID_ORDER_STATUS);
         }
 
         String cleanSerial = serialNumber.trim();
+
+        // 2. Tìm Item trong phiếu
         InventoryCheckItem item = itemRepo.findByInventoryCheckIdAndSerialNumber(checkId, cleanSerial).orElse(null);
 
+        if (item != null && item.getCountedQuantity() >= 1) {
+            // Nếu đã đếm rồi (số lượng >= 1) -> Báo lỗi ngay
+            throw new RuntimeException("SERIAL_ALREADY_SCANNED");
+            // Hoặc dùng: throw new AppException(ErrorCode.SERIAL_ALREADY_SCANNED); nếu bạn đã khai báo Enum
+        }
+        // 3. Lấy thông tin người quét
+        User scanner = null;
+        if (scannedByUserId != null) {
+            scanner = userRepository.findById(scannedByUserId).orElse(null);
+        }
+        // 4. Xử lý Item
         if (item == null) {
+            // Tạo mới (Hàng thừa - Overage)
             ProductDetail pd = productDetailRepo.findBySerialNumberIgnoreCase(cleanSerial).orElse(null);
             item = InventoryCheckItem.builder()
-                    .inventoryCheck(check).productDetail(pd).serialNumber(cleanSerial)
-                    .systemQuantity(0).countedQuantity(0).status("OVERAGE")
-                    .createdAt(LocalDateTime.now()).updatedAt(LocalDateTime.now()).build();
+                    .inventoryCheck(check)
+                    .productDetail(pd)
+                    .serialNumber(cleanSerial)
+                    .systemQuantity(0)
+                    .countedQuantity(0) // Ban đầu là 0, xuống dưới sẽ +1
+                    .status("OVERAGE")
+                    .scannedBy(scanner)
+                    .createdAt(LocalDateTime.now())
+                    .updatedAt(LocalDateTime.now())
+                    .build();
             item = itemRepo.save(item);
         }
-
-        item.setCountedQuantity(item.getCountedQuantity() + 1);
+        // 5. Tăng số lượng (Từ 0 lên 1)
+        item.setCountedQuantity(1); // Luôn set là 1 thay vì +1
         item.setCheckedTime(LocalDateTime.now());
         item.setUpdatedAt(LocalDateTime.now());
+        if (scanner != null) {
+            item.setScannedBy(scanner);
+        }
         return mapper.toItemResponse(itemRepo.save(item));
     }
-
-    // ... (Các hàm khác giữ nguyên) ...
 
     @Override
     public InventoryCheckResponseDto startCheck(UUID checkId, UUID checkedByUserId) { return getById(checkId); }
