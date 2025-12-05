@@ -28,6 +28,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -107,6 +108,20 @@ public class OutboundOrderItemService implements IOutboundOrderItemService {
             _productDetailRepository.saveAll(serials);
         }
         _itemRepo.deleteAll(itemsToDelete);
+    }
+
+    @Override
+    public void returnSerials(OutboundOrderItem item) {
+        if (item.getProductDetails() == null || item.getProductDetails().isEmpty()) return;
+
+        List<ProductDetail> serials = item.getProductDetails();
+        for(ProductDetail pd : serials){
+            pd.setStatus(SerialStatus.IN_WAREHOUSE);
+            pd.setOutboundOrderItem(null);
+            pd.setUpdatedAt(LocalDateTime.now());
+            System.out.println(pd.getSerialNumber());
+        }
+        _productDetailRepository.saveAll(serials);
     }
 
     // chỉ xử lý khi status order đã Confirmed

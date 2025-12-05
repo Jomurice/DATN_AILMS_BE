@@ -26,7 +26,7 @@ public class OutboundOrderItem {
     Integer scannedQuantity;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "outboundOrder_id", nullable = true)
+    @JoinColumn(name = "outboundOrder_id")
     OutboundOrder outboundOrder;
 
     @ManyToOne(fetch = FetchType.LAZY)

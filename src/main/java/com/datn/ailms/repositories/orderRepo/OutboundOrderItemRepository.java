@@ -16,5 +16,6 @@ public interface OutboundOrderItemRepository extends JpaRepository<OutboundOrder
 
     @EntityGraph(attributePaths = {"product"})
     List<OutboundOrderItem> findByProductId(UUID productId);
+
     Optional<OutboundOrderItem> findByOutboundOrderIdAndProductId(UUID outboundOrderId, UUID productId);
 }

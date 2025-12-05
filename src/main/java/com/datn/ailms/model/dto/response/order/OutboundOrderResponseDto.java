@@ -18,8 +18,9 @@ public class OutboundOrderResponseDto {
     String code;
     LocalDate createAt;
     UUID createdBy;
-    String customer;
+    UUID customerId;
     String status;
+    String note;
 //    double totalPrice;
     List<OutboundOrderItemResponseDto> items;
 }

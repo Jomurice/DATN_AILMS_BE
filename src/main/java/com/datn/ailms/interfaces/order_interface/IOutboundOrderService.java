@@ -1,6 +1,7 @@
 package com.datn.ailms.interfaces.order_interface;
 
 import com.datn.ailms.model.dto.request.inventory.ProductConfirmRequestDto;
+import com.datn.ailms.model.dto.request.order.CancelRequestDto;
 import com.datn.ailms.model.dto.request.order.OutboundOrderRequestDto;
 import com.datn.ailms.model.dto.response.inventory.ProductDetailResponseDto;
 import com.datn.ailms.model.dto.response.order.OutboundOrderResponseDto;
@@ -13,6 +14,9 @@ public interface IOutboundOrderService {
     OutboundOrderResponseDto getById (UUID id);
     List<OutboundOrderResponseDto> getAll();
     OutboundOrderResponseDto update(OutboundOrderRequestDto request, UUID id);
+    void cancelOutbound(UUID orderId, CancelRequestDto request);
+    void confirmCancel(UUID orderId);
+    void rejectCancel(UUID orderId);
     OutboundOrderResponseDto confirmOrder(OutboundOrderRequestDto request,UUID orderId);
     OutboundOrderResponseDto confirmExport(UUID orderId, UUID userId);
     List<OutboundOrderResponseDto> getAllByStatus(String status);

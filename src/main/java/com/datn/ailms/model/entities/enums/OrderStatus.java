@@ -4,5 +4,6 @@ public enum OrderStatus {
     DRAFT, // chưa xác nhận
     CONFIRMED, // đã xác nhận
     CANCELLED, // hủy phiếu
-    EXPORT
+    EXPORT,
+    PENDING_CANCEL,   // chờ admin duyệt hủy
 }
