@@ -22,11 +22,10 @@ public class OutboundOrder {
     UUID id;
 
     String code;
-    String customer;
     LocalDateTime createAt;
     LocalDateTime updateAt;
     String status;
-
+    String note;
     @OneToMany(mappedBy = "outboundOrder", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     List<OutboundOrderItem> items = new ArrayList<>();
 
@@ -37,4 +36,12 @@ public class OutboundOrder {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "exported_by")
     private User exportedBy;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "canceled_by")
+    private User canceledBy;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "customer_id")
+    private Customer customer;
 }

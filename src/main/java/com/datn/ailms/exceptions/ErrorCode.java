@@ -9,7 +9,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 public enum ErrorCode {
     UNAUTHENTICATED(1001,"Unauthenticated", HttpStatus.UNAUTHORIZED),
     USER_NOT_EXISTED(1005, "User not existed", HttpStatus.NOT_FOUND),
-    CANT_FIND_SERIAL_NUMBER(1006,"Dont have Serial Number",HttpStatus.NOT_FOUND),
+    CANT_FIND_SERIAL_NUMBER(1006,"Don't have Serial Number",HttpStatus.NOT_FOUND),
 
     USERNAME_EXISTED(1006, "User already exists", HttpStatus.CONFLICT),
     EMAIL_EXISTED(1007, "Email already exists", HttpStatus.CONFLICT),
@@ -51,6 +51,11 @@ public enum ErrorCode {
     INVENTORY_CHECK_NOT_FOUND(1044, "Check inventory not found", HttpStatus.NOT_FOUND),
 
     SUPPLIER_NOT_EXISTED(1045,"Supplier not existed", HttpStatus.NOT_FOUND),
+    CUSTOMER_NOT_EXISTED(1046,"Customer not existed", HttpStatus.NOT_FOUND),
+    PHONE_EXISTED(1047, "Phone already exists", HttpStatus.CONFLICT),
+    ORDER_ALREADY_CANCELED(1048,"Order already canceled", HttpStatus.CONFLICT),
+    ORDER_CANNOT_CANCEL(1049, "Order cannot cancel", HttpStatus.CONFLICT),
+
     ;
 
 

@@ -19,6 +19,7 @@ public interface IOutboundOrderItemService {
     OutboundOrderItemResponseDto update(OutboundOrderItemRequestDto request, UUID outboundOrderId);
     void removeItem(Set<UUID> productIds, Map<UUID, OutboundOrderItem> existingItemMap);
 //    OutboundOrderItemResponseDto addSingleItem (OutboundOrderItemRequestDto request, UUID orderId);
+    void returnSerials(OutboundOrderItem item);
     void deleteItem (UUID productId, UUID outOrderId);
 
     List<OutboundOrderItemResponseDto> getItemsByOrderId(UUID outboundOrderId);

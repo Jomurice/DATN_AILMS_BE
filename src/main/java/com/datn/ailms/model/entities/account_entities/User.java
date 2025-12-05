@@ -61,11 +61,15 @@ public class User {
     @OneToMany(mappedBy = "createdBy")
     private Set<PurchaseOrder> createdOrders;
 
+    @ToString.Exclude
     @OneToMany(mappedBy = "createdBy")
     private Set<OutboundOrder> createOutbound;
 
     @OneToMany(mappedBy = "exportedBy")
     private Set<OutboundOrder> exportedOutbound;
+
+    @OneToMany(mappedBy = "canceledBy")
+    private Set<OutboundOrder> canceledOutbound;
 
     @OneToMany(mappedBy = "scannedBy")
     private Set<ProductDetail> scannedItems;

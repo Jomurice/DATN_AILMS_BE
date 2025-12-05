@@ -14,7 +14,7 @@ import java.util.UUID;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class OutboundOrderRequestDto {
     String code;
-    String customer;
+    UUID customerId;
     UUID createdBy;
     String status;
     List<OutboundOrderItemRequestDto> items;

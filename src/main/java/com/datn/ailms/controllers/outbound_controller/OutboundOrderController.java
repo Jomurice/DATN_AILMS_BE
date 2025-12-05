@@ -1,6 +1,7 @@
 package com.datn.ailms.controllers.outbound_controller;
 
 import com.datn.ailms.model.dto.request.inventory.ProductConfirmRequestDto;
+import com.datn.ailms.model.dto.request.order.CancelRequestDto;
 import com.datn.ailms.model.dto.request.order.ExportRequestDto;
 import com.datn.ailms.model.dto.request.order.OutboundOrderRequestDto;
 import com.datn.ailms.model.dto.response.ApiResp;
@@ -52,13 +53,37 @@ public class OutboundOrderController {
                 .build();
     }
 
-    @PatchMapping("/{orderId}/confirm")
+    @PatchMapping("/{orderId}/confirm-order")
     public ApiResp<OutboundOrderResponseDto> confirmOrder(
             @RequestBody OutboundOrderRequestDto request, @PathVariable UUID orderId){
 
         var result = _outOrderService.confirmOrder(request,orderId);
         return ApiResp.<OutboundOrderResponseDto>builder()
                 .result(result)
+                .build();
+    }
+
+    @PatchMapping("/{orderId}/cancel")
+    public ApiResp<Void> cancelOutbound(@PathVariable UUID orderId, @RequestBody CancelRequestDto request){
+        _outOrderService.cancelOutbound(orderId,request);
+        return ApiResp.<Void>builder()
+                .message("Cancel outbound success !")
+                .build();
+    }
+
+    @PatchMapping("/{orderId}/confirm-cancel")
+    public ApiResp<Void> confirmCancel(@PathVariable UUID orderId){
+        _outOrderService.confirmCancel(orderId);
+        return ApiResp.<Void>builder()
+                .message("Confirm cancel outbound success !")
+                .build();
+    }
+
+    @PatchMapping("/{orderId}/reject-cancel")
+    public ApiResp<Void> rejectCancel(@PathVariable UUID orderId){
+        _outOrderService.rejectCancel(orderId);
+        return ApiResp.<Void>builder()
+                .message("Reject cancel outbound success !")
                 .build();
     }
 
