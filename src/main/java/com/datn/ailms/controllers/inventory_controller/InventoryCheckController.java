@@ -7,6 +7,11 @@ import com.datn.ailms.model.dto.response.inventory_check.InventoryCheckItemRespo
 import com.datn.ailms.model.dto.response.inventory_check.InventoryCheckResponseDto;
 import com.datn.ailms.interfaces.inventory_check.IInventoryCheckService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,11 +24,15 @@ public class InventoryCheckController {
 
     final IInventoryCheckService _checkService;
 
-    // --- Phiếu Kiểm Kê (check_inventory) - CRUD & Flow ---
-
+    // ✅ GET ALL (PHÂN TRANG & LỌC) - CHỈ GIỮ HÀM NÀY
     @GetMapping
-    public ApiResp<List<InventoryCheckResponseDto>> getAll() {
-        return ApiResp.<List<InventoryCheckResponseDto>>builder().result(_checkService.getAll()).build();
+    public ApiResp<Page<InventoryCheckResponseDto>> getAll(
+            @RequestParam(required = false, defaultValue = "ALL") String status,
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        return ApiResp.<Page<InventoryCheckResponseDto>>builder()
+                .result(_checkService.getAll(status, pageable))
+                .build();
     }
 
     @GetMapping("/{id}")
@@ -65,6 +74,7 @@ public class InventoryCheckController {
         return ApiResp.<String>builder().result("Summary for Check ID: " + id).build();
     }
     @PostMapping("/{id}/close")
+//    @PreAuthorize("hasAuthority('ADMIN')")
     public ApiResp<InventoryCheckResponseDto> closeCheck(@PathVariable UUID id) {
         return ApiResp.<InventoryCheckResponseDto>builder()
                 .result(_checkService.closeCheck(id))

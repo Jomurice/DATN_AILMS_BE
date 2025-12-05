@@ -1,5 +1,6 @@
 package com.datn.ailms.model.entities.inventory_entities;
 
+import com.datn.ailms.model.entities.account_entities.User;
 import com.datn.ailms.model.entities.product_entities.ProductDetail;
 import jakarta.persistence.*;
 import lombok.*;
@@ -9,7 +10,9 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Data
+//@Data
+@Getter // ✅ SỬA
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -39,6 +42,12 @@ public class InventoryCheckItem {
     String status; // MATCHED, SHORTAGE, OVERAGE, UNKNOWN
 
     String note;
+
+    // ✅ THÊM MỚI: Lưu người quét
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "scanned_by")
+    User scannedBy;
+
     LocalDateTime checkedTime;
     LocalDateTime createdAt;
     LocalDateTime updatedAt;
