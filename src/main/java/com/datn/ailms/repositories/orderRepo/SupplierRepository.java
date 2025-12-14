@@ -12,8 +12,7 @@ import java.util.UUID;
 @Repository
 public interface SupplierRepository extends JpaRepository<Supplier, UUID> {
 
-    @Query(value = "SELECT * FROM suppliers s " +
-            "WHERE (:active IS NULL OR s.active = :active) " +
+    @Query(value = "SELECT * FROM suppliers s WHERE (:active IS NULL OR s.active = :active) " +
             "AND unaccent(lower(s.company_name)) LIKE unaccent(lower(concat('%', :companyName, '%')))",
             nativeQuery = true)
     Page<Supplier> searchSuppliers(@Param("companyName") String companyName,
