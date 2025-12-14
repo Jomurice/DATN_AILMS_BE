@@ -26,7 +26,7 @@ public class PasswordResetService {
         User user = _userService.getUserEntityByEmail(request.getEmail());
         String otpCode = _otpService.createOtp(user.getId());
 
-        String subject = "Khôi phục mật khẩu";
+        String subject = "Khôi; phục mật khẩu";
         String content = "Mã OTP của bạn là: " + otpCode +
                 "\nVui lòng nhập mã OTP này để đổi mật khẩu." +
                 "\nLưu ý: Mã OTP chỉ có hiệu lực trong vòng 5 phút.";
@@ -36,7 +36,8 @@ public class PasswordResetService {
 
     public boolean verifyOTP(PasswordRequestDto request) {
         User user = _userService.getUserEntityByEmail(request.getEmail());
-        Otp otpEntity = _otpRepository.findByUserIdAndOtpCode(user.getId(), request.getOtpCode()).orElseThrow(() -> new AppException(ErrorCode.OTP_INVALID));
+        Otp otpEntity = _otpRepository.findByUserIdAndOtpCode(user.getId(), request.getOtpCode()).orElseThrow(()
+                -> new AppException(ErrorCode.OTP_INVALID));
         return true;
     }
 

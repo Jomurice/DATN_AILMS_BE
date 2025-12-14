@@ -10,6 +10,8 @@ import com.datn.ailms.repositories.BrandRepository;
 import com.datn.ailms.repositories.productRepo.CategoryRepository;
 import com.datn.ailms.repositories.productRepo.ProductRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -88,6 +90,22 @@ public class ProductService {
     public void delete(UUID id) {
         productRepo.deleteById(id);
     }
+
+//    public Page<ProductResponseDto> searchProducts(UUID categoryId, String name, Pageable pageable) {
+//        String searchName = (name != null) ? name : "";
+//        Category category = null;
+//
+//        if (categoryId != null) {
+//            category = _categoryRepo.findById(categoryId).orElse(null);
+//        }
+//
+//        Page<Product> products;
+//        if (category != null) {
+//            products = productRepo.findByCategoryAndNameContainingIgnoreCase(category, searchName, pageable);
+//        } else {
+//            products = productRepo.findByCategoryAndNameContainingIgnoreCase(searchName, pageable);
+//        }
+//    }
 
 
 }
