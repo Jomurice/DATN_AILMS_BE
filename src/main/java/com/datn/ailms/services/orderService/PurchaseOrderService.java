@@ -13,24 +13,40 @@ import com.datn.ailms.model.entities.account_entities.User;
 import com.datn.ailms.model.entities.enums.SerialStatus;
 import com.datn.ailms.model.entities.order_entites.PurchaseOrder;
 import com.datn.ailms.model.entities.order_entites.PurchaseOrderItem;
+import com.datn.ailms.model.entities.order_entites.Supplier;
 import com.datn.ailms.model.entities.product_entities.Product;
 import com.datn.ailms.model.entities.product_entities.ProductDetail;
 import com.datn.ailms.repositories.orderRepo.PurchaseOrderItemRepository;
 import com.datn.ailms.repositories.orderRepo.PurchaseOrderRepository;
+import com.datn.ailms.repositories.orderRepo.SupplierRepository;
 import com.datn.ailms.repositories.productRepo.ProductDetailRepository;
 import com.datn.ailms.repositories.productRepo.ProductRepository;
 import com.datn.ailms.repositories.userRepo.UserRepository;
 import com.datn.ailms.repositories.warehousetopology.WarehouseRepository;
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.WriterException;
+import com.google.zxing.client.j2se.MatrixToImageWriter;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.qrcode.QRCodeWriter;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 @Service
 @RequiredArgsConstructor
@@ -45,6 +61,7 @@ public class PurchaseOrderService implements IPurchaseOrderService {
     final ProductDetailRepository _detailRepo;
     final PurchaseOrderItemRepository purchaseOrderItemRepository;
     final WarehouseRepository _warehouseRepo;
+    final SupplierRepository supplierRepo;
     @Override
     public PurchaseOrderResponseDto create(PurchaseOrderRequestDto request) {
         PurchaseOrder order = _orderMapper.toEntity(request);
@@ -99,9 +116,12 @@ public class PurchaseOrderService implements IPurchaseOrderService {
     public PurchaseOrderResponseDto update(UUID id, PurchaseOrderRequestDto request) {
         PurchaseOrder existing = _orderRepo.findById(id)
                 .orElseThrow(() -> new RuntimeException("PurchaseOrder not found"));
+
+        Supplier supplier = supplierRepo.findById(request.getSupplierId())
+                .orElseThrow(() -> new RuntimeException("Supplier not found"));
         // MapStruct có thể hỗ trợ update nếu bạn khai báo @MappingTarget
         existing.setCode(request.getCode());
-        existing.setSupplier(request.getSupplier());
+        existing.setSupplier(supplier);
         existing.setStatus(request.getStatus());
         existing.setCreatedAt(request.getCreatedAt());
 
@@ -193,5 +213,53 @@ public class PurchaseOrderService implements IPurchaseOrderService {
                 )
                 .toList();
     }
+
+    public void generateQrCodeForPurchaseOrder(UUID purchaseOrderId, OutputStream os)
+            throws WriterException, IOException {
+
+        List<PurchaseOrderItem> items = purchaseOrderItemRepository.findByPurchaseOrderId(purchaseOrderId);
+
+        if (items == null || items.isEmpty()) {
+            throw new AppException(ErrorCode.ORDER_NOT_FOUND);
+        }
+
+        ZipOutputStream zipOut = new ZipOutputStream(os);
+        QRCodeWriter writer = new QRCodeWriter();
+
+        for(PurchaseOrderItem item : items) {
+            for(ProductDetail detail : item.getProductDetails()) {
+
+                String qrCodeText = detail.getSerialNumber();
+
+                BitMatrix bitMatrix = writer.encode(qrCodeText, BarcodeFormat.QR_CODE, 300,300);
+
+                String fileName = detail.getProduct().getName() + "_"  + qrCodeText + ".png";
+
+                zipOut.putNextEntry(new ZipEntry(fileName));
+                MatrixToImageWriter.writeToStream(bitMatrix, "PNG", zipOut);
+                zipOut.closeEntry();
+            }
+        }
+
+        zipOut.finish();
+    }
+
+    public Page<PurchaseOrderResponseDto> searchPurchaseOrders(int page, int size, String status, String keyword) {
+
+        if (keyword == null) keyword = "";
+        if (status != null && status.isEmpty()) status = null;
+
+        Pageable pageable = PageRequest.of(
+                page,
+                size,
+                Sort.by(Sort.Direction.DESC, "createdAt")
+        );
+
+        Page<PurchaseOrder> orders =
+                _orderRepo.searchPurchaseOrder(status, keyword, pageable);
+
+        return orders.map(_orderMapper::toDto);
+    }
+
 
 }

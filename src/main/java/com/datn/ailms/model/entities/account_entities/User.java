@@ -1,5 +1,6 @@
 package com.datn.ailms.model.entities.account_entities;
 
+import com.datn.ailms.model.entities.order_entites.OutboundOrder;
 import com.datn.ailms.model.entities.order_entites.PurchaseOrder;
 import com.datn.ailms.model.entities.order_entites.PurchaseOrderItem;
 import com.datn.ailms.model.entities.product_entities.ProductDetail;
@@ -59,6 +60,16 @@ public class User {
 
     @OneToMany(mappedBy = "createdBy")
     private Set<PurchaseOrder> createdOrders;
+
+    @ToString.Exclude
+    @OneToMany(mappedBy = "createdBy")
+    private Set<OutboundOrder> createOutbound;
+
+    @OneToMany(mappedBy = "exportedBy")
+    private Set<OutboundOrder> exportedOutbound;
+
+    @OneToMany(mappedBy = "canceledBy")
+    private Set<OutboundOrder> canceledOutbound;
 
     @OneToMany(mappedBy = "scannedBy")
     private Set<ProductDetail> scannedItems;

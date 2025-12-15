@@ -1,15 +1,16 @@
 package com.datn.ailms.controllers.order_controllers;
 
-import com.datn.ailms.interfaces.order_interface.IPurchaseOrderService;
+
 import com.datn.ailms.model.dto.request.order.PurchaseOrderRequestDto;
 import com.datn.ailms.model.dto.response.ApiResp;
 import com.datn.ailms.model.dto.response.ProductDetailSerialDto;
 import com.datn.ailms.model.dto.response.order.PurchaseOrderResponseDto;
-import com.datn.ailms.model.entities.product_entities.ProductDetail;
 import com.datn.ailms.services.orderService.PurchaseOrderService;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -46,7 +47,6 @@ public class PurchaseOrderController {
         var result = _purchaseOrderService.update(id, purchaseOrderRequestDto);
         return ApiResp.<PurchaseOrderResponseDto>builder().result(result).build();
     }
-
     @DeleteMapping("/{id}")
     ApiResp<PurchaseOrderResponseDto> delete(@PathVariable UUID id){
          _purchaseOrderService.delete(id);
@@ -71,5 +71,31 @@ public class PurchaseOrderController {
         return ApiResp.<List<ProductDetailSerialDto>>builder().result(serials).build();
     }
 
+    @GetMapping("/{purchaseOrderId}/qrcodes")
+    public void downloadQrCodes(
+            @PathVariable UUID purchaseOrderId,
+            HttpServletResponse response
+    ) throws Exception {
 
+        response.setContentType("application/zip");
+        response.setHeader("Content-Disposition", "attachment; filename=\"qrcodes.zip\"");
+
+        _purchaseOrderService.generateQrCodeForPurchaseOrder(purchaseOrderId, response.getOutputStream());
+    }
+
+    @GetMapping("/search-po")
+    public ApiResp<Page<PurchaseOrderResponseDto>> searchPurchaseOrders(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String keyword
+    ) {
+        Page<PurchaseOrderResponseDto> orders =
+                _purchaseOrderService.searchPurchaseOrders(page, size, status, keyword);
+
+        return ApiResp.<Page<PurchaseOrderResponseDto>>builder()
+                .message("Get purchase orders successfully")
+                .result(orders)
+                .build();
+    }
 }

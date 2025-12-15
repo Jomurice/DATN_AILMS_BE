@@ -15,7 +15,7 @@ import java.util.UUID;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class PurchaseOrderRequestDto {
     String code;
-    String supplier;
+    UUID supplierId;
     String status;
     LocalDate createdAt;
     UUID createdBy;

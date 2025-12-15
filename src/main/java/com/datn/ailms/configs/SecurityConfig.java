@@ -23,6 +23,21 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain chain(HttpSecurity http,customJwtDecoder customJwtDecoder) throws Exception {
+        //        http.csrf(AbstractHttpConfigurer::disable);
+//        http.cors(Customizer.withDefaults());
+//        http.authorizeHttpRequests(config -> {
+//            // 1. Các API này AI CŨNG ĐƯỢC VÀO (Công khai)
+//            config.requestMatchers(
+//                    "/api/auth/**",
+//                    "/api/users/register",
+//                    "/api/products/**",  // Ví dụ: Cho xem sản phẩm thoải mái (tùy bạn)
+//                    "/v3/api-docs/**",
+//                    "/swagger-ui/**",
+//                    "/swagger-ui.html"
+//            ).permitAll();
+//            // 2. Tất cả các API khác: BẮT BUỘC PHẢI CÓ TOKEN
+//            config.anyRequest().authenticated();
+//        });
         http.csrf(AbstractHttpConfigurer::disable);
 
         // ✅ bật CORS và lấy config từ bean corsConfigurationSource
