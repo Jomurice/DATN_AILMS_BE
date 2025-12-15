@@ -2,9 +2,11 @@ package com.datn.ailms.services.orderService;
 
 import com.datn.ailms.exceptions.AppException;
 import com.datn.ailms.exceptions.ErrorCode;
+import com.datn.ailms.filter.OutboundOrderSpec;
 import com.datn.ailms.interfaces.order_interface.IOutboundOrderService;
 import com.datn.ailms.mapper.OutboundOrderMapper;
 import com.datn.ailms.mapper.ProductDetailMapper;
+import com.datn.ailms.model.dto.OutboundOrderFilter;
 import com.datn.ailms.model.dto.request.inventory.ProductConfirmRequestDto;
 import com.datn.ailms.model.dto.request.order.CancelRequestDto;
 import com.datn.ailms.model.dto.request.order.OutboundOrderRequestDto;
@@ -29,6 +31,8 @@ import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -55,6 +59,13 @@ public class OutboundOrderService implements IOutboundOrderService {
     final OutboundOrderMapper _outboundOrderMapper;
     final ProductDetailMapper _productDetailMapper;
     final OutboundOrderItemService _outItemService;
+
+    @Override
+    public Page<OutboundOrderResponseDto> search(OutboundOrderFilter f, Pageable pageable) {
+       return _outboundOrderRepo
+               .findAll(OutboundOrderSpec.filter(f),pageable)
+               .map(_outboundOrderMapper::toDto);
+    }
 
     @Override
     public OutboundOrderResponseDto create(OutboundOrderRequestDto request) {
@@ -84,11 +95,22 @@ public class OutboundOrderService implements IOutboundOrderService {
     }
 
     @Override
-    public List<OutboundOrderResponseDto> getAll() {
-        List<OutboundOrder> orders = _outboundOrderRepo.findAll("DRAFT");
-        return _outboundOrderMapper.toResponseList(orders);
+    public OutboundOrderResponseDto getByCode(String code) {
+        OutboundOrder outboundOrder = _outboundOrderRepo.findByCode(code)
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
 
+        if(!outboundOrder.getStatus().equals(OrderStatus.DRAFT.name())){
+            throw new AppException(ErrorCode.ORDER_ALREADY_COMPLETED);
+        }
+
+        return _outboundOrderMapper.toDto(outboundOrder);
     }
+
+//    @Override
+//    public Page<OutboundOrderResponseDto> getAll(Pageable pageable) {
+//        Page<OutboundOrder> orders = _outboundOrderRepo.findAll("DRAFT",pageable);
+//        return orders.map(_outboundOrderMapper::toDto);
+//    }
 
     @Override
     public OutboundOrderResponseDto update(OutboundOrderRequestDto request, UUID outboundOrderId) {
@@ -279,14 +301,14 @@ public class OutboundOrderService implements IOutboundOrderService {
         return _productDetailMapper.toResponseList(scannedList);
     }
 
-    @Override
-    public List<OutboundOrderResponseDto> getAllByStatus(String status) {
-        if (status == null || status.trim().isEmpty()) {
-            return getAll();
-        }
-        List<OutboundOrder> orders = _outboundOrderRepo.findByStatus(status);
-        return _outboundOrderMapper.toResponseList(orders);
-    }
+//    @Override
+//    public List<OutboundOrderResponseDto> getAllByStatus(String status) {
+//        if (status == null || status.trim().isEmpty()) {
+//            return getAll();
+//        }
+//        List<OutboundOrder> orders = _outboundOrderRepo.findByStatus(status);
+//        return _outboundOrderMapper.toResponseList(orders);
+//    }
 
     @Override
     public List<OutboundOrderResponseDto> getAllByProductId(UUID productId) {

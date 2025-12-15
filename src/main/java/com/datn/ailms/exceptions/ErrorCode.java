@@ -11,7 +11,7 @@ public enum ErrorCode {
     USER_NOT_EXISTED(1005, "User not existed", HttpStatus.NOT_FOUND),
     CANT_FIND_SERIAL_NUMBER(1006,"Don't have Serial Number",HttpStatus.NOT_FOUND),
 
-    USERNAME_EXISTED(1006, "User already exists", HttpStatus.CONFLICT),
+    USERNAME_EXISTED(1006, "Username already exists", HttpStatus.CONFLICT),
     EMAIL_EXISTED(1007, "Email already exists", HttpStatus.CONFLICT),
     PRODUCT_NOT_FOUND(1008, "Product not found", HttpStatus.NOT_FOUND),
     MENU_EXISTED(1009, "Menu already exists", HttpStatus.CONFLICT),
