@@ -1,7 +1,9 @@
 package com.datn.ailms.model.entities.product_entities;
 
 import com.datn.ailms.model.entities.account_entities.User;
+import com.datn.ailms.model.entities.inventory_entities.InventoryCheckItem;
 import com.datn.ailms.model.entities.enums.SerialStatus;
+import com.datn.ailms.model.entities.order_entites.OutboundOrderItem;
 import com.datn.ailms.model.entities.order_entites.PurchaseOrderItem;
 import com.datn.ailms.model.entities.topo_entities.Warehouse;
 import jakarta.persistence.*;
@@ -9,6 +11,8 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(
@@ -50,10 +54,21 @@ public class ProductDetail {
     @JoinColumn(name = "purchase_order_item_id")
     PurchaseOrderItem purchaseOrderItem;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "outbound_order_item_id")
+    OutboundOrderItem outboundOrderItem;
+
 
     // 👉 User thực hiện scan
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "scanned_by")
     private User scannedBy;
+
+    // MappedBy đê JPA biết là quan hệ 2 chiều giữa prDe và CheckInventory
+//    @ManyToMany(mappedBy = "productDetails")
+//    private Set<InventoryCheckItem> checkInventories = new HashSet<>();
+
+    @OneToMany(mappedBy = "productDetail", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Set<InventoryCheckItem> inventoryCheckItems; // Đặt tên mới để tránh nhầm lẫn
 }
 

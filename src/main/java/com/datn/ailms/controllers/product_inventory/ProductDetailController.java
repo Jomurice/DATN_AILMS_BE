@@ -8,6 +8,7 @@ import com.datn.ailms.model.dto.request.inventory.ProductGenerateSerialRequest;
 import com.datn.ailms.model.dto.response.ApiResp;
 import com.datn.ailms.model.dto.response.inventory.GenerateSerialForPOResponse;
 import com.datn.ailms.model.dto.response.inventory.ProductDetailResponseDto;
+import com.datn.ailms.model.entities.enums.SerialStatus;
 import com.datn.ailms.model.entities.product_entities.ProductDetail;
 import com.datn.ailms.repositories.productRepo.ProductDetailRepository;
 import com.datn.ailms.services.inventoryService.IProductConfirmService;
@@ -87,6 +88,23 @@ public class ProductDetailController {
                 .orElseThrow(() -> new EntityNotFoundException("ProductDetail not found: " + serial));
         return ApiResp.<ProductDetailResponseDto>builder()
                 .result(_productDetailMapper.toResponse(detail))
+                .build();
+    }
+    @GetMapping("/warehouse/{warehouseId}")
+    public ApiResp<List<ProductDetailResponseDto>> getByWarehouseId(@PathVariable UUID warehouseId) {
+        // Định nghĩa trạng thái "Đang tồn kho"
+        List<SerialStatus> validStatuses = List.of(
+                SerialStatus.IN_WAREHOUSE,
+                SerialStatus.AVAILABLE,
+                SerialStatus.IN_STOCK
+        );
+
+        // Gọi Repo lọc theo WarehouseID VÀ Status
+        // Đảm bảo ProductDetailRepository đã có phương thức findByWarehouseIdAndStatusIn
+        List<ProductDetail> result = _productDetailRepository.findByWarehouseIdAndStatusIn(warehouseId, validStatuses);
+
+        return ApiResp.<List<ProductDetailResponseDto>>builder()
+                .result(_productDetailMapper.toResponseList(result))
                 .build();
     }
 }
