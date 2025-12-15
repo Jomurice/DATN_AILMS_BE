@@ -1,5 +1,6 @@
 package com.datn.ailms.controllers.outbound_controller;
 
+import com.datn.ailms.model.dto.OutboundOrderFilter;
 import com.datn.ailms.model.dto.request.inventory.ProductConfirmRequestDto;
 import com.datn.ailms.model.dto.request.order.CancelRequestDto;
 import com.datn.ailms.model.dto.request.order.ExportRequestDto;
@@ -10,6 +11,8 @@ import com.datn.ailms.model.dto.response.inventory.ProductDetailResponseDto;
 import com.datn.ailms.model.dto.response.order.OutboundOrderResponseDto;
 import com.datn.ailms.services.orderService.OutboundOrderService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.query.Param;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,9 +27,23 @@ public class OutboundOrderController {
     final OutboundOrderService _outOrderService;
 
 
-    @GetMapping
-    public ApiResp<List<OutboundOrderResponseDto>> getAll(){
-        return ApiResp.<List<OutboundOrderResponseDto>>builder().result(_outOrderService.getAll()).build();
+//    @GetMapping
+//    public ApiResp<Page<OutboundOrderResponseDto>> getAll(Pageable pageable){
+//        return ApiResp.<Page<OutboundOrderResponseDto>>builder().result(_outOrderService.getAll(pageable)).build();
+//    }
+
+    @GetMapping("/search")
+    public ApiResp<Page<OutboundOrderResponseDto>> search(OutboundOrderFilter f, Pageable pageable){
+        var result = _outOrderService.search(f,pageable);
+        return ApiResp.<Page<OutboundOrderResponseDto>>builder().result(result).build();
+    }
+
+    @GetMapping("/code/{codeOrder}")
+    public ApiResp<OutboundOrderResponseDto> getByCode(@PathVariable String codeOrder){
+        var result = _outOrderService.getByCode(codeOrder);
+        return ApiResp.<OutboundOrderResponseDto>builder()
+                .result(result)
+                .build();
     }
 
     @PostMapping
@@ -96,14 +113,14 @@ public class OutboundOrderController {
                 .build();
     }
 
-    @GetMapping("/status/{status}")
-    public ApiResp<List<OutboundOrderResponseDto>> getAllByStatus(@PathVariable String status){
-        return ApiResp.<List<OutboundOrderResponseDto>>builder()
-                .code(0)
-                .message("success")
-                .result(_outOrderService.getAllByStatus(status))
-                .build();
-    }
+//    @GetMapping("/status/{status}")
+//    public ApiResp<List<OutboundOrderResponseDto>> getAllByStatus(@PathVariable String status){
+//        return ApiResp.<List<OutboundOrderResponseDto>>builder()
+//                .code(0)
+//                .message("success")
+//                .result(_outOrderService.getAllByStatus(status))
+//                .build();
+//    }
 
     @GetMapping("/{orderId}/serials")
     public ApiResp<List<ProductDetailResponseDto>> getSerials(
