@@ -27,7 +27,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -71,7 +73,6 @@ public class InventoryCheckService implements IInventoryCheckService {
         return mapper.toResponse(check);
     }
 
-    // ✅ CREATE: TẠO HEADER + SNAPSHOT + TRẠNG THÁI DRAFT (CHƯA KIỂM)
     @Override
     public InventoryCheckResponseDto create(InventoryCheckRequestDto request) {
         try {
@@ -91,9 +92,11 @@ public class InventoryCheckService implements IInventoryCheckService {
             }
             check.setCreatedAt(LocalDateTime.now());
             check.setUpdatedAt(LocalDateTime.now());
-
-            // 🔥 SỬA: Để mặc định là DRAFT (Chưa kiểm)
             check.setStatus("DRAFT");
+
+            // 🔥 SỬA: BẮT BUỘC DEADLINE LÀ HẾT NGÀY HÔM NAY (23:59:59)
+            // Backend tự set, không quan tâm FE gửi ngày nào
+            check.setDeadline(LocalDateTime.of(LocalDate.now(), LocalTime.MAX));
 
             InventoryCheck savedCheck = checkRepo.save(check);
 
@@ -132,7 +135,7 @@ public class InventoryCheckService implements IInventoryCheckService {
         }
     }
 
-    // --- SCAN SERIAL (SỬA ĐỂ TỰ ĐỘNG CHUYỂN TRẠNG THÁI) ---
+    // --- SCAN SERIAL (GIỮ NGUYÊN LOGIC CHẶN HÀNG THỪA) ---
     @Override
     public InventoryCheckItemResponseDto scanSerial(UUID checkId, String serialNumber, UUID scannedByUserId) {
         InventoryCheck check = checkRepo.findById(checkId)
@@ -153,34 +156,24 @@ public class InventoryCheckService implements IInventoryCheckService {
         InventoryCheckItem item = itemRepo.findByInventoryCheckIdAndSerialNumber(checkId, cleanSerial).orElse(null);
 
         if (item != null && item.getCountedQuantity() >= 1) {
-            // Nếu đã đếm rồi (số lượng >= 1) -> Báo lỗi ngay
+            // Nếu đã đếm rồi -> Báo lỗi
             throw new RuntimeException("SERIAL_ALREADY_SCANNED");
-            // Hoặc dùng: throw new AppException(ErrorCode.SERIAL_ALREADY_SCANNED); nếu bạn đã khai báo Enum
         }
+
         // 3. Lấy thông tin người quét
         User scanner = null;
         if (scannedByUserId != null) {
             scanner = userRepository.findById(scannedByUserId).orElse(null);
         }
-        // 4. Xử lý Item
+
+        // 4. Xử lý Item (CHẶN HÀNG THỪA)
         if (item == null) {
-            // Tạo mới (Hàng thừa - Overage)
-            ProductDetail pd = productDetailRepo.findBySerialNumberIgnoreCase(cleanSerial).orElse(null);
-            item = InventoryCheckItem.builder()
-                    .inventoryCheck(check)
-                    .productDetail(pd)
-                    .serialNumber(cleanSerial)
-                    .systemQuantity(0)
-                    .countedQuantity(0) // Ban đầu là 0, xuống dưới sẽ +1
-                    .status("OVERAGE")
-                    .scannedBy(scanner)
-                    .createdAt(LocalDateTime.now())
-                    .updatedAt(LocalDateTime.now())
-                    .build();
-            item = itemRepo.save(item);
+            // Thay vì tạo mới status OVERAGE, ta chặn luôn
+            throw new RuntimeException("Lỗi: Serial này không có trong sổ sách tồn kho của kho này");
         }
+
         // 5. Tăng số lượng (Từ 0 lên 1)
-        item.setCountedQuantity(1); // Luôn set là 1 thay vì +1
+        item.setCountedQuantity(1);
         item.setCheckedTime(LocalDateTime.now());
         item.setUpdatedAt(LocalDateTime.now());
         if (scanner != null) {
@@ -200,8 +193,23 @@ public class InventoryCheckService implements IInventoryCheckService {
         existing.setNote(request.getNote()); existing.setDeadline(request.getDeadline()); existing.setUpdatedAt(LocalDateTime.now());
         return mapper.toResponse(checkRepo.save(existing));
     }
+
     @Override
-    public void delete(UUID id) { if (!checkRepo.existsById(id)) throw new AppException(ErrorCode.INVENTORY_CHECK_NOT_FOUND); checkRepo.deleteById(id); }
+    public void delete(UUID id) {
+        InventoryCheck check = checkRepo.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.INVENTORY_CHECK_NOT_FOUND));
+
+        // ⚠️ BẮT BUỘC CÓ: Chặn xóa nếu không phải là Nháp
+        if (!"DRAFT".equals(check.getStatus())) {
+            throw new RuntimeException("Chỉ được xóa phiếu ở trạng thái NHÁP (DRAFT).");
+        }
+
+        // Xóa các dòng chi tiết trước (để tránh lỗi database)
+        List<InventoryCheckItem> items = itemRepo.findByInventoryCheckId(id);
+        itemRepo.deleteAll(items);
+
+        checkRepo.delete(check);
+    }
     @Override
     public InventoryCheckResponseDto completeCheck(UUID checkId) {
         InventoryCheck check = checkRepo.findById(checkId).orElseThrow(() -> new AppException(ErrorCode.INVENTORY_CHECK_NOT_FOUND));
@@ -210,13 +218,19 @@ public class InventoryCheckService implements IInventoryCheckService {
         for (InventoryCheckItem item : items) {
             int sys = item.getSystemQuantity() != null ? item.getSystemQuantity() : 0;
             int cnt = item.getCountedQuantity() != null ? item.getCountedQuantity() : 0;
-            if (sys == cnt) item.setStatus("MATCHED"); else if (sys > cnt) item.setStatus("SHORTAGE"); else item.setStatus("OVERAGE");
+
+            // Logic cũ vẫn giữ để tính toán
+            if (sys == cnt) item.setStatus("MATCHED");
+            else if (sys > cnt) item.setStatus("SHORTAGE");
+            else item.setStatus("OVERAGE");
+
             item.setUpdatedAt(LocalDateTime.now());
         }
         itemRepo.saveAll(items);
         check.setStatus("PENDING_RECONCILIATION"); check.setUpdatedAt(LocalDateTime.now());
         return mapper.toResponse(checkRepo.save(check));
     }
+
     @Override
     public InventoryCheckResponseDto closeCheck(UUID checkId) {
         InventoryCheck check = checkRepo.findById(checkId).orElseThrow(() -> new AppException(ErrorCode.INVENTORY_CHECK_NOT_FOUND));
