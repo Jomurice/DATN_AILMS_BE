@@ -11,10 +11,8 @@ import com.nimbusds.jose.JOSEException;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
 
 import java.text.ParseException;
 
@@ -39,5 +37,18 @@ public class AuthenticationController {
                 .result(result)
                 .build();
     }
+
+    @PostMapping("/logout")
+    public ApiResp<Void> logout(
+            @RequestHeader(value = "Authorization", required = false) String authorization
+    ) {
+        return ApiResp.<Void>builder()
+                .message("Logout success")
+                .build();
+    }
+
+
+
+
 
 }
