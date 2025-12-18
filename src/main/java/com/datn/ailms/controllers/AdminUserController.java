@@ -10,8 +10,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.UUID;
-
 
 @RestController
 @RequestMapping("/api/admin/users")
@@ -21,7 +19,7 @@ public class AdminUserController {
     private final UserService _userService;
 
     @PatchMapping("/{userId}/active")
-    public ApiResp<UserResponseDto> activeAccount(@PathVariable UUID userId) {
+    public ApiResp<UserResponseDto> activeAccount(@PathVariable String userId) {
         return ApiResp.<UserResponseDto>builder()
                 .result(_userService.activeAccount(userId))
                 .message("Account is active")
@@ -29,7 +27,7 @@ public class AdminUserController {
     }
 
     @PatchMapping("/{userId}/blocked")
-    public ApiResp<UserResponseDto> blockAccount(@PathVariable UUID userId) {
+    public ApiResp<UserResponseDto> blockAccount(@PathVariable String userId) {
         return ApiResp.<UserResponseDto>builder()
                 .result(_userService.blockedAccount(userId))
                 .message("Account is blocked")

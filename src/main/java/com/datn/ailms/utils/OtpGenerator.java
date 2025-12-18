@@ -16,19 +16,4 @@ public class OtpGenerator {
         }
         return builder.toString();
     }
-
-    public String generateCodeNumbers(int length) {
-
-        if(length <= 0){
-            throw new IllegalArgumentException("Length must be greater than 0");
-        }
-
-        SecureRandom random = new SecureRandom();
-        StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < length; i++) {
-            String digitalCode = String.valueOf(random.nextInt(10));
-            builder.append(digitalCode);
-        }
-        return builder.toString();
-    }
 }
