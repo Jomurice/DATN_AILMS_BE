@@ -23,7 +23,7 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain chain(HttpSecurity http,customJwtDecoder customJwtDecoder) throws Exception {
-        //        http.csrf(AbstractHttpConfigurer::disable);
+//                http.csrf(AbstractHttpConfigurer::disable);
 //        http.cors(Customizer.withDefaults());
 //        http.authorizeHttpRequests(config -> {
 //            // 1. Các API này AI CŨNG ĐƯỢC VÀO (Công khai)
