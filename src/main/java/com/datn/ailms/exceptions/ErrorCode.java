@@ -3,14 +3,15 @@ package com.datn.ailms.exceptions;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 
 @Getter
 public enum ErrorCode {
     UNAUTHENTICATED(1001,"Unauthenticated", HttpStatus.UNAUTHORIZED),
     USER_NOT_EXISTED(1005, "User not existed", HttpStatus.NOT_FOUND),
-    CANT_FIND_SERIAL_NUMBER(1006,"Dont have Serial Number",HttpStatus.NOT_FOUND),
+    CANT_FIND_SERIAL_NUMBER(1006,"Don't have Serial Number",HttpStatus.NOT_FOUND),
 
-    USERNAME_EXISTED(1006, "User already exists", HttpStatus.CONFLICT),
+    USERNAME_EXISTED(1006, "Username already exists", HttpStatus.CONFLICT),
     EMAIL_EXISTED(1007, "Email already exists", HttpStatus.CONFLICT),
     PRODUCT_NOT_FOUND(1008, "Product not found", HttpStatus.NOT_FOUND),
     MENU_EXISTED(1009, "Menu already exists", HttpStatus.CONFLICT),
@@ -25,6 +26,36 @@ public enum ErrorCode {
     OTP_EXPIRED(1021, "OTP expired", HttpStatus.BAD_REQUEST),
     OTP_INVALID(1022, "OTP invalid", HttpStatus.BAD_REQUEST),
     PASSWORD_INCORRECT(1023, "Password incorrect", HttpStatus.BAD_REQUEST),
+
+    WAREHOUSE_NOT_EXISTED(1025, "Warehouse not existed", HttpStatus.NOT_FOUND),
+    ZONE_NOT_EXISTED(1026, "Zone not existed", HttpStatus.NOT_FOUND),
+    AISLE_NOT_EXISTED(1027, "AISLE not existed", HttpStatus.NOT_FOUND),
+    SHELF_NOT_EXISTED(1028, "Shell not existed", HttpStatus.NOT_FOUND),
+    BIN_NOT_EXISTED(1028, "Bin not existed", HttpStatus.NOT_FOUND),
+    ORDER_NOT_FOUND(1029,"Order not found",HttpStatus.NOT_FOUND),
+    INVALID_PARAM(1030,"Invalid Parameter", HttpStatus.BAD_REQUEST),
+    SERIAL_ALREADY_SCANNED(1031,"Serial had been scanned", HttpStatus.CONFLICT),
+    BIN_FULL(1032,"No more space in Bin", HttpStatus.CONFLICT),
+    SERIAL_NOT_FOUND(1033, "Serial not found", HttpStatus.NOT_FOUND),
+    ORDER_ALREADY_COMPLETED(1034,"Order already completed", HttpStatus.CONFLICT),
+    SERIAL_LIMIT_REACHED(1035, "Out of limit", HttpStatus.CONFLICT),
+    STOCK_NOT_ENOUGH(1036, "Insufficient inventory", HttpStatus.CONFLICT),
+    ITEM_NOT_FOUND(1037, "Item not found", HttpStatus.NOT_FOUND),
+    INVALID_ORDER_STATUS(1038, "Order is not in DRAFT status", HttpStatus.CONFLICT),
+    SERIAL_NOT_IN_ORDER(1039, "Serial not in order", HttpStatus.NOT_FOUND),
+    SERIAL_ALREADY_ASSIGNED_TO_OTHER_ORDER(1040, "Serial already assigned to other order", HttpStatus.CONFLICT),
+    QUANTITY_EXCEEDED(1041, "Quantity exceeded", HttpStatus.CONFLICT),
+    // Thêm mới cho CheckInventory (tiếp tục numbering)
+    INVALID_INPUT(1042, "Invalid input", HttpStatus.BAD_REQUEST),
+    WAREHOUSE_NOT_FOUND(1043, "Warehouse not found", HttpStatus.NOT_FOUND),
+    INVENTORY_CHECK_NOT_FOUND(1044, "Check inventory not found", HttpStatus.NOT_FOUND),
+
+    SUPPLIER_NOT_EXISTED(1045,"Supplier not existed", HttpStatus.NOT_FOUND),
+    CUSTOMER_NOT_EXISTED(1046,"Customer not existed", HttpStatus.NOT_FOUND),
+    PHONE_EXISTED(1047, "Phone already exists", HttpStatus.CONFLICT),
+    ORDER_ALREADY_CANCELED(1048,"Order already canceled", HttpStatus.CONFLICT),
+    ORDER_CANNOT_CANCEL(1049, "Order cannot cancel", HttpStatus.CONFLICT),
+
     ;
 
 

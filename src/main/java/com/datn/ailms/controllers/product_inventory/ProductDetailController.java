@@ -1,16 +1,24 @@
 package com.datn.ailms.controllers.product_inventory;
 
+import com.datn.ailms.interfaces.IProductScanService;
 import com.datn.ailms.mapper.ProductDetailMapper;
+import com.datn.ailms.model.dto.request.inventory.GenerateSerialForPORequest;
+import com.datn.ailms.model.dto.request.inventory.ProductConfirmRequestDto;
+import com.datn.ailms.model.dto.request.inventory.ProductGenerateSerialRequest;
 import com.datn.ailms.model.dto.response.ApiResp;
+import com.datn.ailms.model.dto.response.inventory.GenerateSerialForPOResponse;
 import com.datn.ailms.model.dto.response.inventory.ProductDetailResponseDto;
-import com.datn.ailms.model.entities.product_entities.ProductDetail;
 import com.datn.ailms.model.entities.enums.SerialStatus;
+import com.datn.ailms.model.entities.product_entities.ProductDetail;
 import com.datn.ailms.repositories.productRepo.ProductDetailRepository;
-import com.datn.ailms.repositories.productRepo.ProductRepository;
-import jakarta.persistence.EntityNotFoundException;
+import com.datn.ailms.services.inventoryService.IProductConfirmService;
+import com.datn.ailms.services.inventoryService.ProductConfirmService;
+import com.datn.ailms.services.inventoryService.ProductScanPOService;
+import com.datn.ailms.services.inventoryService.ProductScanService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.UUID;
 
@@ -18,42 +26,85 @@ import java.util.UUID;
 @RequestMapping("/api/product-details")
 @RequiredArgsConstructor
 public class ProductDetailController {
+
     private final ProductDetailRepository _productDetailRepository;
     private final ProductDetailMapper _productDetailMapper;
-    private final ProductRepository productRepo;
+    private final ProductScanService _productScanService;
+    private final ProductConfirmService _productConfirmService;
 
+    private final ProductScanPOService productScanPOService;
+
+    @PostMapping("/create-serial-for-po")
+    public ApiResp<GenerateSerialForPOResponse> createSerialForPO(
+            @RequestBody GenerateSerialForPORequest request) {
+        var result = productScanPOService.generateSerialsForPO(request);
+        return ApiResp.<GenerateSerialForPOResponse>builder().result(result).build();
+    }
+
+    // 1️⃣ Lấy tất cả ProductDetail
     @GetMapping
-    ApiResp<List<ProductDetailResponseDto>> getAll(){
+    public ApiResp<List<ProductDetailResponseDto>> getAll() {
         var result = _productDetailRepository.findAll();
         var toList = _productDetailMapper.toResponseList(result);
         return ApiResp.<List<ProductDetailResponseDto>>builder().result(toList).build();
     }
 
-    // API tạo 1 serial mới chưa gán bin
+    // 2️⃣ Lấy ProductDetail theo productId
+    @GetMapping("/{productId}")
+    public ApiResp<List<ProductDetailResponseDto>> getByProductId(@PathVariable UUID productId) {
+        var result = _productDetailRepository.findByProductId(productId);
+        var toList = _productDetailMapper.toResponseList(result);
+        return ApiResp.<List<ProductDetailResponseDto>>builder().result(toList).build();
+    }
+
+    // 3️⃣ Tạo serial cho toàn bộ PO item (theo orderQuantity)
     @PostMapping("/create-serial")
-    public ApiResp<ProductDetailResponseDto> createSerial(@RequestParam String serial,
-                                                          @RequestParam UUID productId) {
-        var product = productRepo.findById(productId)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
+    public ApiResp<List<ProductDetailResponseDto>> createSerial(@RequestBody ProductGenerateSerialRequest request) {
+        List<ProductDetailResponseDto> result = _productScanService.generateSerials(request);
+        return ApiResp.<List<ProductDetailResponseDto>>builder().result(result).build();
+    }
 
-        ProductDetail detail = new ProductDetail();
-        detail.setSerialNumber(serial);
-        detail.setStatus(SerialStatus.INBOUND); // trạng thái ban đầu
-        detail.setBin(null);                // chưa gán bin
-        detail.setProduct(product);
+    // 4️⃣ Tạo serial batch với số lượng tùy chọn
+    @PostMapping("/create-serial-batch/{quantity}")
+    public ApiResp<List<ProductDetailResponseDto>> createSerialBatch(
+            @RequestBody ProductGenerateSerialRequest request,
+            @PathVariable int quantity
+    ) {
+        List<ProductDetailResponseDto> result = _productScanService.generateSerialBatch(request, quantity);
+        return ApiResp.<List<ProductDetailResponseDto>>builder().result(result).build();
+    }
 
-        _productDetailRepository.save(detail);
-        var result = _productDetailMapper.toResponse(detail);
+    // 5️⃣ Xác nhận scan nhập kho
+    @PostMapping("/confirm-scan")
+    public ApiResp<ProductDetailResponseDto> confirmScan(@RequestBody ProductConfirmRequestDto request) {
+        ProductDetailResponseDto result = _productConfirmService.confirmSerial(request);
         return ApiResp.<ProductDetailResponseDto>builder().result(result).build();
     }
 
-    // Get by serial number
+    // 6️⃣ Lấy ProductDetail theo serial
     @GetMapping("/by-serial")
     public ApiResp<ProductDetailResponseDto> getBySerial(@RequestParam String serial) {
         ProductDetail detail = _productDetailRepository.findBySerialNumber(serial)
                 .orElseThrow(() -> new EntityNotFoundException("ProductDetail not found: " + serial));
         return ApiResp.<ProductDetailResponseDto>builder()
                 .result(_productDetailMapper.toResponse(detail))
+                .build();
+    }
+    @GetMapping("/warehouse/{warehouseId}")
+    public ApiResp<List<ProductDetailResponseDto>> getByWarehouseId(@PathVariable UUID warehouseId) {
+        // Định nghĩa trạng thái "Đang tồn kho"
+        List<SerialStatus> validStatuses = List.of(
+                SerialStatus.IN_WAREHOUSE,
+                SerialStatus.AVAILABLE,
+                SerialStatus.IN_STOCK
+        );
+
+        // Gọi Repo lọc theo WarehouseID VÀ Status
+        // Đảm bảo ProductDetailRepository đã có phương thức findByWarehouseIdAndStatusIn
+        List<ProductDetail> result = _productDetailRepository.findByWarehouseIdAndStatusIn(warehouseId, validStatuses);
+
+        return ApiResp.<List<ProductDetailResponseDto>>builder()
+                .result(_productDetailMapper.toResponseList(result))
                 .build();
     }
 }

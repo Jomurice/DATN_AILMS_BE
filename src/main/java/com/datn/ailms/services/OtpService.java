@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -20,20 +21,20 @@ public class OtpService {
     private final OtpGenerator _otpGenerator;
     private final UserService _userService;
 
-    public String createOtp(String userId) {
-        String otp = _otpGenerator.generateOtp(6);
+    public String createOtp(UUID userId) {
+        String otp = _otpGenerator.generateCodeNumbers(6);
 
         Otp otpEntity = new Otp();
         otpEntity.setUserId(userId);
         otpEntity.setOtpCode(otp);
         otpEntity.setCreatedAt(LocalDateTime.now());
-        otpEntity.setExpiryTime(LocalDateTime.now().plusMinutes(1));
+        otpEntity.setExpiryTime(LocalDateTime.now().plusMinutes(3));
 
         _otpRepository.save(otpEntity);
         return otp;
     }
 
-    public boolean validateOtp(String userId, String otp) {
+    public boolean validateOtp(UUID userId, String otp) {
         Otp otpEntity = _otpRepository.findById(userId).orElseThrow(
                 () -> new AppException(ErrorCode.OTP_NOT_EXISTED)
         );
@@ -48,7 +49,7 @@ public class OtpService {
         return true;
     }
 
-    public void clearOtp(String userId) {
+    public void clearOtp(UUID userId) {
         _otpRepository.deleteById(userId);
     }
 }

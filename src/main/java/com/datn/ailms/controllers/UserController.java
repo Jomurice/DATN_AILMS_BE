@@ -6,9 +6,7 @@ import com.datn.ailms.model.dto.response.ApiResp;
 import com.datn.ailms.model.dto.response.UserResponseDto;
 
 
-
-
-
+import com.datn.ailms.model.dto.response.stats.UserStatsDto;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/users")
@@ -59,7 +58,7 @@ public class UserController {
 
 
     @GetMapping("/{userId}")
-    public ApiResp<UserResponseDto> getUserById(@PathVariable("userId") String userId){
+    public ApiResp<UserResponseDto> getUserById(@PathVariable("userId") UUID userId){
         UserResponseDto user = _userService.getUserById(userId);
         return ApiResp.<UserResponseDto>builder()
                 .result(user)
@@ -80,8 +79,15 @@ public class UserController {
                 .build();
     }
     @PutMapping("/{userId}")
-    public ApiResp<UserResponseDto> updateUser(@PathVariable("userId") String userId, @RequestBody UserRequestDto userRequest){
+    public ApiResp<UserResponseDto> updateUser(@PathVariable("userId") UUID userId, @RequestBody UserRequestDto userRequest){
         UserResponseDto userResponse = _userService.updateUser(userId, userRequest);
         return ApiResp.<UserResponseDto>builder().result(userResponse).build();
+    }
+
+    @GetMapping("/stats")
+    public ApiResp<UserStatsDto> getUserStats() {
+        return ApiResp.<UserStatsDto>builder()
+                .result(_userService.getUserStats())
+                .build();
     }
 }

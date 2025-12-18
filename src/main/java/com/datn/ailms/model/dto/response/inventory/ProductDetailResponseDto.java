@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
@@ -13,9 +14,14 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 public class ProductDetailResponseDto {
-    private String id;
     private String serialNumber;
-    private SerialStatus status;
     private UUID productId;
-    private UUID binId;
+    private UUID purchaseOrderItemId;
+    private UUID warehouseId;
+    private String status;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+    private UUID scannedByUserId;
+    private String productSku;
+    private String productName;
 }
