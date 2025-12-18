@@ -4,18 +4,16 @@ import com.datn.ailms.mapper.ProductMapper;
 import com.datn.ailms.model.dto.request.inventory.ProductRequestDto;
 import com.datn.ailms.model.dto.response.inventory.ProductResponseDto;
 import com.datn.ailms.model.entities.Brand;
+import com.datn.ailms.model.entities.CategoryBrand;
 import com.datn.ailms.model.entities.product_entities.Category;
 import com.datn.ailms.model.entities.product_entities.Product;
 import com.datn.ailms.repositories.BrandRepository;
+import com.datn.ailms.repositories.categoryBrand.CategoryBrandRepository;
 import com.datn.ailms.repositories.productRepo.CategoryRepository;
 import com.datn.ailms.repositories.productRepo.ProductRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -24,6 +22,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ProductService {
     private final ProductRepository productRepo;
+    private final CategoryBrandRepository _categoryBrandRepo;
     private final ProductMapper mapper;
     private final BrandRepository _brandRepo;
     private final CategoryRepository _categoryRepo;
@@ -38,10 +37,18 @@ public class ProductService {
         Brand brand = _brandRepo.findById(request.getBrandId())
                 .orElseThrow(() -> new RuntimeException("Brand not found"));
 
-        entity.setBrands(Collections.singleton(brand));
-        entity.setCategory(category);
-        entity.setCreatedAt(LocalDateTime.now());
-        entity.setUpdatedAt(LocalDateTime.now());
+        // Kiểm tra CategoryBrand
+        CategoryBrand categoryBrand = _categoryBrandRepo
+                .findByCategoryIdAndBrandId(request.getCategoryId(), request.getBrandId())
+                .orElseGet(() -> {
+                    CategoryBrand cb = new CategoryBrand();
+                    cb.setId(UUID.randomUUID());
+                    cb.setCategory(category);
+                    cb.setBrand(brand);
+                    return _categoryBrandRepo.save(cb);
+                });
+
+        entity.setCategoryBrand(categoryBrand);
 
         entity = productRepo.save(entity);
         return mapper.toResponse(entity);
@@ -72,16 +79,13 @@ public class ProductService {
 
         // giữ lại id cũ
         updated.setId(existing.getId());
-        updated.setUpdatedAt(LocalDateTime.now());
-        Category category = _categoryRepo.findById(request.getCategoryId())
-                .orElseThrow(() -> new RuntimeException("Category not found"));
-        updated.setCategory(category);
 
-        // Brand
-        Brand brand = _brandRepo.findById(request.getBrandId())
-                .orElseThrow(() -> new RuntimeException("Brand not found"));
-        updated.setBrands(Collections.singleton(brand));
+        // gán CategoryBrand mới nếu thay đổi
+        CategoryBrand categoryBrand = _categoryBrandRepo
+                .findByCategoryIdAndBrandId(request.getCategoryId(),request.getBrandId())
+                .orElseThrow(() -> new RuntimeException("CategoryBrand not found"));
 
+        updated.setCategoryBrand(categoryBrand);
 
         updated = productRepo.save(updated);
         return mapper.toResponse(updated);
@@ -90,22 +94,4 @@ public class ProductService {
     public void delete(UUID id) {
         productRepo.deleteById(id);
     }
-
-//    public Page<ProductResponseDto> searchProducts(UUID categoryId, String name, Pageable pageable) {
-//        String searchName = (name != null) ? name : "";
-//        Category category = null;
-//
-//        if (categoryId != null) {
-//            category = _categoryRepo.findById(categoryId).orElse(null);
-//        }
-//
-//        Page<Product> products;
-//        if (category != null) {
-//            products = productRepo.findByCategoryAndNameContainingIgnoreCase(category, searchName, pageable);
-//        } else {
-//            products = productRepo.findByCategoryAndNameContainingIgnoreCase(searchName, pageable);
-//        }
-//    }
-
-
 }

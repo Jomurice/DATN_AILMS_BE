@@ -1,0 +1,9 @@
+package com.datn.ailms.repositories.warehousetopology;
+
+import com.datn.ailms.model.entities.topo_entities.Aisle;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.UUID;
+
+public interface AisleRepository extends JpaRepository<Aisle, UUID> {
+}

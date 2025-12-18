@@ -1,6 +1,5 @@
 package com.datn.ailms.model.entities;
 
-import com.datn.ailms.model.entities.product_entities.Product;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -23,7 +22,6 @@ public class Brand {
 
     private String name;
 
-    // Many-to-Many với Product
-    @ManyToMany(mappedBy = "brands")
-    Set<Product> products = new HashSet<>();
+    @OneToMany(mappedBy = "brand", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<CategoryBrand> categoryBrands = new HashSet<>();
 }

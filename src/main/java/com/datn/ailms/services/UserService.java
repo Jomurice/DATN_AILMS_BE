@@ -3,7 +3,6 @@ package com.datn.ailms.services;
 import com.datn.ailms.exceptions.ErrorCode;
 import com.datn.ailms.interfaces.IUserService;
 import com.datn.ailms.model.dto.request.ChangePasswordRequestDto;
-import com.datn.ailms.model.dto.response.stats.UserStatsDto;
 import com.datn.ailms.repositories.userRepo.UserRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +24,6 @@ import java.util.HashSet;
 import java.util.List;
 
 import java.util.Set;
-import java.util.UUID;
 
 
 @Service
@@ -76,11 +74,11 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public UserResponseDto getUserById(UUID id) {
+    public UserResponseDto getUserById(String id) {
         User user = _userRepository.findById(id).orElseThrow(
                 () -> new AppException(ErrorCode.USER_NOT_EXISTED)
         );
-//        System.out.println(user.toString());
+        System.out.println(user.toString());
         return _userMapper.toUserResponse(user);
     }
 
@@ -109,7 +107,7 @@ public class UserService implements IUserService {
         return _userMapper.toUserResponse(savedUser);
     }
 
-    public UserResponseDto updateUser(UUID id, UserRequestDto userRequest) {
+    public UserResponseDto updateUser(String id, UserRequestDto userRequest) {
         User user = _userRepository.findById(id).orElseThrow(
                 () -> new AppException(ErrorCode.USER_NOT_EXISTED)
         );
@@ -139,7 +137,7 @@ public class UserService implements IUserService {
     }
 
     @Transactional
-    public void updateUserPassword(UUID userId, String newPassword) {
+    public void updateUserPassword(String userId, String newPassword) {
         User user = _userRepository.findById(userId).orElseThrow(
                 () -> new AppException(ErrorCode.USER_NOT_EXISTED)
         );
@@ -167,7 +165,7 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public UserResponseDto activeAccount(UUID id) {
+    public UserResponseDto activeAccount(String id) {
         User user = _userRepository.findById(id).orElseThrow(
                 () -> new AppException(ErrorCode.USER_NOT_EXISTED)
         );
@@ -178,7 +176,7 @@ public class UserService implements IUserService {
         return _userMapper.toUserResponse(savedUser);
     }
     @Override
-    public UserResponseDto blockedAccount(UUID id) {
+    public UserResponseDto blockedAccount(String id) {
         User user = _userRepository.findById(id).orElseThrow(
                 () -> new AppException(ErrorCode.USER_NOT_EXISTED)
         );
@@ -187,11 +185,6 @@ public class UserService implements IUserService {
         User savedUser = _userRepository.save(user);
 
         return _userMapper.toUserResponse(savedUser);
-    }
-
-    @Override
-    public UserStatsDto getUserStats() {
-        return _userRepository.countUserStats();
     }
 
 
