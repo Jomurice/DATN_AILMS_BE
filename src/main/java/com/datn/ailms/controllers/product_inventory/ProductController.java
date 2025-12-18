@@ -5,6 +5,7 @@ import com.datn.ailms.model.dto.response.ApiResp;
 import com.datn.ailms.model.dto.response.inventory.ProductResponseDto;
 import com.datn.ailms.services.inventoryService.ProductService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -50,4 +51,23 @@ public class ProductController {
                 .build();
     }
 
+
+    @GetMapping("/search-products")
+    public ApiResp<Page<ProductResponseDto>> searchProducts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) UUID categoryId,
+            @RequestParam(required = false) UUID brandId
+    ) {
+        Page<ProductResponseDto> products =
+                _productService.searchProducts(page, size, name, categoryId, brandId);
+
+        return ApiResp.<Page<ProductResponseDto>>builder()
+                .message("Get products successfully")
+                .result(products)
+                .build();
+    }
+
 }
+

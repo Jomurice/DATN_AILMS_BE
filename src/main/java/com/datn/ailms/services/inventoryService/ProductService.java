@@ -11,7 +11,9 @@ import com.datn.ailms.repositories.productRepo.CategoryRepository;
 import com.datn.ailms.repositories.productRepo.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -27,6 +29,7 @@ public class ProductService {
     private final ProductMapper mapper;
     private final BrandRepository _brandRepo;
     private final CategoryRepository _categoryRepo;
+    private final ProductRepository productRepository;
 
 
     public ProductResponseDto create(ProductRequestDto request) {
@@ -87,25 +90,37 @@ public class ProductService {
         return mapper.toResponse(updated);
     }
 
-    public void delete(UUID id) {
-        productRepo.deleteById(id);
+    public Page<ProductResponseDto> searchProducts(
+            int page,
+            int size,
+            String name,
+            UUID categoryId,
+            UUID brandId
+    ) {
+        Pageable pageable = PageRequest.of(
+                page,
+                size,
+                Sort.by(Sort.Direction.DESC, "createdAt")
+        );
+
+        if (name != null && !name.isBlank()) {
+            name = "%" + name.trim() + "%";
+        } else {
+            name = null;
+        }
+
+        Page<Product> products =
+                productRepository.searchProducts(
+                        name,
+                        categoryId,
+                        brandId,
+                        pageable
+                );
+
+        return products.map(mapper::toResponse);
     }
 
-//    public Page<ProductResponseDto> searchProducts(UUID categoryId, String name, Pageable pageable) {
-//        String searchName = (name != null) ? name : "";
-//        Category category = null;
-//
-//        if (categoryId != null) {
-//            category = _categoryRepo.findById(categoryId).orElse(null);
-//        }
-//
-//        Page<Product> products;
-//        if (category != null) {
-//            products = productRepo.findByCategoryAndNameContainingIgnoreCase(category, searchName, pageable);
-//        } else {
-//            products = productRepo.findByCategoryAndNameContainingIgnoreCase(searchName, pageable);
-//        }
-//    }
+
 
 
 }
