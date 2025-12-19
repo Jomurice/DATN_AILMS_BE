@@ -55,7 +55,12 @@ public class InventoryCheckController {
         _checkService.delete(id);
         return ApiResp.<Void>builder().message("Deleted Inventory Check: " + id).build();
     }
-
+//    @DeleteMapping("/{id}")
+//    @PreAuthorize("hasAuthority('ADMIN')")
+//    public ApiResp<Void> delete(@PathVariable UUID id) {
+//        _checkService.delete(id);
+//        return ApiResp.<Void>builder().message("Deleted Inventory Check: " + id).build();
+//    }
     @PostMapping("/{id}/start")
     public ApiResp<InventoryCheckResponseDto> startCheck(
             @PathVariable UUID id,
@@ -80,6 +85,15 @@ public class InventoryCheckController {
                 .result(_checkService.closeCheck(id))
                 .build();
     }
+//    @PostMapping("/{id}/close")
+//    // ✅ Sửa thành hasAuthority('ADMIN') để khớp chính xác với DB
+//    @PreAuthorize("hasAuthority('ADMIN')")
+//    public ApiResp<InventoryCheckResponseDto> closeCheck(@PathVariable UUID id) {
+//        return ApiResp.<InventoryCheckResponseDto>builder()
+//                .result(_checkService.closeCheck(id))
+//                .build();
+//    }
+
     // --- Quét Serial ---
 
     @PostMapping("/{id}/scan")

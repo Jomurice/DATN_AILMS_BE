@@ -72,15 +72,15 @@ public class OutboundOrderService implements IOutboundOrderService {
         User user = _userRepository.findById(request.getCreatedBy())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
-//        Customer customer = _customerRepo.findById(request.getCustomer())
-//                .orElseThrow(() -> new AppException(ErrorCode.CUSTOMER_NOT_EXISTED));
-//
+        Customer customer = _customerRepo.findById(request.getCustomerId())
+                .orElseThrow(() -> new AppException(ErrorCode.CUSTOMER_NOT_EXISTED));
+
         OutboundOrder outbound = _outboundOrderMapper.toEntity(request);
 
         outbound.setCreatedBy(user);
         outbound.setStatus(OrderStatus.DRAFT.name());
         outbound.setCreateAt(LocalDateTime.now());
-//        outbound.setCustomer(customer);
+        outbound.setCustomer(customer);
         outbound.setCode(generateOrderCode());
 
         outbound = _outboundOrderRepo.save(outbound);
@@ -247,16 +247,16 @@ public class OutboundOrderService implements IOutboundOrderService {
     }
 
     @Override
-    public List<ProductDetailResponseDto> getByOrderIdAndSKU(UUID orderId, String sku) {
+    public Page<ProductDetailResponseDto> getByOrderIdAndSKU(UUID orderId, String sku,Pageable pageable) {
         OutboundOrder outOrder = _outboundOrderRepo.findById(orderId)
                 .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
 
         Product product = _productRepo.findBySku(sku)
                 .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
 
-        List<ProductDetail> productDetails = _productDetailRepo.findByOrderIdAndSku(orderId,sku);
+        Page<ProductDetail> productDetails = _productDetailRepo.findByOrderIdAndSku(orderId,sku,pageable);
 
-        return _productDetailMapper.toResponseList(productDetails);
+        return productDetails.map(_productDetailMapper::toResponse);
     }
 
     @Override

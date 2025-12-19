@@ -142,6 +142,29 @@
             <artifactId>junit-jupiter</artifactId>
             <version>5.10.2</version>
         </dependency>
+        <!-- Selenium Java -->
+        <dependency>
+            <groupId>org.seleniumhq.selenium</groupId>
+            <artifactId>selenium-java</artifactId>
+            <version>4.25.0</version>
+        </dependency>
+
+        <!-- WebDriver Manager (tự động tải driver cho Chrome/Firefox/Edge) -->
+        <dependency>
+            <groupId>io.github.bonigarcia</groupId>
+            <artifactId>webdrivermanager</artifactId>
+            <version>5.9.2</version>
+        </dependency>
+
+        <!-- JUnit 5 (nếu bạn viết testcase dạng Unit Test) -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>5.11.0</version>
+            <scope>test</scope>
+        </dependency>
+
+
     </dependencies>
 
     <build>
