@@ -4,9 +4,12 @@ import com.datn.ailms.exceptions.AppException;
 import com.datn.ailms.exceptions.ErrorCode;
 import com.datn.ailms.model.dto.request.AuthenRequest;
 import com.datn.ailms.model.dto.request.IntrospectRequest;
+import com.datn.ailms.model.dto.request.LogoutRequest;
 import com.datn.ailms.model.dto.response.AuthenResponse;
 import com.datn.ailms.model.dto.response.IntrospectResponse;
+import com.datn.ailms.model.entities.account_entities.InvalidatedToken;
 import com.datn.ailms.model.entities.account_entities.User;
+import com.datn.ailms.repositories.userRepo.InvalidatedTokenRepository;
 import com.datn.ailms.repositories.userRepo.UserRepository;
 import com.datn.ailms.interfaces.IAuthenticationService;
 import com.nimbusds.jose.*;
@@ -43,6 +46,8 @@ import java.util.StringJoiner;
 public class AuthenticationServiceImpl implements IAuthenticationService {
 
     private final UserRepository _userRepository;
+    private final InvalidatedTokenRepository invalidatedTokenRepository;
+
 
     @NonFinal
     @Value("${jwt.signerKey}")
@@ -66,6 +71,8 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
 
             var verify = signedJWT.verify(verifier);
 
+            String jti = signedJWT.getJWTClaimsSet().getJWTID();
+            boolean invalidated = invalidatedTokenRepository.existsById(jti);
             return IntrospectResponse.builder()
                     .valid(verify && expiry.after(new Date()))
                     .build();
@@ -75,6 +82,25 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    public void logout(LogoutRequest request) throws ParseException, JOSEException {
+        String token = request.getToken();
+
+        SignedJWT signedJWT = SignedJWT.parse(token);
+
+        String jti = signedJWT.getJWTClaimsSet().getJWTID();
+        Date expiry = signedJWT.getJWTClaimsSet().getExpirationTime();
+
+        InvalidatedToken invalidatedToken = InvalidatedToken.builder()
+                .id(jti)
+                .expiryTime(expiry)
+                .build();
+
+        invalidatedTokenRepository.save(invalidatedToken);
+    }
+
+
 
     @Override
     public AuthenResponse authenticate(AuthenRequest authenRequest) {

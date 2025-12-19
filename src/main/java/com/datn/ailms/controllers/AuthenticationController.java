@@ -2,6 +2,7 @@ package com.datn.ailms.controllers;
 
 import com.datn.ailms.model.dto.request.AuthenRequest;
 import com.datn.ailms.model.dto.request.IntrospectRequest;
+import com.datn.ailms.model.dto.request.LogoutRequest;
 import com.datn.ailms.model.dto.response.ApiResp;
 import com.datn.ailms.model.dto.response.AuthenResponse;
 import com.datn.ailms.model.dto.response.IntrospectResponse;
@@ -9,6 +10,7 @@ import com.datn.ailms.interfaces.IAuthenticationService;
 import com.fasterxml.jackson.core.io.JsonEOFException;
 import com.nimbusds.jose.JOSEException;
 import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -19,8 +21,9 @@ import java.text.ParseException;
 @RestController
 @RequestMapping("/auth")
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@RequiredArgsConstructor
 public class AuthenticationController {
-
+    private final IAuthenticationService authenticationService;
     @Autowired
     IAuthenticationService IAuthenticationService;
 
@@ -39,13 +42,14 @@ public class AuthenticationController {
     }
 
     @PostMapping("/logout")
-    public ApiResp<Void> logout(
-            @RequestHeader(value = "Authorization", required = false) String authorization
-    ) {
-        return ApiResp.<Void>builder()
-                .message("Logout success")
-                .build();
+    ApiResp<Void> logout(@RequestBody LogoutRequest request)
+            throws ParseException, JOSEException {
+
+        authenticationService.logout(request);
+
+        return ApiResp.<Void>builder().build();
     }
+
 
 
 
