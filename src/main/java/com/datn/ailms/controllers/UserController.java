@@ -12,6 +12,7 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -33,6 +34,7 @@ public class UserController {
 //    }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ApiResp<Page<UserResponseDto>> getAllUsers(
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String role,
@@ -58,20 +60,23 @@ public class UserController {
 
 
     @GetMapping("/{userId}")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ApiResp<UserResponseDto> getUserById(@PathVariable("userId") UUID userId){
         UserResponseDto user = _userService.getUserById(userId);
         return ApiResp.<UserResponseDto>builder()
                 .result(user)
                 .build();
     }
-//    @GetMapping("/search")
-//    public ApiResp<List<UserResponseDto>> searchUsersByName(@RequestParam("name") String name) {
-//        return ApiResp.<List<UserResponseDto>>builder()
-//                .result(_userService.getUsersByNameContainingIgnoreCase(name))
-//                .build();
-//    }
+    @GetMapping("/search")
+    @PreAuthorize("hasAnyRole('ADMIN')")
+    public ApiResp<List<UserResponseDto>> searchUsersByName(@RequestParam("name") String name) {
+        return ApiResp.<List<UserResponseDto>>builder()
+                .result(_userService.getUsersByNameContainingIgnoreCase(name))
+                .build();
+    }
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ApiResp<UserResponseDto> createUser(@RequestBody UserRequestDto userRequest){
         UserResponseDto createdUser = _userService.createUser(userRequest);
         return ApiResp.<UserResponseDto>builder()
@@ -79,6 +84,7 @@ public class UserController {
                 .build();
     }
     @PutMapping("/{userId}")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ApiResp<UserResponseDto> updateUser(@PathVariable("userId") UUID userId, @RequestBody UserRequestDto userRequest){
         UserResponseDto userResponse = _userService.updateUser(userId, userRequest);
         return ApiResp.<UserResponseDto>builder().result(userResponse).build();

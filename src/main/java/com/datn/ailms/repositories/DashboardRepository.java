@@ -13,110 +13,197 @@ import java.util.UUID;
 
 @Repository
 public interface DashboardRepository extends JpaRepository<ProductDetail, UUID> {
-
-    // --- Không lọc warehouse ---
-
     @Query("""
-        SELECT 
-            FUNCTION('TO_CHAR', pd.createdAt, 'YYYY-MM-DD') as day,
-            COUNT(pd.id) as total
-        FROM ProductDetail pd
-        WHERE pd.status = :status
-          AND pd.createdAt BETWEEN :startDate AND :endDate
-        GROUP BY FUNCTION('TO_CHAR', pd.createdAt, 'YYYY-MM-DD')
-        ORDER BY day
-    """)
-    List<Object[]> countByStatusAndDay(
-            @Param("status") SerialStatus status,
+    SELECT 
+        FUNCTION('TO_CHAR', pd.createdAt, 'YYYY-MM-DD') AS day,
+        COUNT(pd.id) AS total
+    FROM ProductDetail pd
+    WHERE pd.status = com.datn.ailms.model.entities.enums.SerialStatus.IN_WAREHOUSE
+      AND pd.createdAt BETWEEN :startDate AND :endDate
+    GROUP BY FUNCTION('TO_CHAR', pd.createdAt, 'YYYY-MM-DD')
+    ORDER BY day
+""")
+    List<Object[]> countInboundByDay(
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate
     );
 
     @Query("""
-        SELECT 
-            FUNCTION('TO_CHAR', pd.createdAt, 'YYYY-MM-DD HH24') as hour,
-            COUNT(pd.id) as total
-        FROM ProductDetail pd
-        WHERE pd.status = :status
-          AND pd.createdAt BETWEEN :startDate AND :endDate
-        GROUP BY FUNCTION('TO_CHAR', pd.createdAt, 'YYYY-MM-DD HH24')
-        ORDER BY hour
-    """)
-    List<Object[]> countByStatusAndHour(
-            @Param("status") SerialStatus status,
+    SELECT 
+        FUNCTION('TO_CHAR', pd.createdAt, 'YYYY-MM-DD HH24') AS hour,
+        COUNT(pd.id) AS total
+    FROM ProductDetail pd
+    WHERE pd.status = com.datn.ailms.model.entities.enums.SerialStatus.IN_WAREHOUSE
+      AND pd.createdAt BETWEEN :startDate AND :endDate
+    GROUP BY FUNCTION('TO_CHAR', pd.createdAt, 'YYYY-MM-DD HH24')
+    ORDER BY hour
+""")
+    List<Object[]> countInboundByHour(
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate
     );
 
     @Query("""
-        SELECT 
-            FUNCTION('TO_CHAR', pd.createdAt, 'YYYY-MM') as month,
-            COUNT(pd.id) as total
-        FROM ProductDetail pd
-        WHERE pd.status = :status
-          AND pd.createdAt BETWEEN :startDate AND :endDate
-        GROUP BY FUNCTION('TO_CHAR', pd.createdAt, 'YYYY-MM')
-        ORDER BY month
-    """)
-    List<Object[]> countByStatusAndMonth(
-            @Param("status") SerialStatus status,
+    SELECT 
+        FUNCTION('TO_CHAR', pd.createdAt, 'YYYY-MM') AS month,
+        COUNT(pd.id) AS total
+    FROM ProductDetail pd
+    WHERE pd.status = com.datn.ailms.model.entities.enums.SerialStatus.IN_WAREHOUSE
+      AND pd.createdAt BETWEEN :startDate AND :endDate
+    GROUP BY FUNCTION('TO_CHAR', pd.createdAt, 'YYYY-MM')
+    ORDER BY month
+""")
+    List<Object[]> countInboundByMonth(
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate
     );
 
-
-
     @Query("""
-        SELECT 
-            FUNCTION('TO_CHAR', pd.createdAt, 'YYYY-MM-DD') AS day,
-            COUNT(pd.id) AS total
-        FROM ProductDetail pd
-        WHERE pd.status = :status
-          AND pd.createdAt BETWEEN :start AND :end
-          AND pd.warehouse.id = :warehouseId
-        GROUP BY FUNCTION('TO_CHAR', pd.createdAt, 'YYYY-MM-DD')
-        ORDER BY day
-    """)
-    List<Object[]> countByStatusAndDayAndWarehouse(
-            @Param("status") SerialStatus status,
+    SELECT 
+        FUNCTION('TO_CHAR', pd.createdAt, 'YYYY-MM-DD') AS day,
+        COUNT(pd.id) AS total
+    FROM ProductDetail pd
+    WHERE pd.status = com.datn.ailms.model.entities.enums.SerialStatus.IN_WAREHOUSE
+      AND pd.createdAt BETWEEN :start AND :end
+      AND pd.warehouse.id = :warehouseId
+    GROUP BY FUNCTION('TO_CHAR', pd.createdAt, 'YYYY-MM-DD')
+    ORDER BY day
+""")
+    List<Object[]> countInboundByDayAndWarehouse(
             @Param("start") LocalDateTime start,
             @Param("end") LocalDateTime end,
             @Param("warehouseId") UUID warehouseId
     );
 
     @Query("""
-        SELECT 
-            FUNCTION('TO_CHAR', pd.createdAt, 'YYYY-MM-DD HH24') AS hour,
-            COUNT(pd.id) AS total
-        FROM ProductDetail pd
-        WHERE pd.status = :status
-          AND pd.createdAt BETWEEN :start AND :end
-          AND pd.warehouse.id = :warehouseId
-        GROUP BY FUNCTION('TO_CHAR', pd.createdAt, 'YYYY-MM-DD HH24')
-        ORDER BY hour
-    """)
-    List<Object[]> countByStatusAndHourAndWarehouse(
-            @Param("status") SerialStatus status,
+    SELECT 
+        FUNCTION('TO_CHAR', pd.createdAt, 'YYYY-MM-DD HH24') AS hour,
+        COUNT(pd.id) AS total
+    FROM ProductDetail pd
+    WHERE pd.status = com.datn.ailms.model.entities.enums.SerialStatus.IN_WAREHOUSE
+      AND pd.createdAt BETWEEN :start AND :end
+      AND pd.warehouse.id = :warehouseId
+    GROUP BY FUNCTION('TO_CHAR', pd.createdAt, 'YYYY-MM-DD HH24')
+    ORDER BY hour
+""")
+    List<Object[]> countInboundByHourAndWarehouse(
             @Param("start") LocalDateTime start,
             @Param("end") LocalDateTime end,
             @Param("warehouseId") UUID warehouseId
     );
 
     @Query("""
-        SELECT 
-            FUNCTION('TO_CHAR', pd.createdAt, 'YYYY-MM') AS month,
-            COUNT(pd.id) AS total
-        FROM ProductDetail pd
-        WHERE pd.status = :status
-          AND pd.createdAt BETWEEN :start AND :end
-          AND pd.warehouse.id = :warehouseId
-        GROUP BY FUNCTION('TO_CHAR', pd.createdAt, 'YYYY-MM')
-        ORDER BY month
-    """)
-    List<Object[]> countByStatusAndMonthAndWarehouse(
-            @Param("status") SerialStatus status,
+    SELECT
+        FUNCTION('TO_CHAR', pd.createdAt, 'YYYY-MM') AS month,
+        COUNT(pd.id) AS total
+    FROM ProductDetail pd
+    WHERE pd.status = com.datn.ailms.model.entities.enums.SerialStatus.IN_WAREHOUSE
+      AND pd.createdAt BETWEEN :start AND :end
+      AND pd.warehouse.id = :warehouseId
+    GROUP BY FUNCTION('TO_CHAR', pd.createdAt, 'YYYY-MM')
+    ORDER BY month
+""")
+    List<Object[]> countInboundByMonthAndWarehouse(
             @Param("start") LocalDateTime start,
             @Param("end") LocalDateTime end,
             @Param("warehouseId") UUID warehouseId
     );
+
+    @Query("""
+    SELECT 
+        FUNCTION('TO_CHAR', pd.updatedAt, 'YYYY-MM-DD') AS day,
+        COUNT(pd.id) AS total
+    FROM ProductDetail pd
+    WHERE pd.status = com.datn.ailms.model.entities.enums.SerialStatus.OUTBOUND
+      AND pd.updatedAt BETWEEN :startDate AND :endDate
+    GROUP BY FUNCTION('TO_CHAR', pd.updatedAt, 'YYYY-MM-DD')
+    ORDER BY day
+""")
+    List<Object[]> countOutboundByDay(
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate
+    );
+
+    @Query("""
+    SELECT 
+        FUNCTION('TO_CHAR', pd.updatedAt, 'YYYY-MM-DD HH24') AS hour,
+        COUNT(pd.id) AS total
+    FROM ProductDetail pd
+    WHERE pd.status = com.datn.ailms.model.entities.enums.SerialStatus.OUTBOUND
+      AND pd.updatedAt BETWEEN :startDate AND :endDate
+    GROUP BY FUNCTION('TO_CHAR', pd.updatedAt, 'YYYY-MM-DD HH24')
+    ORDER BY hour
+""")
+    List<Object[]> countOutboundByHour(
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate
+    );
+
+    @Query("""
+    SELECT 
+        FUNCTION('TO_CHAR', pd.updatedAt, 'YYYY-MM') AS month,
+        COUNT(pd.id) AS total
+    FROM ProductDetail pd
+    WHERE pd.status = com.datn.ailms.model.entities.enums.SerialStatus.OUTBOUND
+      AND pd.updatedAt BETWEEN :startDate AND :endDate
+    GROUP BY FUNCTION('TO_CHAR', pd.updatedAt, 'YYYY-MM')
+    ORDER BY month
+""")
+    List<Object[]> countOutboundByMonth(
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate
+    );
+
+    @Query("""
+    SELECT 
+        FUNCTION('TO_CHAR', pd.updatedAt, 'YYYY-MM-DD') AS day,
+        COUNT(pd.id) AS total
+    FROM ProductDetail pd
+    WHERE pd.status = com.datn.ailms.model.entities.enums.SerialStatus.OUTBOUND
+      AND pd.updatedAt BETWEEN :start AND :end
+      AND pd.warehouse.id = :warehouseId
+    GROUP BY FUNCTION('TO_CHAR', pd.updatedAt, 'YYYY-MM-DD')
+    ORDER BY day
+""")
+    List<Object[]> countOutboundByDayAndWarehouse(
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end,
+            @Param("warehouseId") UUID warehouseId
+    );
+
+    @Query("""
+    SELECT 
+        FUNCTION('TO_CHAR', pd.updatedAt, 'YYYY-MM-DD HH24') AS hour,
+        COUNT(pd.id) AS total
+    FROM ProductDetail pd
+    WHERE pd.status = com.datn.ailms.model.entities.enums.SerialStatus.OUTBOUND
+      AND pd.updatedAt BETWEEN :start AND :end
+      AND pd.warehouse.id = :warehouseId
+    GROUP BY FUNCTION('TO_CHAR', pd.updatedAt, 'YYYY-MM-DD HH24')
+    ORDER BY hour
+""")
+    List<Object[]> countOutboundByHourAndWarehouse(
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end,
+            @Param("warehouseId") UUID warehouseId
+    );
+
+    @Query("""
+    SELECT
+        FUNCTION('TO_CHAR', pd.updatedAt, 'YYYY-MM') AS month,
+        COUNT(pd.id) AS total
+    FROM ProductDetail pd
+    WHERE pd.status = com.datn.ailms.model.entities.enums.SerialStatus.OUTBOUND
+      AND pd.updatedAt BETWEEN :start AND :end
+      AND pd.warehouse.id = :warehouseId
+    GROUP BY FUNCTION('TO_CHAR', pd.updatedAt, 'YYYY-MM')
+    ORDER BY month
+""")
+    List<Object[]> countOutboundByMonthAndWarehouse(
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end,
+            @Param("warehouseId") UUID warehouseId
+    );
+
+
 }

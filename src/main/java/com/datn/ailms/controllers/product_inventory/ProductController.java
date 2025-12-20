@@ -6,6 +6,7 @@ import com.datn.ailms.model.dto.response.inventory.ProductResponseDto;
 import com.datn.ailms.services.inventoryService.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,6 +19,7 @@ public class ProductController {
     private final ProductService _productService;
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN')")
      ApiResp<ProductResponseDto> create(@RequestBody ProductRequestDto request) {
               var result =  _productService.create(request);
               return ApiResp.<ProductResponseDto>builder().result(result).build();
@@ -30,18 +32,21 @@ public class ProductController {
 
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN')")
      ApiResp<List<ProductResponseDto>> getAll() {
         var result =  _productService.getAll();
         return ApiResp.<List<ProductResponseDto>>builder().result(result).build();
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     ApiResp<ProductResponseDto> getById(@PathVariable UUID id) {
         var result = _productService.getById(id);
         return ApiResp.<ProductResponseDto>builder().result(result).build();
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     ApiResp<ProductResponseDto> update(
             @PathVariable UUID id,
             @RequestBody ProductRequestDto request) {
@@ -53,6 +58,7 @@ public class ProductController {
 
 
     @GetMapping("/search-products")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ApiResp<Page<ProductResponseDto>> searchProducts(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,

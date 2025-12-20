@@ -26,6 +26,7 @@ public class InventoryCheckController {
 
     // ✅ GET ALL (PHÂN TRANG & LỌC) - CHỈ GIỮ HÀM NÀY
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN','LM')")
     public ApiResp<Page<InventoryCheckResponseDto>> getAll(
             @RequestParam(required = false, defaultValue = "ALL") String status,
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable

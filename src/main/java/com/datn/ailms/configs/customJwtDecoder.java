@@ -2,6 +2,7 @@ package com.datn.ailms.configs;
 
 import com.datn.ailms.model.dto.request.IntrospectRequest;
 import com.datn.ailms.services.AuthenticationServiceImpl;
+import com.nimbusds.jose.JOSEException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -11,6 +12,7 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.spec.SecretKeySpec;
+import java.text.ParseException;
 import java.util.Objects;
 
 @Component
@@ -34,7 +36,7 @@ public class customJwtDecoder implements JwtDecoder {
             var response = authenticationService.introspect(
                     IntrospectRequest.builder().token(token).build());
             if (!response.isValid()) throw new JwtException("Token invalid");
-        } catch ( RuntimeException e) {
+        } catch (RuntimeException | ParseException | JOSEException e) {
             throw new JwtException(e.getMessage());
         }
 

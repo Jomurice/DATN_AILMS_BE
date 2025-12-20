@@ -4,6 +4,7 @@ import com.datn.ailms.model.dto.response.ApiResp;
 import com.datn.ailms.model.dto.response.UserResponseDto;
 import com.datn.ailms.services.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,6 +22,7 @@ public class AdminUserController {
     private final UserService _userService;
 
     @PatchMapping("/{userId}/active")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ApiResp<UserResponseDto> activeAccount(@PathVariable UUID userId) {
         return ApiResp.<UserResponseDto>builder()
                 .result(_userService.activeAccount(userId))
@@ -29,6 +31,7 @@ public class AdminUserController {
     }
 
     @PatchMapping("/{userId}/blocked")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ApiResp<UserResponseDto> blockAccount(@PathVariable UUID userId) {
         return ApiResp.<UserResponseDto>builder()
                 .result(_userService.blockedAccount(userId))

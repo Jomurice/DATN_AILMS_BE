@@ -10,6 +10,7 @@ import com.datn.ailms.model.dto.response.warehouse_response.WarehouseResponseDto
 import com.datn.ailms.services.warehouseServices.WarehouseSerivce;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,6 +24,7 @@ public class WarehouseController {
     public final WarehouseSerivce _warehouseService;
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ApiResp<List<WarehouseResponseDto>> getAllWarehouses() {
         return ApiResp.<List<WarehouseResponseDto>>builder()
                 .result(_warehouseService.findAll())
@@ -30,6 +32,7 @@ public class WarehouseController {
     }
 
     @GetMapping("/tree/location/{location}")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ApiResp<List<WarehouseResponseDto>> getTreeByLocation(@PathVariable String location) {
         return ApiResp.<List<WarehouseResponseDto>>builder()
                 .result(_warehouseService.findTreeByLocation(location))
@@ -45,6 +48,7 @@ public class WarehouseController {
 
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN','LM')")
     public ApiResp<WarehouseResponseDto> createWarehouse(@RequestBody CreateWarehouseRequestDto request) {
         return ApiResp.<WarehouseResponseDto>builder()
                 .result(_warehouseService.create(request))
@@ -53,6 +57,7 @@ public class WarehouseController {
 
 
     @PutMapping("/{warehouseId}")
+    @PreAuthorize("hasAnyRole('ADMIN','LM')")
     public ApiResp<WarehouseResponseDto> updateWarehouse(
             @PathVariable UUID warehouseId,
             @RequestBody UpdateWarehouseRequestDto request) {
