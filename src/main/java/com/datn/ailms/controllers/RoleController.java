@@ -6,6 +6,7 @@ import com.datn.ailms.model.dto.response.ApiResp;
 import com.datn.ailms.model.dto.response.RoleResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,6 +21,7 @@ public class RoleController {
     private IRoleService _roleService;
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ApiResp<List<RoleResponseDto>> getAllRoles() {
         return ApiResp.<List<RoleResponseDto>>
                 builder()
@@ -28,6 +30,7 @@ public class RoleController {
     }
 
     @GetMapping("/{roleId}")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ApiResp<RoleResponseDto> getRoleById(@PathVariable("roleId") String roleId) {
         return ApiResp.<RoleResponseDto>builder()
                 .result(_roleService.getRoleById(roleId))
@@ -35,6 +38,7 @@ public class RoleController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ApiResp<RoleResponseDto> createRole(@RequestBody RoleRequestDto roleRequestDto) {
         return ApiResp.<RoleResponseDto>builder()
                 .result(_roleService.createRole(roleRequestDto))
@@ -42,6 +46,7 @@ public class RoleController {
     }
 
     @PutMapping("/{roleId}")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ApiResp<RoleResponseDto> updateRole(@PathVariable("roleId") String roleId, @RequestBody RoleRequestDto roleRequestDto) {
         return ApiResp.<RoleResponseDto>builder()
                 .result(_roleService.updateRole(roleId, roleRequestDto))

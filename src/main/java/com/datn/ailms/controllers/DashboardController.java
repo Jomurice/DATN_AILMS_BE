@@ -7,6 +7,7 @@ import com.datn.ailms.model.dto.response.ApiResp;
 import com.datn.ailms.model.dto.response.DashboardStatsResponseDto;
 import com.datn.ailms.services.DashboardService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -23,6 +24,7 @@ public class DashboardController {
     private final DashboardService _dashboardService;
 
     @GetMapping("/stats")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     ApiResp<DashboardStatsResponseDto> getDashboardStat(@RequestParam(name="timeframe",defaultValue = "ALL") String timeframe,
                                                         @RequestParam(name="warehouseId", required = false) UUID warehouseId){
         DashboardStatsRequestDto requestDto = DashboardStatsRequestDto.builder()
@@ -34,6 +36,7 @@ public class DashboardController {
     }
 
     @GetMapping("/series")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ApiResp<InOutSeriesDto> getSeries(
             @RequestParam(name = "timeframe", defaultValue = "30D") String timeframe,
             @RequestParam(name="warehouseId", required = false) UUID warehouseId

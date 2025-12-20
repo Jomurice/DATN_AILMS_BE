@@ -11,6 +11,6 @@ import java.text.ParseException;
 
 public interface IAuthenticationService {
     AuthenResponse authenticate(AuthenRequest authenRequest);
-    IntrospectResponse introspect(IntrospectRequest request) throws JOSEException;
+    IntrospectResponse introspect(IntrospectRequest request) throws JOSEException, ParseException;
     void logout(LogoutRequest request) throws ParseException, JOSEException;
 }

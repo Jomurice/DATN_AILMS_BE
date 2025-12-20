@@ -1,7 +1,9 @@
 package com.datn.ailms.configs;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -11,8 +13,8 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
 
 import java.util.List;
 
@@ -20,31 +22,22 @@ import java.util.List;
 @EnableMethodSecurity
 @EnableWebSecurity
 public class SecurityConfig {
+    private final String[] PUBLIC_ENDPOINTS = {
+        "/users/", "/auth/token","/auth/introspect","/auth/logout","/auth/refresh"
+    };
 
+    @Autowired
+    private customJwtDecoder customJwtDecoder;
     @Bean
-    public SecurityFilterChain chain(HttpSecurity http,customJwtDecoder customJwtDecoder) throws Exception {
-//                http.csrf(AbstractHttpConfigurer::disable);
-//        http.cors(Customizer.withDefaults());
-//        http.authorizeHttpRequests(config -> {
-//            // 1. Các API này AI CŨNG ĐƯỢC VÀO (Công khai)
-//            config.requestMatchers(
-//                    "/api/auth/**",
-//                    "/api/users/register",
-//                    "/api/products/**",  // Ví dụ: Cho xem sản phẩm thoải mái (tùy bạn)
-//                    "/v3/api-docs/**",
-//                    "/swagger-ui/**",
-//                    "/swagger-ui.html"
-//            ).permitAll();
-//            // 2. Tất cả các API khác: BẮT BUỘC PHẢI CÓ TOKEN
-//            config.anyRequest().authenticated();
-//        });
-        http.csrf(AbstractHttpConfigurer::disable);
-
-        // ✅ bật CORS và lấy config từ bean corsConfigurationSource
+    public SecurityFilterChain chain(HttpSecurity http) throws Exception {
         http.cors(Customizer.withDefaults());
-        http.authorizeHttpRequests(config -> {
-                config.anyRequest().permitAll();
-        });
+        http.authorizeHttpRequests(request -> request.requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS)
+                .permitAll()
+                .requestMatchers("/api/dashboard/**").hasRole("ADMIN")
+                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                .anyRequest()
+                .authenticated()
+        );
         http.oauth2ResourceServer(oauth2 -> oauth2.jwt(jwtConfigurer -> jwtConfigurer
                         .decoder(customJwtDecoder)
                         .jwtAuthenticationConverter(jwtAuthenticationConverter()))
@@ -55,16 +48,15 @@ public class SecurityConfig {
     }
 
     @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
+    public CorsFilter corsFilter() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:5173"));
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-        configuration.setAllowedHeaders(List.of("*"));
-        configuration.setAllowCredentials(true);
+        configuration.addAllowedOrigin("*");
+        configuration.addAllowedHeader("*");
+        configuration.addAllowedMethod("*");
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
-        return source;
+        return new CorsFilter(source);
     }
 
 

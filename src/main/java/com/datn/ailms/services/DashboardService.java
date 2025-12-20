@@ -49,28 +49,22 @@ public class DashboardService implements IDashboardService {
         List<Object[]> outboundRows;
 
         // Trường hợp có warehouse cụ thể
-        if (warehouseId != null) {
+        if (warehouseId == null) {
             switch (timeframe) {
                 case "24H":
-                    inboundRows = dashboardRepository.countByStatusAndHourAndWarehouse(
-                            SerialStatus.IN_WAREHOUSE, start, end, warehouseId);
-                    outboundRows = dashboardRepository.countByStatusAndHourAndWarehouse(
-                            SerialStatus.OUTBOUND, start, end, warehouseId);
+                    inboundRows = dashboardRepository.countInboundByHour(start, end);
+                    outboundRows = dashboardRepository.countOutboundByHour(start, end);
                     break;
                 case "7D":
                 case "30D":
                 case "1M":
-                    inboundRows = dashboardRepository.countByStatusAndDayAndWarehouse(
-                            SerialStatus.IN_WAREHOUSE, start, end, warehouseId);
-                    outboundRows = dashboardRepository.countByStatusAndDayAndWarehouse(
-                            SerialStatus.OUTBOUND, start, end, warehouseId);
+                    inboundRows = dashboardRepository.countInboundByDay(start, end);
+                    outboundRows = dashboardRepository.countOutboundByDay(start,end);
                     break;
                 case "1Y":
                 default:
-                    inboundRows = dashboardRepository.countByStatusAndMonthAndWarehouse(
-                            SerialStatus.IN_WAREHOUSE, start, end, warehouseId);
-                    outboundRows = dashboardRepository.countByStatusAndMonthAndWarehouse(
-                            SerialStatus.OUTBOUND, start, end, warehouseId);
+                    inboundRows = dashboardRepository.countInboundByMonth(start, end);
+                    outboundRows = dashboardRepository.countOutboundByMonth(start,end);
                     break;
             }
         }
@@ -78,25 +72,19 @@ public class DashboardService implements IDashboardService {
         else {
             switch (timeframe) {
                 case "24H":
-                    inboundRows = dashboardRepository.countByStatusAndHour(
-                            SerialStatus.IN_WAREHOUSE, start, end);
-                    outboundRows = dashboardRepository.countByStatusAndHour(
-                            SerialStatus.OUTBOUND, start, end);
+                    inboundRows = dashboardRepository.countInboundByHourAndWarehouse(start, end,warehouseId);
+                    outboundRows = dashboardRepository.countOutboundByHourAndWarehouse(start,end,warehouseId);
                     break;
                 case "7D":
                 case "30D":
                 case "1M":
-                    inboundRows = dashboardRepository.countByStatusAndDay(
-                            SerialStatus.IN_WAREHOUSE, start, end);
-                    outboundRows = dashboardRepository.countByStatusAndDay(
-                            SerialStatus.OUTBOUND, start, end);
+                    inboundRows = dashboardRepository.countInboundByDayAndWarehouse(start, end,warehouseId);
+                    outboundRows = dashboardRepository.countOutboundByDayAndWarehouse(start, end,warehouseId);
                     break;
                 case "1Y":
                 default:
-                    inboundRows = dashboardRepository.countByStatusAndMonth(
-                            SerialStatus.IN_WAREHOUSE, start, end);
-                    outboundRows = dashboardRepository.countByStatusAndMonth(
-                            SerialStatus.OUTBOUND, start, end);
+                    inboundRows = dashboardRepository.countInboundByMonthAndWarehouse(start, end,warehouseId);
+                    outboundRows = dashboardRepository.countOutboundByMonthAndWarehouse(start, end,warehouseId);
                     break;
             }
         }
