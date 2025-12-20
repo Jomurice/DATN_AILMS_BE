@@ -17,5 +17,6 @@ public class OutboundOrderRequestDto {
     UUID customerId;
     UUID createdBy;
     String status;
+    UUID warehouseId;
     List<OutboundOrderItemRequestDto> items;
 }

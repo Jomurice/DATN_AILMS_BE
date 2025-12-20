@@ -6,6 +6,7 @@ import com.datn.ailms.model.dto.request.DashboardStatsRequestDto;
 import com.datn.ailms.model.dto.response.DashboardStatsResponseDto;
 import com.datn.ailms.model.entities.enums.SerialStatus;
 import com.datn.ailms.repositories.DashboardRepository;
+import com.datn.ailms.repositories.orderRepo.OutboundOrderItemRepository;
 import com.datn.ailms.repositories.productRepo.ProductDetailRepository;
 import com.datn.ailms.repositories.userRepo.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ public class DashboardService implements IDashboardService {
 
     private final ProductDetailRepository _productDetailRepo;
     private final UserRepository _userRepo;
+    private final OutboundOrderItemRepository _outboundItemRepo;
     private final DashboardRepository dashboardRepository;
 
     @Override
@@ -144,4 +146,25 @@ public class DashboardService implements IDashboardService {
                 .outbound(outbound)
                 .build();
     }
+
+//    @Override
+//    public DashboardStatsResponseDto getStatus(String timeframe, UUID warehouseId) {
+//        LocalDateTime fromDate = switch (timeframe) {
+//            case "DAY" -> LocalDate.now().atStartOfDay();
+//            case "WEEK" -> LocalDate.now().minusDays(7).atStartOfDay();
+//            case "MONTH" -> LocalDate.now().minusMonths(1).atStartOfDay();
+//            default -> null;
+//        };
+//
+//        long inStock = _productDetailRepo.countInStock(warehouseId);
+//        long exported = _outboundItemRepo.sumExportedQty(fromDate, warehouseId);
+//
+//        long employees = _userRepo.countUsers();
+//
+//        return DashboardStatsResponseDto.builder()
+//                .inStock(inStock)
+//                .exported(exported)
+//                .employees(employees)
+//                .build();
+//    }
 }

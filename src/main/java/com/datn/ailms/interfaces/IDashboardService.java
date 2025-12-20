@@ -11,4 +11,5 @@ import java.util.UUID;
 public interface IDashboardService {
     DashboardStatsResponseDto getDashboardStats(DashboardStatsRequestDto requestDto);
     InOutSeriesDto getInboundOutboundSeries(LocalDateTime start, LocalDateTime end, String timeFrame, UUID warehouseId);
+//    DashboardStatsResponseDto getStatus (String timeframe, UUID warehouseId);
 }

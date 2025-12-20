@@ -26,7 +26,7 @@ public enum ErrorCode {
     OTP_EXPIRED(1021, "OTP expired", HttpStatus.BAD_REQUEST),
     OTP_INVALID(1022, "OTP invalid", HttpStatus.BAD_REQUEST),
     PASSWORD_INCORRECT(1023, "Password incorrect", HttpStatus.BAD_REQUEST),
-
+    USER_BLOCKED(1024, "User blocked", HttpStatus.CONFLICT),
     WAREHOUSE_NOT_EXISTED(1025, "Warehouse not existed", HttpStatus.NOT_FOUND),
     ZONE_NOT_EXISTED(1026, "Zone not existed", HttpStatus.NOT_FOUND),
     AISLE_NOT_EXISTED(1027, "AISLE not existed", HttpStatus.NOT_FOUND),

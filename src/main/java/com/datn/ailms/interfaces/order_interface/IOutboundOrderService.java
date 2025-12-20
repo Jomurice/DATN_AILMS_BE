@@ -27,6 +27,6 @@ public interface IOutboundOrderService {
     OutboundOrderResponseDto confirmExport(UUID orderId, UUID userId);
 //    List<OutboundOrderResponseDto> getAllByStatus(String status);
     List<OutboundOrderResponseDto> getAllByProductId(UUID productId);
-    List<ProductDetailResponseDto> getByOrderIdAndSKU(UUID orderId, String sku);
+    Page<ProductDetailResponseDto> getByOrderIdAndSKU(UUID orderId, String sku, Pageable pageable);
     List<ProductDetailResponseDto> scanned(UUID orderId, ProductConfirmRequestDto request);
 }

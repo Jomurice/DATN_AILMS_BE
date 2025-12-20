@@ -16,7 +16,7 @@ import java.util.UUID;
 
 public interface IOutboundOrderItemService {
     List<OutboundOrderItemResponseDto> addItem(OutboundOrderRequestDto request, UUID outboundOrder);
-    OutboundOrderItemResponseDto update(OutboundOrderItemRequestDto request, UUID outboundOrderId);
+    OutboundOrderItemResponseDto update(OutboundOrderItemRequestDto request, UUID outboundOrderId, UUID warehouseId);
     void removeItem(Set<UUID> productIds, Map<UUID, OutboundOrderItem> existingItemMap);
 //    OutboundOrderItemResponseDto addSingleItem (OutboundOrderItemRequestDto request, UUID orderId);
     void returnSerials(OutboundOrderItem item);

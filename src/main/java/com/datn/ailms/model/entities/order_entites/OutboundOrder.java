@@ -1,6 +1,7 @@
 package com.datn.ailms.model.entities.order_entites;
 
 import com.datn.ailms.model.entities.account_entities.User;
+import com.datn.ailms.model.entities.topo_entities.Warehouse;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -44,4 +45,8 @@ public class OutboundOrder {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id")
     private Customer customer;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "warehouse_id", nullable = false)
+    private Warehouse warehouse;
 }

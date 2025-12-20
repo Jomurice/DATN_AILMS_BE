@@ -19,11 +19,13 @@ public interface OutboundOrderMapper {
     @Mapping(source = "items", target = "items")
     @Mapping(source = "createdBy.id", target = "createdBy")
     @Mapping(source = "customer.id", target = "customerId")
+    @Mapping(source = "warehouse.id", target = "warehouseId")
     OutboundOrderResponseDto toDto(OutboundOrder entity);
 
     @Mapping(source = "items", target = "items")
     @Mapping(source = "createdBy", target = "createdBy.id")
     @Mapping(source = "customerId", target = "customer")
+    @Mapping(source = "warehouseId", target = "warehouse.id")
     OutboundOrder toEntity(OutboundOrderRequestDto dto);
 
     List<OutboundOrderResponseDto> toResponseList( List<OutboundOrder> entities);
