@@ -14,4 +14,5 @@ import java.util.UUID;
 public class DashboardStatsRequestDto {
     private String timeframe;
     private UUID warehouseId;
+    private String statusProduct;
 }

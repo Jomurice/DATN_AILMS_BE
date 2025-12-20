@@ -123,10 +123,10 @@ public class OutboundOrderController {
 //    }
 
     @GetMapping("/{orderId}/serials")
-    public ApiResp<List<ProductDetailResponseDto>> getSerials(
-            @PathVariable UUID orderId, @Param("sku") String sku){
-        var result = _outOrderService.getByOrderIdAndSKU(orderId, sku);
-        return ApiResp.<List<ProductDetailResponseDto>>builder()
+    public ApiResp<Page<ProductDetailResponseDto>> getSerials(
+            @PathVariable UUID orderId, @RequestParam("sku") String sku, Pageable pageable){
+        var result = _outOrderService.getByOrderIdAndSKU(orderId, sku, pageable);
+        return ApiResp.<Page<ProductDetailResponseDto>>builder()
                 .result(result)
                 .build();
     }

@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -16,6 +17,14 @@ public interface OutboundOrderItemRepository extends JpaRepository<OutboundOrder
 
     @EntityGraph(attributePaths = {"product"})
     List<OutboundOrderItem> findByProductId(UUID productId);
+
+//    @Query("""
+//        SELECT COALESCE(SUM(oi.quantity),0)
+//        FROM OutboundOrderItem oi
+//        WHERE oi.createdAt >= :fromDate
+//        AND oi.status
+//        """)
+//    long sumExportedQty(LocalDateTime fromDate, UUID warehouseId);
 
     Optional<OutboundOrderItem> findByOutboundOrderIdAndProductId(UUID outboundOrderId, UUID productId);
 }
