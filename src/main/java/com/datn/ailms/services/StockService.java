@@ -16,7 +16,7 @@ public class StockService {
 
     final ProductDetailRepository _productDetailRepo;
 
-    public long getAvailableQuantity(UUID productId) {
-        return _productDetailRepo.countAvailableByProductId(productId);
+    public long getAvailableQuantity(UUID productId, UUID warehouseId) {
+        return _productDetailRepo.countAvailableByProductIdAndWarehouse(productId, warehouseId);
     }
 }

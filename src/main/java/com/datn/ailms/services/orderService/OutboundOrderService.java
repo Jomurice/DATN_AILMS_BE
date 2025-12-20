@@ -21,12 +21,14 @@ import com.datn.ailms.model.entities.order_entites.OutboundOrder;
 import com.datn.ailms.model.entities.order_entites.OutboundOrderItem;
 import com.datn.ailms.model.entities.product_entities.Product;
 import com.datn.ailms.model.entities.product_entities.ProductDetail;
+import com.datn.ailms.model.entities.topo_entities.Warehouse;
 import com.datn.ailms.repositories.orderRepo.CustomerRepository;
 import com.datn.ailms.repositories.orderRepo.OutboundOrderItemRepository;
 import com.datn.ailms.repositories.orderRepo.OutboundOrderRepository;
 import com.datn.ailms.repositories.productRepo.ProductDetailRepository;
 import com.datn.ailms.repositories.productRepo.ProductRepository;
 import com.datn.ailms.repositories.userRepo.UserRepository;
+import com.datn.ailms.repositories.warehousetopology.WarehouseRepository;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -53,6 +55,7 @@ public class OutboundOrderService implements IOutboundOrderService {
     final UserRepository _userRepository;
     final CustomerRepository _customerRepo;
     final ProductRepository _productRepo;
+    final WarehouseRepository _warehouseRepo;
     final ProductDetailRepository _productDetailRepo;
     final OutboundOrderRepository _outboundOrderRepo;
     final OutboundOrderItemRepository _outOrderItemRepo;
@@ -72,15 +75,15 @@ public class OutboundOrderService implements IOutboundOrderService {
         User user = _userRepository.findById(request.getCreatedBy())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
-        Customer customer = _customerRepo.findById(request.getCustomerId())
-                .orElseThrow(() -> new AppException(ErrorCode.CUSTOMER_NOT_EXISTED));
+        Warehouse warehouse = _warehouseRepo.findById(request.getWarehouseId())
+                .orElseThrow(() -> new AppException(ErrorCode.WAREHOUSE_NOT_EXISTED));
 
         OutboundOrder outbound = _outboundOrderMapper.toEntity(request);
 
         outbound.setCreatedBy(user);
         outbound.setStatus(OrderStatus.DRAFT.name());
         outbound.setCreateAt(LocalDateTime.now());
-        outbound.setCustomer(customer);
+        outbound.setWarehouse(warehouse);
         outbound.setCode(generateOrderCode());
 
         outbound = _outboundOrderRepo.save(outbound);
@@ -130,8 +133,6 @@ public class OutboundOrderService implements IOutboundOrderService {
 
     @Override
     public void cancelOutbound(UUID orderId, CancelRequestDto request) {
-        System.out.println(orderId + "__" + request);
-
         OutboundOrder order = _outboundOrderRepo.findById(orderId)
                 .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
 
@@ -194,7 +195,7 @@ public class OutboundOrderService implements IOutboundOrderService {
             throw new AppException(ErrorCode.INVALID_ORDER_STATUS);
         }
 
-        _outItemService.checkAndReserveItems(outOrder.getItems());
+        _outItemService.checkAndReserveItems(outOrder.getItems(), request.getWarehouseId());
 
         outOrder.setCustomer(customer);
         outOrder.setStatus(OrderStatus.CONFIRMED.name());

@@ -12,6 +12,7 @@ import com.datn.ailms.model.entities.account_entities.User;
 import com.datn.ailms.repositories.userRepo.InvalidatedTokenRepository;
 import com.datn.ailms.repositories.userRepo.UserRepository;
 import com.datn.ailms.interfaces.IAuthenticationService;
+import com.github.dockerjava.api.exception.UnauthorizedException;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
@@ -116,6 +117,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         }
 
         var token = generateToken(user);
+
         return AuthenResponse.builder()
                 .token(token.token)
                 .authenticated(true)

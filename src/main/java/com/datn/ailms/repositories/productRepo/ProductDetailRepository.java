@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -66,8 +67,24 @@ public interface ProductDetailRepository extends JpaRepository<ProductDetail, UU
     FROM ProductDetail pd
     WHERE pd.product.id = :productId
       AND pd.status = 'IN_WAREHOUSE'
+      AND pd.warehouse.id = :warehouseId
 """)
-    long countAvailableByProductId(@Param("productId") UUID productId);
+    long countAvailableByProductIdAndWarehouse(@Param("productId") UUID productId, @Param("warehouseId") UUID warehouseId);
+
+    @Query("""
+        SELECT pd
+        FROM ProductDetail pd
+        WHERE pd.product.id = :productId
+        AND pd.warehouse.id = :warehouseId
+        AND pd.status = 'IN_WAREHOUSE'
+        ORDER BY pd.createdAt
+        """)
+    List<ProductDetail> findTopNByProductAndWarehouse(
+            UUID productId,
+            UUID warehouseId,
+            Pageable pageable
+    );
+
 
     @Query("""
     SELECT pd FROM ProductDetail pd
@@ -76,7 +93,15 @@ public interface ProductDetailRepository extends JpaRepository<ProductDetail, UU
     List<ProductDetail> findByOutboundOrderId(@Param("orderId") UUID orderId);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    List<ProductDetail> findByProductIdAndStatus(UUID productId, SerialStatus status);
+    @Query("""
+        SELECT pd
+        FROM ProductDetail pd
+        WHERE pd.product.id = :productId
+          AND pd.warehouse.id = :warehouseId
+          AND pd.status = 'IN_WAREHOUSE'
+        ORDER BY pd.createdAt
+    """)
+    List<ProductDetail> findAvailableForExport(UUID productId, UUID warehouseId);
 
     List<ProductDetail> findByOutboundOrderItemId(UUID id);
 
@@ -92,4 +117,15 @@ public interface ProductDetailRepository extends JpaRepository<ProductDetail, UU
             @Param("status") SerialStatus status,
             @Param("warehouseId") UUID warehouseId
     );
+
+//    @Query("""
+//        SELECT COUNT(pd)
+//        FROM ProductDetail pd
+//        WHERE pd.status = 'IN_WAREHOUSE'
+//          AND pd.warehouse.id = :warehouseId
+//    """)
+//    long countInStock(UUID warehouseId);
+
+
+
 }

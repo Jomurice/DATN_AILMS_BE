@@ -53,8 +53,10 @@ public class OutboundOrderItemController {
 
     @PutMapping("/{orderId}")
     public ApiResp<OutboundOrderItemResponseDto> updateItem(
-            @PathVariable UUID orderId, @RequestBody OutboundOrderItemRequestDto request){
-        var result = _outboundItemService.update(request, orderId);
+            @PathVariable UUID orderId,
+            @PathVariable UUID warehouseId,
+            @RequestBody OutboundOrderItemRequestDto request){
+        var result = _outboundItemService.update(request, orderId,warehouseId);
         return ApiResp.<OutboundOrderItemResponseDto>builder()
                 .result(result)
                 .build();

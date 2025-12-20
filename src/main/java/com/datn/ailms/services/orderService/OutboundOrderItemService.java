@@ -17,6 +17,7 @@ import com.datn.ailms.model.entities.order_entites.OutboundOrder;
 import com.datn.ailms.model.entities.order_entites.OutboundOrderItem;
 import com.datn.ailms.model.entities.product_entities.Product;
 import com.datn.ailms.model.entities.product_entities.ProductDetail;
+import com.datn.ailms.model.entities.topo_entities.Warehouse;
 import com.datn.ailms.repositories.orderRepo.OutboundOrderItemRepository;
 import com.datn.ailms.repositories.orderRepo.OutboundOrderRepository;
 import com.datn.ailms.repositories.productRepo.ProductDetailRepository;
@@ -26,6 +27,7 @@ import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -68,10 +70,13 @@ public class OutboundOrderItemService implements IOutboundOrderItemService {
         // xóa các item k còn trong req
         removeItem(newProductIds,existingItemMap);
 
+        Warehouse warehouse = order.getWarehouse();
+
         // Thêm hoặc update item
         for(OutboundOrderItemRequestDto req : requests.getItems()){
             Product product = _productRepository.findById(req.getProductId())
                     .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+
 
             OutboundOrderItem item = existingItemMap.getOrDefault(product.getId(),
                     OutboundOrderItem.builder()
@@ -84,6 +89,13 @@ public class OutboundOrderItemService implements IOutboundOrderItemService {
             item.setOrderQuantity(req.getOrderQuantity());
             itemsToSave.add(item);
 
+            List<ProductDetail> serials = _productDetailRepository
+                    .findTopNByProductAndWarehouse(
+                            product.getId(),
+                            warehouse.getId(),
+                            PageRequest.of(0, req.getOrderQuantity())
+                    );
+            serialsToSave.addAll(serials);
 
         }
         _itemRepo.saveAll(itemsToSave);
@@ -167,7 +179,7 @@ public class OutboundOrderItemService implements IOutboundOrderItemService {
 
 
     @Override
-    public OutboundOrderItemResponseDto update(OutboundOrderItemRequestDto request, UUID outboundOrderId) {
+    public OutboundOrderItemResponseDto update(OutboundOrderItemRequestDto request, UUID outboundOrderId, UUID warehouseId) {
         OutboundOrderItem item = _itemRepo.findByOutboundOrderIdAndProductId(outboundOrderId, request.getProductId())
                 .orElseThrow(() -> new AppException(ErrorCode.ITEM_NOT_FOUND));
 
@@ -182,7 +194,7 @@ public class OutboundOrderItemService implements IOutboundOrderItemService {
 
             // Lấy lại serials mới
             List<ProductDetail> newSerials = _productDetailRepository
-                    .findByProductIdAndStatus(request.getProductId(), SerialStatus.IN_WAREHOUSE)
+                    .findAvailableForExport(request.getProductId(),warehouseId)
                     .stream()
                     .limit(request.getOrderQuantity())
                     .toList();
@@ -226,17 +238,17 @@ public class OutboundOrderItemService implements IOutboundOrderItemService {
         return serials;
     }
 
-    public void checkAndReserveItems(List<OutboundOrderItem> items){
+    public void checkAndReserveItems(List<OutboundOrderItem> items, UUID warehouseId){
         for(OutboundOrderItem item : items){
             Product product = item.getProduct();
 
-            long available = _stockService.getAvailableQuantity(product.getId());
+            long available = _stockService.getAvailableQuantity(product.getId(), warehouseId);
             if (item.getOrderQuantity() > available)
                 throw new AppException(ErrorCode.STOCK_NOT_ENOUGH);
 
 
             List<ProductDetail> serials = _productDetailRepository
-                    .findByProductIdAndStatus(product.getId(), SerialStatus.IN_WAREHOUSE)
+                    .findAvailableForExport(product.getId(), warehouseId)
                     .stream()
                     .limit(item.getOrderQuantity()) // Chỉ lấy số lượng SP = vs số lượng SP trong req
                     .toList();

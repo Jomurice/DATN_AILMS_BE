@@ -1,5 +1,6 @@
 package com.datn.ailms.model.entities.topo_entities;
 
+import com.datn.ailms.model.entities.order_entites.OutboundOrder;
 import com.datn.ailms.model.entities.product_entities.ProductDetail;
 import jakarta.persistence.*;
 import lombok.*;
@@ -47,4 +48,7 @@ public class Warehouse {
 
     @OneToMany(mappedBy = "warehouse")
     List<ProductDetail> productDetails;
+
+    @OneToMany(mappedBy = "warehouse")
+    List<OutboundOrder> outboundOrders;
 }
