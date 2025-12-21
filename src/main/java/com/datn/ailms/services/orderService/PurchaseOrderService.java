@@ -173,8 +173,11 @@ public class PurchaseOrderService implements IPurchaseOrderService {
             item.setScannedQuantity((int) scannedCount);
             purchaseOrderItemRepository.save(item);
         });
+        int currentQty = warehouse.getCurrentQuantity() == null
+                ? 0
+                : warehouse.getCurrentQuantity();
 
-        warehouse.setCurrentQuantity(warehouse.getCurrentQuantity() + added.get());
+        warehouse.setCurrentQuantity(currentQty + added.get());
         _warehouseRepo.save(warehouse);
 
 //        order.setCreatedAt(new LocalDate());
