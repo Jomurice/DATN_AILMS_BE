@@ -3,6 +3,7 @@ package com.datn.ailms.controllers;
 import com.datn.ailms.model.dto.request.AuthenRequest;
 import com.datn.ailms.model.dto.request.IntrospectRequest;
 import com.datn.ailms.model.dto.request.LogoutRequest;
+import com.datn.ailms.model.dto.request.RefreshRequest;
 import com.datn.ailms.model.dto.response.ApiResp;
 import com.datn.ailms.model.dto.response.AuthenResponse;
 import com.datn.ailms.model.dto.response.IntrospectResponse;
@@ -49,7 +50,11 @@ public class AuthenticationController {
         return ApiResp.<Void>builder().build();
     }
 
-
+    @PostMapping("/refresh")
+    ApiResp<AuthenResponse> authenticate(@RequestBody RefreshRequest request) throws ParseException, JOSEException {
+        var result = authenticationService.refreshToken(request);
+        return ApiResp.<AuthenResponse>builder().result(result).build();
+    }
 
 
 
