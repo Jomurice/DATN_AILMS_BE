@@ -5,6 +5,7 @@ import com.datn.ailms.exceptions.ErrorCode;
 import com.datn.ailms.model.dto.request.AuthenRequest;
 import com.datn.ailms.model.dto.request.IntrospectRequest;
 import com.datn.ailms.model.dto.request.LogoutRequest;
+import com.datn.ailms.model.dto.request.RefreshRequest;
 import com.datn.ailms.model.dto.response.AuthenResponse;
 import com.datn.ailms.model.dto.response.IntrospectResponse;
 import com.datn.ailms.model.entities.account_entities.InvalidatedToken;
@@ -39,6 +40,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
 import java.util.StringJoiner;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -95,6 +97,28 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         }
     }
 
+    @Override
+    public AuthenResponse refreshToken(RefreshRequest refreshRequest) throws ParseException, JOSEException {
+        var signedJWT = verifyToken(refreshRequest.getToken(), true);
+        var jit = signedJWT.getJWTClaimsSet().getJWTID();
+        var expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
+
+        InvalidatedToken invalidatedToken = InvalidatedToken.builder().id(jit).expiryTime(expiryTime).build();
+
+        invalidatedTokenRepository.save(invalidatedToken);
+
+        var username = signedJWT.getJWTClaimsSet().getSubject();
+
+        var user = _userRepository.findByUsername(username).orElseThrow(() -> new AppException(ErrorCode.UNAUTHENTICATED));
+
+        var tokenInfo = generateToken(user);
+        var refreshToken = generateRefreshToken(user);
+
+        return AuthenResponse.builder()
+                .token(tokenInfo.token())
+                .refreshToken(refreshToken.token())
+                .authenticated(true).build();
+    }
 
 
     @Override
@@ -111,12 +135,47 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         }
 
         var token = generateToken(user);
+        var refreshToken = generateRefreshToken(user);
 
         return AuthenResponse.builder()
-                .token(token.token)
+                .token(token.token())
+                .refreshToken(refreshToken.token())
                 .authenticated(true)
                 .build();
     }
+
+    private TokenInfo generateRefreshToken(User user) {
+
+        JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
+        Date issueTime = new Date();
+
+        Date expiryTime = new Date(
+                Instant.ofEpochMilli(issueTime.getTime())
+                        .plus(REFRESHABLE_DURATION, ChronoUnit.SECONDS)
+                        .toEpochMilli()
+        );
+
+        JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
+                .subject(user.getUsername())
+                .issuer("tien")
+                .issueTime(issueTime)
+                .expirationTime(expiryTime)
+                .jwtID(UUID.randomUUID().toString())
+                .claim("type", "refresh")
+                .build();
+
+        Payload payload = new Payload(jwtClaimsSet.toJSONObject());
+        JWSObject jwsObject = new JWSObject(header, payload);
+
+        try {
+            jwsObject.sign(new MACSigner(SIGNER_KEY.getBytes()));
+            return new TokenInfo(jwsObject.serialize(), expiryTime); // ✅ ĐÂY LÀ return BỊ THIẾU
+        } catch (JOSEException e) {
+            log.error("Cannot create refresh token", e);
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
+        }
+    }
+
 
     private TokenInfo generateToken(User user){
 
