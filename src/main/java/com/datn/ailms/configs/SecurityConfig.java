@@ -30,24 +30,45 @@ public class SecurityConfig {
     private customJwtDecoder customJwtDecoder;
     @Bean
     public SecurityFilterChain chain(HttpSecurity http) throws Exception {
-        http.cors(Customizer.withDefaults());
-        http.authorizeHttpRequests(request -> request.requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS)
-                .permitAll()
-                .requestMatchers("/api/dashboard/**").hasRole("ADMIN")
-                .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                .requestMatchers(
-                        "/swagger-ui/**",
-                        "/v3/api-docs/",
-                        "/swagger-ui.html"
-                ).permitAll()
-                .anyRequest()
-                .authenticated()
-        );
+//        http.cors(Customizer.withDefaults());
+//        http.authorizeHttpRequests(request -> request.requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS)
+//                .permitAll()
+//                .requestMatchers("/api/dashboard/**").hasRole("ADMIN")
+//                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+//                .anyRequest()
+//                .authenticated()
+//        );
+
+
+        http
+                .cors(Customizer.withDefaults())
+                .csrf(AbstractHttpConfigurer::disable)
+
+                .authorizeHttpRequests(auth -> auth
+
+                        // 🔓 SWAGGER
+                        .requestMatchers(
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/swagger-ui.html"
+                        ).permitAll()
+
+                        // 🔓 PUBLIC API
+                        .requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS).permitAll()
+
+                        // 🔐 ROLE BASED
+                        .requestMatchers("/api/dashboard/**").hasRole("ADMIN")
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+
+                        // 🔐 OTHER
+                        .anyRequest().authenticated()
+                );
         http.oauth2ResourceServer(oauth2 -> oauth2.jwt(jwtConfigurer -> jwtConfigurer
                         .decoder(customJwtDecoder)
                         .jwtAuthenticationConverter(jwtAuthenticationConverter()))
                 .authenticationEntryPoint(new JwtAuthenticationEntryPoint()));
         http.csrf(AbstractHttpConfigurer::disable);
+
         return http.build();
     }
 

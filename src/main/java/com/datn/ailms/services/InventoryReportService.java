@@ -111,7 +111,7 @@ public class InventoryReportService {
                 GROUP BY p.id, p.name, p.sku, w.id, w.name
             ),
             summary AS (
-                SELECT 
+                SELECT
                     COALESCE(o.productId, i.productId, out.productId, p.id) AS productId,
                     COALESCE(o.productName, i.productName, out.productName, p.name) AS productName,
                     COALESCE(o.sku, i.sku, out.sku, p.sku) AS sku,
@@ -120,16 +120,29 @@ public class InventoryReportService {
                     COALESCE(o.openingStock, 0) AS openingStock,
                     COALESCE(i.totalIn, 0) AS totalIn,
                     COALESCE(out.totalOut, 0) AS totalOut,
-                    (COALESCE(o.openingStock, 0)
-                     + COALESCE(i.totalIn, 0)
-                     - COALESCE(out.totalOut, 0)) AS closingStock
+            
+                    
+                    COALESCE(
+                        s.quantity,
+                        (COALESCE(o.openingStock, 0)
+                         + COALESCE(i.totalIn, 0)
+                         - COALESCE(out.totalOut, 0))
+                    ) AS closingStock
+            
                 FROM products p
                 INNER JOIN warehouses w ON w.id = :warehouseId
                 LEFT JOIN opening o ON p.id = o.productId
                 LEFT JOIN inflow i ON p.id = i.productId
                 LEFT JOIN outflow out ON p.id = out.productId
+            
+                
+                LEFT JOIN stock s
+                    ON s.product_id = p.id
+                   AND s.warehouse_id = :warehouseId
+            
                 WHERE (CAST(:productId AS uuid) IS NULL OR p.id = CAST(:productId AS uuid))
             )
+            
             SELECT *
             FROM summary
             WHERE closingStock >= 0
