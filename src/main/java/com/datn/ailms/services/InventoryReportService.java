@@ -4,18 +4,17 @@ import com.datn.ailms.model.dto.response.InventorySummaryDto;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
 @Service
-@RequiredArgsConstructor
 public class InventoryReportService {
 
     @PersistenceContext
@@ -24,143 +23,121 @@ public class InventoryReportService {
     public Page<InventorySummaryDto> getInventorySummary(
             LocalDate startDate,
             LocalDate endDate,
-            UUID productId,
             UUID warehouseId,
+            UUID productId,
             int page,
             int size
     ) {
 
         if (warehouseId == null) {
-            throw new IllegalArgumentException("warehouseId là bắt buộc");
-        }
-        if (startDate.isAfter(endDate)) {
-            throw new IllegalArgumentException("startDate phải trước endDate");
+            throw new IllegalArgumentException("warehouseId is required");
         }
 
-        String baseSql = """
-            WITH opening AS (
-                SELECT 
-                    p.id AS productId,
-                    p.name AS productName,
-                    p.sku,
-                    :warehouseId AS warehouseId,
-                    w.name AS warehouseName,
-                    COALESCE(SUM(pois.scanned_quantity), 0)
-                    - COALESCE(SUM(COALESCE(ooi.scanned_quantity, 0)), 0) AS openingStock
-                FROM products p
-                INNER JOIN warehouses w ON w.id = :warehouseId
-                LEFT JOIN purchase_orders po
-                    ON po.warehouse_id = :warehouseId
-                    AND po.created_at < :startDate
-                    AND po.status = 'COMPLETED'
-                LEFT JOIN purchase_order_items pois
-                    ON pois.purchase_order_id = po.id
-                    AND pois.product_id = p.id
-                LEFT JOIN outbound_order oo
-                    ON oo.create_at < :startDate
-                    AND oo.status = 'EXPORT'
-                LEFT JOIN outbound_order_item ooi
-                    ON ooi.outbound_order_id = oo.id
-                    AND ooi.product_id = p.id
-                LEFT JOIN product_details pd_out
-                    ON pd_out.outbound_order_item_id = ooi.id
-                    AND pd_out.warehouse_id = :warehouseId
-                WHERE (CAST(:productId AS uuid) IS NULL OR p.id = CAST(:productId AS uuid))
-                GROUP BY p.id, p.name, p.sku, w.id, w.name
-            ),
-            inflow AS (
-                SELECT 
-                    p.id AS productId,
-                    p.name AS productName,
-                    p.sku,
-                    :warehouseId AS warehouseId,
-                    w.name AS warehouseName,
-                    COALESCE(SUM(pois.scanned_quantity), 0) AS totalIn
-                FROM products p
-                INNER JOIN warehouses w ON w.id = :warehouseId
-                INNER JOIN purchase_orders po
-                    ON po.warehouse_id = :warehouseId
-                    AND po.created_at BETWEEN :startDate AND :endDate
-                    AND po.status = 'COMPLETED'
-                INNER JOIN purchase_order_items pois
-                    ON pois.purchase_order_id = po.id
-                    AND pois.product_id = p.id
-                WHERE (CAST(:productId AS uuid) IS NULL OR p.id = CAST(:productId AS uuid))
-                GROUP BY p.id, p.name, p.sku, w.id, w.name
-            ),
-            outflow AS (
-                SELECT 
-                    p.id AS productId,
-                    p.name AS productName,
-                    p.sku,
-                    :warehouseId AS warehouseId,
-                    w.name AS warehouseName,
-                    COALESCE(SUM(ooi.scanned_quantity), 0) AS totalOut
-                FROM products p
-                INNER JOIN warehouses w ON w.id = :warehouseId
-                INNER JOIN outbound_order oo
-                    ON oo.create_at BETWEEN :startDate AND :endDate
-                    AND oo.status = 'EXPORT'
-                INNER JOIN outbound_order_item ooi
-                    ON ooi.outbound_order_id = oo.id
-                    AND ooi.product_id = p.id
-                INNER JOIN product_details pd
-                    ON pd.outbound_order_item_id = ooi.id
-                    AND pd.warehouse_id = :warehouseId
-                WHERE (CAST(:productId AS uuid) IS NULL OR p.id = CAST(:productId AS uuid))
-                GROUP BY p.id, p.name, p.sku, w.id, w.name
-            ),
-            summary AS (
-                SELECT
-                    COALESCE(o.productId, i.productId, out.productId, p.id) AS productId,
-                    COALESCE(o.productName, i.productName, out.productName, p.name) AS productName,
-                    COALESCE(o.sku, i.sku, out.sku, p.sku) AS sku,
-                    :warehouseId AS warehouseId,
-                    w.name AS warehouseName,
-                    COALESCE(o.openingStock, 0) AS openingStock,
-                    COALESCE(i.totalIn, 0) AS totalIn,
-                    COALESCE(out.totalOut, 0) AS totalOut,
-            
-                    
-                    COALESCE(
-                        s.quantity,
-                        (COALESCE(o.openingStock, 0)
-                         + COALESCE(i.totalIn, 0)
-                         - COALESCE(out.totalOut, 0))
-                    ) AS closingStock
-            
-                FROM products p
-                INNER JOIN warehouses w ON w.id = :warehouseId
-                LEFT JOIN opening o ON p.id = o.productId
-                LEFT JOIN inflow i ON p.id = i.productId
-                LEFT JOIN outflow out ON p.id = out.productId
-            
-                
-                LEFT JOIN stock s
-                    ON s.product_id = p.id
-                   AND s.warehouse_id = :warehouseId
-            
-                WHERE (CAST(:productId AS uuid) IS NULL OR p.id = CAST(:productId AS uuid))
-            )
-            
-            SELECT *
-            FROM summary
-            WHERE closingStock >= 0
-            ORDER BY productName
+        if (startDate == null) startDate = LocalDate.of(2000, 1, 1);
+        if (endDate == null) endDate = LocalDate.now();
+
+        String sql = """
+        WITH last_check AS (
+            SELECT id, updated_at
+            FROM check_inventory
+            WHERE warehouse_id = :warehouseId
+              AND status = 'CLOSED'
+            ORDER BY updated_at DESC
+            LIMIT 1
+        ),
+
+        opening_from_check AS (
+            SELECT
+                pd.product_id,
+                COUNT(*) AS opening_qty
+            FROM check_inventory_item cii
+            JOIN product_details pd ON pd.id = cii.product_detail_id
+            JOIN last_check lc ON lc.id = cii.check_inventory_id
+            WHERE cii.counted_quantity = 1
+            GROUP BY pd.product_id
+        ),
+
+        opening_from_serial AS (
+            SELECT
+                pd.product_id,
+                COUNT(*) AS opening_qty
+            FROM product_details pd
+            WHERE pd.warehouse_id = :warehouseId
+              AND pd.status IN ('IN_WAREHOUSE', 'AVAILABLE', 'IN_STOCK')
+              AND pd.created_at < :startDate
+            GROUP BY pd.product_id
+        ),
+
+        opening AS (
+            SELECT
+                p.id AS product_id,
+                COALESCE(ofc.opening_qty, ofs.opening_qty, 0) AS opening_qty
+            FROM products p
+            LEFT JOIN opening_from_check ofc ON ofc.product_id = p.id
+            LEFT JOIN opening_from_serial ofs ON ofs.product_id = p.id
+        ),
+
+        inflow AS (
+            SELECT
+                pd.product_id,
+                COUNT(*) AS total_in
+            FROM product_details pd
+            WHERE pd.warehouse_id = :warehouseId
+              AND pd.created_at BETWEEN :startDate AND :endDate
+            GROUP BY pd.product_id
+        ),
+
+        outflow AS (
+            SELECT
+                pd.product_id,
+                COUNT(*) AS total_out
+            FROM product_details pd
+            WHERE pd.warehouse_id = :warehouseId
+              AND pd.outbound_order_item_id IS NOT NULL
+              AND pd.updated_at BETWEEN :startDate AND :endDate
+            GROUP BY pd.product_id
+        )
+
+        SELECT
+            p.id        AS product_id,
+            p.name      AS product_name,
+            p.sku,
+            w.id        AS warehouse_id,
+            w.name      AS warehouse_name,
+            o.opening_qty                       AS opening_stock,
+            COALESCE(i.total_in, 0)             AS total_in,
+            COALESCE(ofl.total_out, 0)          AS total_out,
+            ( o.opening_qty
+              + COALESCE(i.total_in, 0)
+              - COALESCE(ofl.total_out, 0)
+            ) AS closing_stock
+        FROM products p
+        JOIN warehouses w ON w.id = :warehouseId
+        LEFT JOIN opening o ON o.product_id = p.id
+        LEFT JOIN inflow i ON i.product_id = p.id
+        LEFT JOIN outflow ofl ON ofl.product_id = p.id
         """;
 
-        // ===== DATA QUERY (paging)
+        // 👉 CHỈ GẮN WHERE productId KHI CÓ
+        if (productId != null) {
+            sql += " WHERE p.id = :productId ";
+        }
+
+        sql += " ORDER BY p.name ";
+
         Query dataQuery = entityManager.createNativeQuery(
-                baseSql + " LIMIT :limit OFFSET :offset"
+                sql + " LIMIT :limit OFFSET :offset"
         );
+
+        dataQuery.setParameter("warehouseId", warehouseId);
         dataQuery.setParameter("startDate", startDate);
         dataQuery.setParameter("endDate", endDate);
-        dataQuery.setParameter("warehouseId", warehouseId);
-        dataQuery.setParameter("productId", productId);
+        if (productId != null) {
+            dataQuery.setParameter("productId", productId);
+        }
         dataQuery.setParameter("limit", size);
         dataQuery.setParameter("offset", page * size);
 
-        @SuppressWarnings("unchecked")
         List<Object[]> rows = dataQuery.getResultList();
 
         List<InventorySummaryDto> content = rows.stream().map(r ->
@@ -177,14 +154,16 @@ public class InventoryReportService {
                         .build()
         ).toList();
 
-        // ===== COUNT QUERY
         Query countQuery = entityManager.createNativeQuery(
-                "SELECT COUNT(*) FROM (" + baseSql + ") c"
+                "SELECT COUNT(*) FROM (" + sql + ") t"
         );
+
+        countQuery.setParameter("warehouseId", warehouseId);
         countQuery.setParameter("startDate", startDate);
         countQuery.setParameter("endDate", endDate);
-        countQuery.setParameter("warehouseId", warehouseId);
-        countQuery.setParameter("productId", productId);
+        if (productId != null) {
+            countQuery.setParameter("productId", productId);
+        }
 
         long total = ((Number) countQuery.getSingleResult()).longValue();
 
