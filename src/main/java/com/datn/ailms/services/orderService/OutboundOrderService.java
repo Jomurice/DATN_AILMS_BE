@@ -219,11 +219,6 @@ public class OutboundOrderService implements IOutboundOrderService {
         boolean allScanned = outOrder.getItems().stream()
                 .allMatch(i -> Optional.ofNullable(i.getScannedQuantity()).orElse(0) >= i.getOrderQuantity());
 
-
-        if(!allScanned){
-
-        }
-
         List<ProductDetail> details = _productDetailRepo.findByOutboundOrderId(orderId);
 
         details.forEach(d -> {
@@ -301,15 +296,6 @@ public class OutboundOrderService implements IOutboundOrderService {
         List<ProductDetail> scannedList = _productDetailRepo.findByOutboundOrderId(orderId);
         return _productDetailMapper.toResponseList(scannedList);
     }
-
-//    @Override
-//    public List<OutboundOrderResponseDto> getAllByStatus(String status) {
-//        if (status == null || status.trim().isEmpty()) {
-//            return getAll();
-//        }
-//        List<OutboundOrder> orders = _outboundOrderRepo.findByStatus(status);
-//        return _outboundOrderMapper.toResponseList(orders);
-//    }
 
     @Override
     public List<OutboundOrderResponseDto> getAllByProductId(UUID productId) {

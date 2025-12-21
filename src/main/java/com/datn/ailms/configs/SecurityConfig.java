@@ -35,6 +35,11 @@ public class SecurityConfig {
                 .permitAll()
                 .requestMatchers("/api/dashboard/**").hasRole("ADMIN")
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                .requestMatchers(
+                        "/swagger-ui/**",
+                        "/v3/api-docs/",
+                        "/swagger-ui.html"
+                ).permitAll()
                 .anyRequest()
                 .authenticated()
         );
@@ -43,7 +48,6 @@ public class SecurityConfig {
                         .jwtAuthenticationConverter(jwtAuthenticationConverter()))
                 .authenticationEntryPoint(new JwtAuthenticationEntryPoint()));
         http.csrf(AbstractHttpConfigurer::disable);
-
         return http.build();
     }
 
