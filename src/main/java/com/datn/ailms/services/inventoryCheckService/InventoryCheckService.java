@@ -8,12 +8,14 @@ import com.datn.ailms.model.dto.request.inventory_check.InventoryCheckItemReques
 import com.datn.ailms.model.dto.request.inventory_check.InventoryCheckRequestDto;
 import com.datn.ailms.model.dto.response.inventory_check.InventoryCheckItemResponseDto;
 import com.datn.ailms.model.dto.response.inventory_check.InventoryCheckResponseDto;
+import com.datn.ailms.model.entities.Stock;
 import com.datn.ailms.model.entities.enums.SerialStatus;
 import com.datn.ailms.model.entities.inventory_entities.InventoryCheck;
 import com.datn.ailms.model.entities.inventory_entities.InventoryCheckItem;
 import com.datn.ailms.model.entities.product_entities.ProductDetail;
 import com.datn.ailms.model.entities.account_entities.User;
 import com.datn.ailms.model.entities.topo_entities.Warehouse;
+import com.datn.ailms.repositories.StockRepository;
 import com.datn.ailms.repositories.inventoryRepo.InventoryCheckItemRepository;
 import com.datn.ailms.repositories.inventoryRepo.InventoryCheckRepository;
 import com.datn.ailms.repositories.productRepo.ProductDetailRepository;
@@ -46,6 +48,8 @@ public class InventoryCheckService implements IInventoryCheckService {
     final WarehouseRepository warehouseRepo;
     final UserRepository userRepository;
     final InventoryCheckMapper mapper;
+    final StockRepository stockRepo;
+
 
     private String generateCheckCode() {
         long count = checkRepo.count() + 1;
@@ -235,8 +239,26 @@ public class InventoryCheckService implements IInventoryCheckService {
     public InventoryCheckResponseDto closeCheck(UUID checkId) {
         InventoryCheck check = checkRepo.findById(checkId).orElseThrow(() -> new AppException(ErrorCode.INVENTORY_CHECK_NOT_FOUND));
         if (!"PENDING_RECONCILIATION".equals(check.getStatus())) throw new AppException(ErrorCode.INVALID_ORDER_STATUS);
+
+        List<InventoryCheckItem> items = itemRepo.findByInventoryCheckId(checkId);
+        for (InventoryCheckItem item : items) {
+            int countedQty = item.getCountedQuantity() != null
+                    ? item.getCountedQuantity()
+                    : 0;
+
+            ProductDetail productDetail = item.getProductDetail();
+            Warehouse warehouse = check.getWarehouse();
+
+            Stock stock = stockRepo
+                    .findByProductDetailAndWarehouse(productDetail, warehouse)
+                    .orElseThrow(() -> new RuntimeException("Stock not found"));
+
+            stock.setQuantity(countedQty);
+            stockRepo.save(stock);
+        }
         check.setStatus("CLOSED"); check.setUpdatedAt(LocalDateTime.now());
         return mapper.toResponse(checkRepo.save(check));
+
     }
     @Override
     public List<String> suggestSerials(UUID checkId, String query) {
