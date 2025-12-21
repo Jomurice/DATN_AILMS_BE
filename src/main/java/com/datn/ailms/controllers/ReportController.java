@@ -23,15 +23,30 @@ public class ReportController {
 
     @GetMapping("/inventory-summary")
     public ApiResp<Page<InventorySummaryDto>> getInventorySummary(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            LocalDate startDate,
+
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            LocalDate endDate,
+
             @RequestParam UUID warehouseId,
+
             @RequestParam(required = false) UUID productId,
+
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
         Page<InventorySummaryDto> data =
-                service.getInventorySummary(startDate, endDate, productId, warehouseId, page, size);
+                service.getInventorySummary(
+                        startDate,
+                        endDate,
+                        warehouseId,
+                        productId,
+                        page,
+                        size
+                );
 
         return ApiResp.<Page<InventorySummaryDto>>builder()
                 .code(0)

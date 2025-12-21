@@ -237,29 +237,21 @@ public class InventoryCheckService implements IInventoryCheckService {
 
     @Override
     public InventoryCheckResponseDto closeCheck(UUID checkId) {
-        InventoryCheck check = checkRepo.findById(checkId).orElseThrow(() -> new AppException(ErrorCode.INVENTORY_CHECK_NOT_FOUND));
-        if (!"PENDING_RECONCILIATION".equals(check.getStatus())) throw new AppException(ErrorCode.INVALID_ORDER_STATUS);
+        InventoryCheck check = checkRepo.findById(checkId)
+                .orElseThrow(() -> new AppException(ErrorCode.INVENTORY_CHECK_NOT_FOUND));
 
-        List<InventoryCheckItem> items = itemRepo.findByInventoryCheckId(checkId);
-        for (InventoryCheckItem item : items) {
-            int countedQty = item.getCountedQuantity() != null
-                    ? item.getCountedQuantity()
-                    : 0;
-
-            ProductDetail productDetail = item.getProductDetail();
-            Warehouse warehouse = check.getWarehouse();
-
-            Stock stock = stockRepo
-                    .findByProductDetailAndWarehouse(productDetail, warehouse)
-                    .orElseThrow(() -> new RuntimeException("Stock not found"));
-
-            stock.setQuantity(countedQty);
-            stockRepo.save(stock);
+        if (!"PENDING_RECONCILIATION".equals(check.getStatus())) {
+            throw new AppException(ErrorCode.INVALID_ORDER_STATUS);
         }
-        check.setStatus("CLOSED"); check.setUpdatedAt(LocalDateTime.now());
-        return mapper.toResponse(checkRepo.save(check));
 
+        check.setStatus("CLOSED");
+        check.setUpdatedAt(LocalDateTime.now());
+
+        return mapper.toResponse(checkRepo.save(check));
     }
+
+
+
     @Override
     public List<String> suggestSerials(UUID checkId, String query) {
         if (query == null || query.trim().isEmpty()) return List.of();
