@@ -164,23 +164,64 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
 
     private record TokenInfo(String token, Date expiryDate) {}
 
-    private SignedJWT verifyToken(String token, boolean isRefresh) throws JOSEException, ParseException {
+//    private SignedJWT verifyToken(String token, boolean isRefresh) throws JOSEException, ParseException {
+//        JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
+//        // mã  hoá đọc token
+//        SignedJWT signedJWT = SignedJWT.parse(token);
+//
+//        Date expiryTime = (isRefresh) ? new Date(
+//                signedJWT.getJWTClaimsSet().getIssueTime().toInstant().plus(REFRESHABLE_DURATION, ChronoUnit.SECONDS).toEpochMilli())
+//                : signedJWT.getJWTClaimsSet().getExpirationTime();
+//
+//        // gán biến đã verify
+//        var verified = signedJWT.verify(verifier);
+//
+//        if(!(verified && expiryTime.after(new Date()))) throw new AppException(ErrorCode.UNAUTHENTICATED);
+//
+//        // Kiểm tra xem token đó có id nằm trong invalidToken hay không, nu đã có thì throw còn không thì thôi
+//        if(invalidatedTokenRepository.existsById(signedJWT.getJWTClaimsSet().getJWTID())) throw new AppException(ErrorCode.UNAUTHENTICATED);
+//        return signedJWT;
+//
+//    }
+
+
+    private SignedJWT verifyToken(String token, boolean isRefresh)
+            throws JOSEException, ParseException {
+
         JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
-        // mã  hoá đọc token
         SignedJWT signedJWT = SignedJWT.parse(token);
 
-        Date expiryTime = (isRefresh) ? new Date(
-                signedJWT.getJWTClaimsSet().getIssueTime().toInstant().plus(REFRESHABLE_DURATION, ChronoUnit.SECONDS).toEpochMilli())
+        Date expiryTime = isRefresh
+                ? new Date(
+                signedJWT.getJWTClaimsSet()
+                        .getIssueTime()
+                        .toInstant()
+                        .plus(REFRESHABLE_DURATION, ChronoUnit.SECONDS)
+                        .toEpochMilli()
+        )
                 : signedJWT.getJWTClaimsSet().getExpirationTime();
 
-        // gán biến đã verify
         var verified = signedJWT.verify(verifier);
 
-        if(!(verified && expiryTime.after(new Date()))) throw new AppException(ErrorCode.UNAUTHENTICATED);
+        if (!(verified && expiryTime.after(new Date()))) {
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
+        }
 
-        // Kiểm tra xem token đó có id nằm trong invalidToken hay không, nu đã có thì throw còn không thì thôi
-        if(invalidatedTokenRepository.existsById(signedJWT.getJWTClaimsSet().getJWTID())) throw new AppException(ErrorCode.UNAUTHENTICATED);
+        if (invalidatedTokenRepository.existsById(
+                signedJWT.getJWTClaimsSet().getJWTID())) {
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
+        }
+
+        // 🔐 NEW: check user status
+//        String username = signedJWT.getJWTClaimsSet().getSubject();
+
+//        User user = _userRepository.findByUsername(username)
+//                .orElseThrow(() -> new AppException(ErrorCode.UNAUTHENTICATED));
+//
+//        if (!user.isStatus()) {
+//            throw new AppException(ErrorCode.USER_BLOCKED);
+//        }
+
         return signedJWT;
-
     }
 }
