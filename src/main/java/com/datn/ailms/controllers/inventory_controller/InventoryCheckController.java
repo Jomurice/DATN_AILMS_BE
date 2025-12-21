@@ -26,7 +26,7 @@ public class InventoryCheckController {
 
     // ✅ GET ALL (PHÂN TRANG & LỌC) - CHỈ GIỮ HÀM NÀY
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN','LM')")
+//    @PreAuthorize("hasAnyRole('ADMIN','LM')")
     public ApiResp<Page<InventoryCheckResponseDto>> getAll(
             @RequestParam(required = false, defaultValue = "ALL") String status,
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
@@ -42,6 +42,7 @@ public class InventoryCheckController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN','LM')")
     public ApiResp<InventoryCheckResponseDto> create(@RequestBody InventoryCheckRequestDto request) {
         return ApiResp.<InventoryCheckResponseDto>builder().result(_checkService.create(request)).build();
     }
@@ -71,6 +72,7 @@ public class InventoryCheckController {
     }
 
     @PostMapping("/{id}/complete")
+    @PreAuthorize("hasAnyRole('ADMIN','LM')")
     public ApiResp<InventoryCheckResponseDto> completeCheck(@PathVariable UUID id) {
         return ApiResp.<InventoryCheckResponseDto>builder().result(_checkService.completeCheck(id)).build();
     }
@@ -80,7 +82,7 @@ public class InventoryCheckController {
         return ApiResp.<String>builder().result("Summary for Check ID: " + id).build();
     }
     @PostMapping("/{id}/close")
-//    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','LM')")
     public ApiResp<InventoryCheckResponseDto> closeCheck(@PathVariable UUID id) {
         return ApiResp.<InventoryCheckResponseDto>builder()
                 .result(_checkService.closeCheck(id))

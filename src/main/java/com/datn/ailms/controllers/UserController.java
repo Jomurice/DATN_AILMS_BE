@@ -60,7 +60,6 @@ public class UserController {
 
 
     @GetMapping("/{userId}")
-    @PreAuthorize("hasAnyRole('ADMIN')")
     public ApiResp<UserResponseDto> getUserById(@PathVariable("userId") UUID userId){
         UserResponseDto user = _userService.getUserById(userId);
         return ApiResp.<UserResponseDto>builder()
