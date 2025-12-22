@@ -57,6 +57,8 @@ public enum ErrorCode {
     ORDER_CANNOT_CANCEL(1049, "Order cannot cancel", HttpStatus.CONFLICT),
 
     INVALID_TOKEN(1050,"Invalid token" , HttpStatus.BAD_REQUEST ),
+
+    SKU_EXISTED(1051,"SKU already exists", HttpStatus.CONFLICT),
     ;
 
 

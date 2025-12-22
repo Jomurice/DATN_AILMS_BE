@@ -24,7 +24,7 @@ public class DashboardController {
     private final DashboardService _dashboardService;
 
     @GetMapping("/stats")
-    @PreAuthorize("hasAnyRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','LM')")
     ApiResp<DashboardStatsResponseDto> getDashboardStat(@RequestParam(name="timeframe",defaultValue = "ALL") String timeframe,
                                                         @RequestParam(name="warehouseId", required = false) UUID warehouseId){
         DashboardStatsRequestDto requestDto = DashboardStatsRequestDto.builder()
@@ -36,7 +36,7 @@ public class DashboardController {
     }
 
     @GetMapping("/series")
-    @PreAuthorize("hasAnyRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','LM')")
     public ApiResp<InOutSeriesDto> getSeries(
             @RequestParam(name = "timeframe", defaultValue = "30D") String timeframe,
             @RequestParam(name="warehouseId", required = false) UUID warehouseId

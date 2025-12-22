@@ -24,7 +24,7 @@ public class WarehouseController {
     public final WarehouseSerivce _warehouseService;
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','LM','WO')")
     public ApiResp<List<WarehouseResponseDto>> getAllWarehouses() {
         return ApiResp.<List<WarehouseResponseDto>>builder()
                 .result(_warehouseService.findAll())

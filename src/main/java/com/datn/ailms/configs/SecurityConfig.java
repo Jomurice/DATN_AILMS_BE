@@ -57,7 +57,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS).permitAll()
 
                         // 🔐 ROLE BASED
-                        .requestMatchers("/api/dashboard/**").hasRole("ADMIN")
+                        .requestMatchers("/api/dashboard/**").hasAnyRole("ADMIN", "LM")
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
                         // 🔐 OTHER

@@ -32,14 +32,14 @@ public class ProductController {
 
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','LM')")
      ApiResp<List<ProductResponseDto>> getAll() {
         var result =  _productService.getAll();
         return ApiResp.<List<ProductResponseDto>>builder().result(result).build();
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','LM')")
     ApiResp<ProductResponseDto> getById(@PathVariable UUID id) {
         var result = _productService.getById(id);
         return ApiResp.<ProductResponseDto>builder().result(result).build();
@@ -58,7 +58,7 @@ public class ProductController {
 
 
     @GetMapping("/search-products")
-    @PreAuthorize("hasAnyRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','LM')")
     public ApiResp<Page<ProductResponseDto>> searchProducts(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
