@@ -47,7 +47,7 @@ public class BrandController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','LM')")
     public ApiResp<List<BrandResponseDto>> getAll() {
         List<BrandResponseDto> result = brandService.getAllBrands();
         return ApiResp.<List<BrandResponseDto>>builder().result(result).build();

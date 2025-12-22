@@ -100,6 +100,12 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
     @Override
     public AuthenResponse refreshToken(RefreshRequest refreshRequest) throws ParseException, JOSEException {
         var signedJWT = verifyToken(refreshRequest.getToken(), true);
+
+        String type = signedJWT.getJWTClaimsSet().getStringClaim("type");
+
+        if(!"refresh".equals(type)) throw new AppException(ErrorCode.UNAUTHENTICATED);
+
+
         var jit = signedJWT.getJWTClaimsSet().getJWTID();
         var expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
 
@@ -125,7 +131,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
     public AuthenResponse authenticate(AuthenRequest authenRequest) {
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         var user = _userRepository.findByUsername(authenRequest.getUsername()).orElseThrow(() ->
-            new AppException(ErrorCode.USER_NOT_EXISTED));
+                new AppException(ErrorCode.USER_NOT_EXISTED));
         boolean authenticated = passwordEncoder.matches(authenRequest.getPassword(), user.getPassword());
 
         if(!authenticated) throw new AppException(ErrorCode.UNAUTHENTICATED);
@@ -199,7 +205,6 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         Payload payload = new Payload(jwtClaimsSet.toJSONObject());
 
         JWSObject jwsObject = new JWSObject(header, payload);
-
         try {
             jwsObject.sign(new MACSigner(SIGNER_KEY.getBytes())); //thuật toán ký và giải mã trùng nhau https://generate-random.org/
             return new TokenInfo(jwsObject.serialize(), expiryTime);

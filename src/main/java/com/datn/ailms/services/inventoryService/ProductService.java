@@ -1,5 +1,7 @@
 package com.datn.ailms.services.inventoryService;
 
+import com.datn.ailms.exceptions.AppException;
+import com.datn.ailms.exceptions.ErrorCode;
 import com.datn.ailms.mapper.ProductMapper;
 import com.datn.ailms.model.dto.request.inventory.ProductRequestDto;
 import com.datn.ailms.model.dto.response.inventory.ProductResponseDto;
@@ -40,6 +42,12 @@ public class ProductService {
                 .orElseThrow(() -> new RuntimeException("Category not found"));
         Brand brand = _brandRepo.findById(request.getBrandId())
                 .orElseThrow(() -> new RuntimeException("Brand not found"));
+
+        boolean existSku = productRepo.existsBySku(entity.getSku());
+
+        if (existSku) {
+            throw new AppException(ErrorCode.SKU_EXISTED);
+        }
 
         entity.setBrands(Collections.singleton(brand));
         entity.setCategory(category);

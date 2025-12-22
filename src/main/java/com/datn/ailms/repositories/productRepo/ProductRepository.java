@@ -44,6 +44,6 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
             Pageable pageable
     );
 
-
+    boolean existsBySku(String sku);
 
 }

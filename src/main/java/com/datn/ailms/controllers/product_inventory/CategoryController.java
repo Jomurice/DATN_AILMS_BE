@@ -20,7 +20,7 @@ public class CategoryController {
     private final ICategoryService _categoryService;
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','LM')")
     public ApiResp<List<CategoryResponseDto>> getAllCategories(){
         return ApiResp.<List<CategoryResponseDto>>builder()
                 .result(_categoryService.getAllCategories())
