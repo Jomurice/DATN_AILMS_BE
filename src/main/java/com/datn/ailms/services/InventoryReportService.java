@@ -43,16 +43,19 @@ public class InventoryReportService {
 
         String sql = """
             WITH opening_in AS (
+                -- Tổng số serial ĐÃ NHẬP KHO trước ngày bắt đầu
                 SELECT
                     pd.product_id,
                     COUNT(*) AS qty_in
                 FROM product_details pd
                 WHERE pd.warehouse_id = :warehouseId
+                  AND pd.status = 'IN_WAREHOUSE'
                   AND pd.created_at < :startDateTime
                 GROUP BY pd.product_id
             ),
             
             opening_out AS (
+                -- Tổng số serial ĐÃ XUẤT trước ngày bắt đầu
                 SELECT
                     pd.product_id,
                     COUNT(*) AS qty_out
@@ -64,6 +67,7 @@ public class InventoryReportService {
             ),
             
             opening AS (
+                -- TỒN ĐẦU KỲ = ĐÃ NHẬP - ĐÃ XUẤT (trước kỳ)
                 SELECT
                     p.id AS product_id,
                     COALESCE(oi.qty_in, 0) - COALESCE(oo.qty_out, 0) AS opening_qty
@@ -73,16 +77,19 @@ public class InventoryReportService {
             ),
             
             inflow AS (
+                -- NHẬP TRONG KỲ: serial chuyển sang IN_WAREHOUSE trong khoảng thời gian
                 SELECT
                     pd.product_id,
                     COUNT(*) AS total_in
                 FROM product_details pd
                 WHERE pd.warehouse_id = :warehouseId
+                  AND pd.status = 'IN_WAREHOUSE'
                   AND pd.created_at BETWEEN :startDateTime AND :endDateTime
                 GROUP BY pd.product_id
             ),
             
             outflow AS (
+                -- XUẤT TRONG KỲ: serial được gán vào đơn xuất trong khoảng thời gian
                 SELECT
                     pd.product_id,
                     COUNT(*) AS total_out
@@ -94,24 +101,28 @@ public class InventoryReportService {
             )
             
             SELECT
-                p.id AS product_id,
+                p.id   AS product_id,
                 p.name AS product_name,
                 p.sku,
-                w.id AS warehouse_id,
+                w.id   AS warehouse_id,
                 w.name AS warehouse_name,
+            
                 COALESCE(o.opening_qty, 0) AS opening_stock,
-                COALESCE(i.total_in, 0) AS total_in,
+                COALESCE(i.total_in, 0)    AS total_in,
                 COALESCE(ofl.total_out, 0) AS total_out,
+            
                 (
                     COALESCE(o.opening_qty, 0)
                   + COALESCE(i.total_in, 0)
                   - COALESCE(ofl.total_out, 0)
                 ) AS closing_stock
+            
             FROM products p
             JOIN warehouses w ON w.id = :warehouseId
             LEFT JOIN opening o ON o.product_id = p.id
             LEFT JOIN inflow i ON i.product_id = p.id
             LEFT JOIN outflow ofl ON ofl.product_id = p.id
+            
         """;
 
         if (productId != null) {
