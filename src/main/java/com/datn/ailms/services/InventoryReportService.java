@@ -38,15 +38,15 @@ public class InventoryReportService {
 
         String sql = """
         
-                WITH base_check AS (
-            SELECT id, updated_at
-            FROM check_inventory
-            WHERE warehouse_id = :warehouseId
-              AND status = 'CLOSED'
-              AND updated_at <= :startDate
-            ORDER BY updated_at DESC
-            LIMIT 1
-        ),
+            WITH base_check AS (
+             SELECT id, updated_at
+             FROM check_inventory
+             WHERE warehouse_id = :warehouseId
+               AND status = 'CLOSED'
+               AND updated_at < (CAST(:startDate AS timestamp) + INTERVAL '1 day')
+             ORDER BY updated_at DESC
+             LIMIT 1
+         ),
         
 
         opening_from_check AS (
