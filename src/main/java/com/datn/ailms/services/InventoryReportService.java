@@ -37,14 +37,17 @@ public class InventoryReportService {
         if (endDate == null) endDate = LocalDate.now();
 
         String sql = """
-        WITH last_check AS (
-            SELECT id, updated_at
-            FROM check_inventory
-            WHERE warehouse_id = :warehouseId
-              AND status = 'CLOSED'
-            ORDER BY updated_at DESC
-            LIMIT 1
-        ),
+        
+            WITH base_check AS (
+             SELECT id, updated_at
+             FROM check_inventory
+             WHERE warehouse_id = :warehouseId
+               AND status = 'CLOSED'
+               AND updated_at < (CAST(:startDate AS timestamp) + INTERVAL '1 day')
+             ORDER BY updated_at DESC
+             LIMIT 1
+         ),
+        
 
         opening_from_check AS (
             SELECT
@@ -52,7 +55,7 @@ public class InventoryReportService {
                 COUNT(*) AS opening_qty
             FROM check_inventory_item cii
             JOIN product_details pd ON pd.id = cii.product_detail_id
-            JOIN last_check lc ON lc.id = cii.check_inventory_id
+            JOIN base_check lc ON lc.id = cii.check_inventory_id
             WHERE cii.counted_quantity = 1
             GROUP BY pd.product_id
         ),
