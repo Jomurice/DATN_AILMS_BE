@@ -33,95 +33,98 @@ public class InventoryReportService {
             throw new IllegalArgumentException("warehouseId is required");
         }
 
+        // Default date
         if (startDate == null) startDate = LocalDate.of(2000, 1, 1);
         if (endDate == null) endDate = LocalDate.now();
 
+        // 🔥 Convert sang datetime để lấy trọn ngày
+        LocalDateTime startDateTime = startDate.atStartOfDay();
+        LocalDateTime endDateTime = endDate.atTime(23, 59, 59);
+
         String sql = """
-        
-            WITH base_check AS (
-             SELECT id, updated_at
-             FROM check_inventory
-             WHERE warehouse_id = :warehouseId
-               AND status = 'CLOSED'
-               AND updated_at < (CAST(:startDate AS timestamp) + INTERVAL '1 day')
-             ORDER BY updated_at DESC
-             LIMIT 1
-         ),
-        
-
-        opening_from_check AS (
+            WITH opening_in AS (
+                -- Tổng số serial ĐÃ NHẬP KHO trước ngày bắt đầu
+                SELECT
+                    pd.product_id,
+                    COUNT(*) AS qty_in
+                FROM product_details pd
+                WHERE pd.warehouse_id = :warehouseId
+                  AND pd.status = 'IN_WAREHOUSE'
+                  AND pd.created_at < :startDateTime
+                GROUP BY pd.product_id
+            ),
+            
+            opening_out AS (
+                -- Tổng số serial ĐÃ XUẤT trước ngày bắt đầu
+                SELECT
+                    pd.product_id,
+                    COUNT(*) AS qty_out
+                FROM product_details pd
+                WHERE pd.warehouse_id = :warehouseId
+                  AND pd.outbound_order_item_id IS NOT NULL
+                  AND pd.updated_at < :startDateTime
+                GROUP BY pd.product_id
+            ),
+            
+            opening AS (
+                -- TỒN ĐẦU KỲ = ĐÃ NHẬP - ĐÃ XUẤT (trước kỳ)
+                SELECT
+                    p.id AS product_id,
+                    COALESCE(oi.qty_in, 0) - COALESCE(oo.qty_out, 0) AS opening_qty
+                FROM products p
+                LEFT JOIN opening_in oi ON oi.product_id = p.id
+                LEFT JOIN opening_out oo ON oo.product_id = p.id
+            ),
+            
+            inflow AS (
+                -- NHẬP TRONG KỲ: serial chuyển sang IN_WAREHOUSE trong khoảng thời gian
+                SELECT
+                    pd.product_id,
+                    COUNT(*) AS total_in
+                FROM product_details pd
+                WHERE pd.warehouse_id = :warehouseId
+                  AND pd.status = 'IN_WAREHOUSE'
+                  AND pd.created_at BETWEEN :startDateTime AND :endDateTime
+                GROUP BY pd.product_id
+            ),
+            
+            outflow AS (
+                -- XUẤT TRONG KỲ: serial được gán vào đơn xuất trong khoảng thời gian
+                SELECT
+                    pd.product_id,
+                    COUNT(*) AS total_out
+                FROM product_details pd
+                WHERE pd.warehouse_id = :warehouseId
+                  AND pd.outbound_order_item_id IS NOT NULL
+                  AND pd.updated_at BETWEEN :startDateTime AND :endDateTime
+                GROUP BY pd.product_id
+            )
+            
             SELECT
-                pd.product_id,
-                COUNT(*) AS opening_qty
-            FROM check_inventory_item cii
-            JOIN product_details pd ON pd.id = cii.product_detail_id
-            JOIN base_check lc ON lc.id = cii.check_inventory_id
-            WHERE cii.counted_quantity = 1
-            GROUP BY pd.product_id
-        ),
-
-        opening_from_serial AS (
-            SELECT
-                pd.product_id,
-                COUNT(*) AS opening_qty
-            FROM product_details pd
-            WHERE pd.warehouse_id = :warehouseId
-              AND pd.status IN ('IN_WAREHOUSE', 'AVAILABLE', 'IN_STOCK')
-              AND pd.created_at < :startDate
-            GROUP BY pd.product_id
-        ),
-
-        opening AS (
-            SELECT
-                p.id AS product_id,
-                COALESCE(ofc.opening_qty, ofs.opening_qty, 0) AS opening_qty
+                p.id   AS product_id,
+                p.name AS product_name,
+                p.sku,
+                w.id   AS warehouse_id,
+                w.name AS warehouse_name,
+            
+                COALESCE(o.opening_qty, 0) AS opening_stock,
+                COALESCE(i.total_in, 0)    AS total_in,
+                COALESCE(ofl.total_out, 0) AS total_out,
+            
+                (
+                    COALESCE(o.opening_qty, 0)
+                  + COALESCE(i.total_in, 0)
+                  - COALESCE(ofl.total_out, 0)
+                ) AS closing_stock
+            
             FROM products p
-            LEFT JOIN opening_from_check ofc ON ofc.product_id = p.id
-            LEFT JOIN opening_from_serial ofs ON ofs.product_id = p.id
-        ),
-
-        inflow AS (
-            SELECT
-                pd.product_id,
-                COUNT(*) AS total_in
-            FROM product_details pd
-            WHERE pd.warehouse_id = :warehouseId
-              AND pd.created_at BETWEEN :startDate AND :endDate
-            GROUP BY pd.product_id
-        ),
-
-        outflow AS (
-            SELECT
-                pd.product_id,
-                COUNT(*) AS total_out
-            FROM product_details pd
-            WHERE pd.warehouse_id = :warehouseId
-              AND pd.outbound_order_item_id IS NOT NULL
-              AND pd.updated_at BETWEEN :startDate AND :endDate
-            GROUP BY pd.product_id
-        )
-
-        SELECT
-            p.id        AS product_id,
-            p.name      AS product_name,
-            p.sku,
-            w.id        AS warehouse_id,
-            w.name      AS warehouse_name,
-            o.opening_qty                       AS opening_stock,
-            COALESCE(i.total_in, 0)             AS total_in,
-            COALESCE(ofl.total_out, 0)          AS total_out,
-            ( o.opening_qty
-              + COALESCE(i.total_in, 0)
-              - COALESCE(ofl.total_out, 0)
-            ) AS closing_stock
-        FROM products p
-        JOIN warehouses w ON w.id = :warehouseId
-        LEFT JOIN opening o ON o.product_id = p.id
-        LEFT JOIN inflow i ON i.product_id = p.id
-        LEFT JOIN outflow ofl ON ofl.product_id = p.id
+            JOIN warehouses w ON w.id = :warehouseId
+            LEFT JOIN opening o ON o.product_id = p.id
+            LEFT JOIN inflow i ON i.product_id = p.id
+            LEFT JOIN outflow ofl ON ofl.product_id = p.id
+            
         """;
 
-        // 👉 CHỈ GẮN WHERE productId KHI CÓ
         if (productId != null) {
             sql += " WHERE p.id = :productId ";
         }
@@ -133,11 +136,13 @@ public class InventoryReportService {
         );
 
         dataQuery.setParameter("warehouseId", warehouseId);
-        dataQuery.setParameter("startDate", startDate);
-        dataQuery.setParameter("endDate", endDate);
+        dataQuery.setParameter("startDateTime", startDateTime);
+        dataQuery.setParameter("endDateTime", endDateTime);
+
         if (productId != null) {
             dataQuery.setParameter("productId", productId);
         }
+
         dataQuery.setParameter("limit", size);
         dataQuery.setParameter("offset", page * size);
 
@@ -162,8 +167,9 @@ public class InventoryReportService {
         );
 
         countQuery.setParameter("warehouseId", warehouseId);
-        countQuery.setParameter("startDate", startDate);
-        countQuery.setParameter("endDate", endDate);
+        countQuery.setParameter("startDateTime", startDateTime);
+        countQuery.setParameter("endDateTime", endDateTime);
+
         if (productId != null) {
             countQuery.setParameter("productId", productId);
         }
