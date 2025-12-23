@@ -30,17 +30,21 @@ public class DashboardService implements IDashboardService {
     public DashboardStatsResponseDto getDashboardStats(DashboardStatsRequestDto requestDto) {
         UUID warehouseId = requestDto.getWarehouseId();
 
-        long inStock;
+        long inStock, outStock;
         if (warehouseId != null) {
             inStock = _productDetailRepo.countByStatusAndWarehouseId(SerialStatus.IN_WAREHOUSE, warehouseId);
+            outStock = _productDetailRepo.countByStatusAndWarehouseId(SerialStatus.OUTBOUND, warehouseId);
         } else {
+
             inStock = _productDetailRepo.countByStatus(SerialStatus.IN_WAREHOUSE);
+            outStock = _productDetailRepo.countByStatus(SerialStatus.OUTBOUND);
         }
 
         long employees = _userRepo.countUsers();
 
         return DashboardStatsResponseDto.builder()
                 .inStock(inStock)
+                .exported(outStock)
                 .employees(employees)
                 .build();
     }
